@@ -1,0 +1,19 @@
+[package]
+name = "idenumbra-col"
+description = "Colombia identification validator (CC, NIT, passport)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+readme = "README.md"
+documentation = "https://docs.rs/idenumbra-co"
+keywords = ["colombia", "id-card", "nit", "validation", "no_std"]
+categories = ["no-std", "parsing"]
+
+[lints]
+workspace = true
+
+[dependencies]
+idenumbra-core = { workspace = true }

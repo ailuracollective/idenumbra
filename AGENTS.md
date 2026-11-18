@@ -1,0 +1,132 @@
+# AGENTS.md
+
+Guidance for coding agents working in this repository.
+
+## Project
+
+`idenumbra` is a Cargo workspace of Latin American identification validators.
+
+- `crates/core`: shared contract (`Validator` trait, `ValidationError`,
+  country code constants). Dependency-free and `no_std`.
+- Country validators: `crates/countries/{arg,bol,bra,chl,col,cri,cub,dom,ecu,gtm,hnd,mex,nic,pan,per,pry,slv,ury,ven}` (ISO code only; package name remains `idenumbra-<code>`).
+  Each is `no_std` and implements `idenumbra_core::Validator`.
+- `crates/std`: orchestrator with one Cargo feature per country plus `all`.
+  Builds a lazy `BTreeMap` registry on first use.
+
+Country codes and feature names use ISO 3166-1 alpha-3 (e.g. `ECU`, `COL`,
+`MEX`) and are matched case-insensitively.
+
+## Layout
+
+- `Cargo.toml`: workspace root, shared package metadata, workspace lints.
+- `crates/`: all crates.
+- `templates/README.template.md`: template for per-crate READMEs.
+- `lefthook.yml`: Git hooks (pre-commit fmt/clippy, commit-msg commitlint).
+- `.commitlintrc.yaml`: conventional commit rules for commitlint-rs.
+- `Makefile`: common build/test/lint targets.
+
+## Build / Test / Lint
+
+From the repo root:
+
+```bash
+make build        # cargo build --workspace
+make build-all    # cargo build --workspace --all-features
+make test         # cargo test --workspace
+make test-all     # cargo test --workspace --all-features
+make test-features FEATURES="ecu arg"
+make fmt          # cargo fmt --all
+make clippy       # cargo clippy --workspace --all-features --examples
+make doc          # cargo doc --workspace --all-features --no-deps
+make example      # cargo run --example basic --all-features
+make hooks        # lefthook install (pre-commit: fmt + clippy)
+make clean
+```
+
+Single country crate without the orchestrator:
+
+```bash
+cargo test -p idenumbra-ecu
+```
+
+## Releases
+
+Automated by Google's release-please (`.github/workflows/release-please.yml`).
+It runs on `main`, opens a `chore(main): release X.Y.Z` PR from the conventional
+commits, and on merge tags `vX.Y.Z` and writes `CHANGELOG.md`.
+
+One version for the whole workspace: `release-please-config.json` bumps
+`[workspace.package].version`, every `[workspace.dependencies]` version, the
+lockfile and `version.txt`. It uses `release-type: simple` + `extra-files`
+because the root manifest is a virtual workspace (the `rust` strategy and the
+`cargo-workspace` plugin both require a `[package]` section there).
+Publishing to crates.io is not wired up.
+
+## Conventions
+
+- Rust 2021 edition, `rust-version = 1.81`, license MIT.
+- Workspace lints: `unsafe_code = "forbid"`, `missing_docs = "warn"`,
+  clippy `unwrap_used`/`expect_used = "warn"`. New public items need docs;
+  avoid `unwrap`/`expect` in non-test code.
+- `idenumbra-core` and every country crate are `no_std`; only the orchestrator
+  uses `std` (for `OnceLock`/`BTreeMap`).
+- Features default to empty. Enable countries explicitly; `all` enables every
+  country. A disabled country is not compiled and returns
+  `ValidationError::ValidatorNotAvailable`.
+- Each country crate exposes free functions `validate` and `validate_with`, plus
+  a zero-sized marker struct (e.g. `IdenumbraECU`) implementing `Validator`.
+- `validate_with(value, kind)` requires the document kind, e.g. `"id_card"`,
+  `"ruc"`, `"passport"`, `"dni"`, `"cuit"`; `validate(value)` infers it from the
+  input. There is no `Option` kind anywhere: pick the function you mean.
+- Registry is built lazily and cached; do not add eager initialization.
+- Keep changes minimal; add a small test for new non-trivial validation logic.
+- Catalogue values that a government can change (province/department codes,
+  issuer prefixes, reserved codes) are named `const`s at the top of the
+  validator file, with a note on when to change them, and each crate README
+  lists them with an official source. Algorithms stay inline.
+- Synthetic test numbers only. Never commit real identification numbers; verify
+  any new test value is synthetic.
+
+## Known traps
+
+- The `Validator` trait's default `validate_with` ignores `kind` and delegates to
+  `validate`. Kind-aware callers should use the free `validate_with` functions or
+  `Idenumbra::validate(..., kind)`; `Idenumbra::infer(...)` is the untyped entry.
+- Country `validate` functions trim input; the orchestrator uppercases the country
+  code but does not trim the value.
+- `missing_docs` is a warning, not an error, but keep docs complete for public APIs.
+- Every check digit is implemented from the published algorithm; test values are
+  synthetic and generated with that algorithm, never taken from real people.
+- Where no public check digit exists (BO NIT, CO cédula, CR cédula/DIMEX, CU
+  carné, HN RTN, PA cédula/RUC), only structure and encoded dates are validated.
+  Do not invent a check digit for these.
+- Colombian 10-digit numbers are validated as cédulas (which have no check
+  digit); the NIT check digit is only checked with `validate_with(.., "nit")`.
+  Paraguayan 6-7 digit numbers are CIs and 8-9 digit numbers are RUCs, so use
+  the `ci`/`ruc` kinds when the document type is known.
+- Guatemalan NIT check characters may be `K`; NIC cédulas end with a check letter,
+  not a digit.
+- ARG CUIT/CUIL prefixes are deliberately not enforced: 25/26 are valid and
+  ARCA assigns new prefixes randomly. GTM CUI checks municipality counts per
+  department (INE currently lists 340); update the table when one is created.
+- Per-crate READMEs are generated from `templates/README.template.md`; keep the
+  double-brace template syntax intact when editing the template.
+- Git hooks require `lefthook` and `commitlint` (`cargo install commitlint-rs`)
+  on `PATH`; run `make hooks` once per clone.
+
+## Adding a country
+
+1. Add the code constant and `canonical` arm in
+   `crates/core/src/country.rs`.
+2. Create `crates/countries/<code>/` with `Cargo.toml` (depends on
+   `idenumbra-core`), `src/lib.rs` (`#![no_std]`, `validators/` module with
+   one file per validation function, `validate`, `validate_with`,
+   marker struct + `Validator` impl), README and tests.
+3. Add the dependency/feature in `crates/std/Cargo.toml`.
+4. Add the `#[cfg(feature = ...)]` entries in `supported_countries()` and the
+   registry in `crates/std/src/lib.rs`, plus the re-export.
+5. Add the country to the `all` feature list and to the orchestrator tests if
+   appropriate.
+6. Regenerate/extend the per-crate README from the template.
+
+## Do not commit unless asked.

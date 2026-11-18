@@ -1,0 +1,19 @@
+[package]
+name = "idenumbra-ecu"
+description = "Ecuador identification validator (ID card, RUC, passport)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+readme = "README.md"
+documentation = "https://docs.rs/idenumbra-ec"
+keywords = ["ecuador", "id-card", "ruc", "validation", "no_std"]
+categories = ["no-std", "parsing"]
+
+[lints]
+workspace = true
+
+[dependencies]
+idenumbra-core = { workspace = true }

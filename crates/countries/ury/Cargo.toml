@@ -1,0 +1,18 @@
+[package]
+name = "idenumbra-ury"
+description = "Uruguay identification validator (CI, RUT)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+readme = "README.md"
+keywords = ["ury", "identification", "validation", "no_std"]
+categories = ["no-std", "parsing"]
+
+[lints]
+workspace = true
+
+[dependencies]
+idenumbra-core = { workspace = true }

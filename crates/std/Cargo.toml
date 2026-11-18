@@ -1,0 +1,61 @@
+[package]
+name = "idenumbra"
+description = "Orchestrator for country identification validators"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+readme = "README.md"
+documentation = "https://docs.rs/idenumbra"
+keywords = ["identification", "validation", "identity"]
+categories = ["parsing"]
+
+[lints]
+workspace = true
+
+[features]
+default = []
+arg = ["dep:idenumbra-arg"]
+bol = ["dep:idenumbra-bol"]
+bra = ["dep:idenumbra-bra"]
+chl = ["dep:idenumbra-chl"]
+col = ["dep:idenumbra-col"]
+cri = ["dep:idenumbra-cri"]
+cub = ["dep:idenumbra-cub"]
+dom = ["dep:idenumbra-dom"]
+ecu = ["dep:idenumbra-ecu"]
+gtm = ["dep:idenumbra-gtm"]
+hnd = ["dep:idenumbra-hnd"]
+mex = ["dep:idenumbra-mex"]
+nic = ["dep:idenumbra-nic"]
+pan = ["dep:idenumbra-pan"]
+per = ["dep:idenumbra-per"]
+pry = ["dep:idenumbra-pry"]
+slv = ["dep:idenumbra-slv"]
+ury = ["dep:idenumbra-ury"]
+ven = ["dep:idenumbra-ven"]
+all = ["arg","bol","bra","chl","col","cri","cub","dom","ecu","gtm","hnd","mex","nic","pan","per","pry","slv","ury","ven"]
+
+[dependencies]
+idenumbra-core = { workspace = true }
+idenumbra-arg = { workspace = true, optional = true }
+idenumbra-bol = { workspace = true, optional = true }
+idenumbra-bra = { workspace = true, optional = true }
+idenumbra-chl = { workspace = true, optional = true }
+idenumbra-col = { workspace = true, optional = true }
+idenumbra-cri = { workspace = true, optional = true }
+idenumbra-cub = { workspace = true, optional = true }
+idenumbra-dom = { workspace = true, optional = true }
+idenumbra-ecu = { workspace = true, optional = true }
+idenumbra-gtm = { workspace = true, optional = true }
+idenumbra-hnd = { workspace = true, optional = true }
+idenumbra-mex = { workspace = true, optional = true }
+idenumbra-nic = { workspace = true, optional = true }
+idenumbra-pan = { workspace = true, optional = true }
+idenumbra-per = { workspace = true, optional = true }
+idenumbra-pry = { workspace = true, optional = true }
+idenumbra-slv = { workspace = true, optional = true }
+idenumbra-ury = { workspace = true, optional = true }
+idenumbra-ven = { workspace = true, optional = true }

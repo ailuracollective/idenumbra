@@ -1,0 +1,17 @@
+# Lefthook: run format/lint before commit and lint the commit message.
+# Install hooks with: lefthook install
+
+pre-commit:
+  parallel: true
+  commands:
+    fmt:
+      glob: "*.rs"
+      run: cargo fmt --all -- --check
+    clippy:
+      glob: "*.rs"
+      run: cargo clippy --workspace --all-features --examples
+
+commit-msg:
+  commands:
+    commitlint:
+      run: commitlint --edit {1}

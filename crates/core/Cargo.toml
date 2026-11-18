@@ -1,0 +1,18 @@
+[package]
+name = "idenumbra-core"
+description = "Country-agnostic identification validation: shared contract, registry helpers and error model"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+readme = "README.md"
+documentation = "https://docs.rs/idenumbra-core"
+keywords = ["identification", "validation", "no_std", "identity"]
+categories = ["no-std", "parsing"]
+
+[lints]
+workspace = true
+
+[dependencies]

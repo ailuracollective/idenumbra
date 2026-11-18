@@ -1,0 +1,18 @@
+[package]
+name = "idenumbra-bra"
+description = "Brazil identification validator (CPF, CNPJ)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+readme = "README.md"
+keywords = ["bra", "identification", "validation", "no_std"]
+categories = ["no-std", "parsing"]
+
+[lints]
+workspace = true
+
+[dependencies]
+idenumbra-core = { workspace = true }
