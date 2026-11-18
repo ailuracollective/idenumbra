@@ -42,6 +42,8 @@ mod tests {
     fn accepts_dni_and_ruc() {
         assert!(validate("12345678").is_ok());
         assert!(validate("20123456786").is_ok());
+        assert!(validate("15123456782").is_ok()); // foreign natural person
+        assert!(validate("17123456785").is_ok()); // prefix 17, undocumented
         assert!(validate("AB123456").is_ok());
     }
 

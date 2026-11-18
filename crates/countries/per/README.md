@@ -10,30 +10,42 @@ Peru identification validator.
 
 ## Validation algorithm
 
-DNI: 8 digits, no check digit. RUC: 11 digits starting with `10`, `15`, `17`
-or `20`; weights `[5,4,3,2,7,6,5,4,3,2]` over the first 10 digits; check digit
-`(11 - sum mod 11) mod 10` (remainder 0 gives 1, remainder 1 gives 0).
+DNI: 8 digits, no check digit (RENIEC publishes none). RUC: 11 digits starting
+with `10`, `15`, `17` or `20`; weights `[5,4,3,2,7,6,5,4,3,2]` over the first
+10 digits; check digit `(11 - sum mod 11) mod 10` (remainder 0 gives 1,
+remainder 1 gives 0).
 
 ### Editable constants
 
 - `RUC_PREFIXES = [b"10", b"15", b"17", b"20"]` (`src/validators/ruc.rs`) —
-  issuer prefixes: `10` natural person with DNI, `15` foreign natural person,
-  `17` natural person without DNI (implementation-only), `20` legal person.
+  issuer prefixes: `10` natural person with DNI and `15` foreign natural
+  person are described by SUNAT; `17` is only documented by implementations;
+  `20` legal person (national or foreign).
 
 ## References
 
-- **Official** — SUNAT, legislation and RUC definition: https://www.sunat.gob.pe/legislacion/ruc/
-- **Official** — SUNAT, inscription in the RUC (natural person `10` + DNI,
-  foreigner `15` + random number, legal person `20`): https://www.gob.pe/284-inscripcion-en-el-ruc
-- **Official** — RENIEC, DNI questions (8 digits): https://identidad.reniec.gob.pe/preguntas-frecuentes-dni
-- **Implementation** — python-stdnum `pe.ruc` (the `17` prefix is only
-  documented by implementations; SUNAT does not list the prefix table):
-  https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/pe/ruc.py
+Official sources are listed first; the `implementation` ones are the
+cross-checks used where the agency does not publish the check-digit algorithm.
+
+- **Official** — SUNAT, *Inscríbete en el RUC* (11 digits; national natural
+  person `10` + DNI + check digit, foreign natural person `15` + random
+  number, legal person `20` + random number):
+  https://centrovirtual.sunat.gob.pe/tramites/inscribete-ruc
+- **Official** — SUNAT, RUC legislation:
+  https://www.sunat.gob.pe/legislacion/ruc/
+- **Official** — SUNAT, inscription in the RUC (natural person, documents
+  required): https://www.gob.pe/284-sacar-ruc-persona-natural
+- **Official** — RENIEC, DNI questions (8 digits):
+  https://identidad.reniec.gob.pe/preguntas-frecuentes-dni
+- **Implementation** — python-stdnum `pe.ruc` (prefix table with `17` and the
+  modulo 11 weights; SUNAT publishes neither):
+  https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/per/ruc.py
 - **Implementation** — https://es.wikipedia.org/wiki/Documento_Nacional_de_Identidad_(Per%C3%BA)
 
-SUNAT publishes no prefix table and no check-digit specification; the RUC
-number is only defined as "11 digits, unique". Official links were opened on
-2026-11-17; the implementation links are public cross-checks, not dated.
+SUNAT publishes no prefix table and no check-digit algorithm; it only names the
+eleventh digit "dígito verificador". `17` is accepted on implementation
+evidence only, and `16` (seen in a few ports and blogs, not in python-stdnum)
+is not accepted. Links were opened on 2026-11-17.
 
 ## Usage
 
@@ -57,7 +69,9 @@ Idenumbra::infer("PER", "12345678")?;
 ## Test numbers (synthetic, not real)
 
 - DNI: `12345678`
-- RUC: `20123456786`
+- RUC (legal person): `20123456786`
+- RUC (foreign natural person): `15123456782`
+- RUC (prefix `17`): `17123456785`
 
 These values are **synthetic** and do **not** correspond to any real person or company. Generated locally with this crate's validation algorithm. Source: generated locally with the SUNAT modulo 11 rules.
 
