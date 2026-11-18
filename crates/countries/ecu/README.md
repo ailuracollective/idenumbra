@@ -33,6 +33,26 @@ tolerated (`171234567-5`).
   Kept so legacy RUCs are not rejected; remove when the SRI confirms what `50`
   identifies.
 
+## Components
+
+`components(value)` (and the `Validation` returned by `validate`) expose the
+parts encoded in the number. `Ok(None)` for a valid passport.
+
+- Cédula: `province` (INEC code and name; code `30` is registered abroad),
+  `person_type` (third digit, `0`-`5`), `serial` (digits 4-9) and `check_digit`.
+- RUC: `province`, `taxpayer` (`NaturalPerson` for `0`-`5`, `PublicEntity` for
+  `6`, `PrivateCompany` for `9`). Natural persons also get the embedded cédula
+  as `id_card`; public entities get their five-digit `serial`.
+
+```rust
+use idenumbra_ecu::{components, Components};
+
+if let Ok(Some(Components::IdCard(card))) = components("1712345675") {
+    assert_eq!(card.province.name, Some("Pichincha"));
+    assert_eq!(card.check_digit, 5);
+}
+```
+
 ## References
 
 Official sources are listed first; the `implementation` ones are the

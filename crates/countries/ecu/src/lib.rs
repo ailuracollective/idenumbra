@@ -2,7 +2,8 @@
 //!
 //! Validates ID card (10 digits), RUC (13 digits) and passport (alphanumeric)
 //! numbers. Implements [`idenumbra_core::Validator`], so it can be used on its
-//! own or registered in the orchestrator.
+//! own or registered in the orchestrator. Validated numbers can also be split
+//! into their parts with [`components`].
 
 #![no_std]
 
@@ -17,16 +18,19 @@ mod validators {
     include!("validators/passport.rs");
     include!("validators/ruc.rs");
     include!("validators/validate_with.rs");
+    include!("validators/components.rs");
 }
 
-pub use validators::{validate, validate_with};
+pub use validators::{
+    components, validate, validate_with, Components, IdCard, Province, Ruc, Taxpayer, Validation,
+};
 
 /// Zero-sized marker type implementing [`Validator`] for Ecuador.
 pub struct IdenumbraECU;
 
 impl Validator for IdenumbraECU {
     const COUNTRY: &'static str = COUNTRY;
-    type Validation = ();
+    type Validation = Validation;
     fn validate(value: &str) -> Result<Self::Validation, ValidationError> {
         validate(value)
     }
@@ -42,14 +46,11 @@ mod tests {
     #[test]
     fn accepts_id_card_and_rucs() {
         assert!(validate("1712345675").is_ok());
-        assert!(validate("1712345675001").is_ok()); // natural person
-        assert!(validate("1790012344001").is_ok()); // private company
-        assert!(validate("1760001200001").is_ok()); // public company
-
-        // The SRI stopped guaranteeing the modulo 11 digit for private RUCs
-        // whose sequential passes six digits, so that digit is not checked.
+        assert!(validate("1712345675001").is_ok());
+        assert!(validate("1790012344001").is_ok());
+        assert!(validate("1760001200001").is_ok());
         assert!(validate("1790012345001").is_ok());
-        assert!(validate("5090012340001").is_ok()); // legacy code 50
+        assert!(validate("5090012340001").is_ok());
     }
 
     #[test]
@@ -61,7 +62,7 @@ mod tests {
                 received: 6
             })
         );
-        assert!(validate("1760001210001").is_err()); // public company
+        assert!(validate("1760001210001").is_err());
     }
 
     #[test]
@@ -74,11 +75,10 @@ mod tests {
             validate("5012345675"),
             Err(ValidationError::InvalidRegion { region: 50 })
         );
-        // RUC always ends in 001 (art. 3 of the RUC reglamento).
         assert!(validate("1712345675002").is_err());
         assert!(validate("1790012344002").is_err());
         assert!(validate("1760001200002").is_err());
-        assert!(validate("1770012340001").is_err()); // third digit 7
+        assert!(validate("1770012340001").is_err());
         assert!(validate("17123458").is_err());
     }
 
@@ -88,7 +88,6 @@ mod tests {
         assert!(validate("171234567500-1").is_ok());
         assert!(validate_with("171234567-5", "id_card").is_ok());
         assert!(validate_with("171234567500-1", "ruc").is_ok());
-        // Only that position: anywhere else the hyphen makes it a bad passport.
         assert!(validate("171234-5675").is_err());
         assert!(validate("17-12345675").is_err());
         assert!(validate_with("1712345-675", "id_card").is_err());
@@ -100,5 +99,72 @@ mod tests {
         assert!(validate_with("1712345675001", "ruc").is_ok());
         assert!(validate_with("1712345675", "ruc").is_err());
         assert!(validate_with("A123456", "passport").is_ok());
+    }
+
+    fn validated(value: &str) -> Validation {
+        match validate(value) {
+            Ok(v) => v,
+            Err(e) => panic!("{e}"),
+        }
+    }
+
+    #[test]
+    fn components_of_id_card() {
+        let v = validated("1712345675");
+        assert_eq!(v.kind, "id_card");
+        let card = match v.components {
+            Some(Components::IdCard(c)) => c,
+            _ => panic!("expected id card"),
+        };
+        assert_eq!(card.province.code, 17);
+        assert_eq!(card.province.name, Some("Pichincha"));
+        assert_eq!(card.person_type, 1);
+        assert_eq!(card.serial, 234567);
+        assert_eq!(card.check_digit, 5);
+    }
+
+    #[test]
+    fn components_of_ruc() {
+        let v = validated("1712345675001");
+        assert_eq!(v.kind, "ruc");
+        let ruc = match v.components {
+            Some(Components::Ruc(r)) => r,
+            _ => panic!("expected ruc"),
+        };
+        assert_eq!(ruc.taxpayer, Taxpayer::NaturalPerson);
+        let embedded = ruc.id_card.unwrap_or_else(|| panic!("expected id card"));
+        assert_eq!(embedded.province.code, 17);
+
+        let v = validated("1760001200001");
+        let ruc = match v.components {
+            Some(Components::Ruc(r)) => r,
+            _ => panic!("expected ruc"),
+        };
+        assert_eq!(ruc.taxpayer, Taxpayer::PublicEntity);
+        assert_eq!(ruc.serial, Some(12));
+
+        let v = validated("1790012344001");
+        let ruc = match v.components {
+            Some(Components::Ruc(r)) => r,
+            _ => panic!("expected ruc"),
+        };
+        assert_eq!(ruc.taxpayer, Taxpayer::PrivateCompany);
+        assert_eq!(ruc.serial, None);
+
+        let v = validated("5090012340001");
+        let ruc = match v.components {
+            Some(Components::Ruc(r)) => r,
+            _ => panic!("expected ruc"),
+        };
+        assert_eq!(ruc.province.code, 50);
+        assert_eq!(ruc.province.name, None);
+    }
+
+    #[test]
+    fn components_require_a_valid_number() {
+        assert!(validate("1712345676").is_err());
+        let v = validated("A123456");
+        assert_eq!(v.kind, "passport");
+        assert_eq!(v.components, None);
     }
 }
