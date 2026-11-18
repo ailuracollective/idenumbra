@@ -53,7 +53,7 @@ cargo test -p idenumbra-arg
 ## Releases
 
 Automated by Google's release-please (`.github/workflows/release-please.yml`).
-It runs on `main`, opens a `chore(main): release X.Y.Z-alpha.N` PR from the
+It runs on `main`, opens a `chore: release X.Y.Z-alpha.N` PR from the
 conventional commits, and on merge tags `vX.Y.Z-alpha.N` and writes
 `CHANGELOG.md`.
 

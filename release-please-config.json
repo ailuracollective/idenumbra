@@ -8,6 +8,7 @@
   "packages": {
     ".": {
       "release-as": "0.1.0-alpha.1",
+      "pull-request-title-pattern": "chore: release${component} ${version}",
       "extra-files": [
         {
           "type": "toml",
