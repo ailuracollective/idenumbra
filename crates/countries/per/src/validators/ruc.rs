@@ -1,12 +1,15 @@
-/// SUNAT prefix pairs: 10/15/17 natural persons, 20 companies. Edit when a new
-/// prefix is issued.
+/// SUNAT publishes `10` (national natural person: `10` + DNI + digit), `15`
+/// (foreign natural person) and `20` (legal person); `17` is accepted on
+/// implementation evidence only. Edit when SUNAT publishes a new prefix.
 const RUC_PREFIXES: [&[u8]; 4] = [b"10", b"15", b"17", b"20"];
 
 fn valid_ruc_prefix(prefix: &[u8]) -> bool {
     RUC_PREFIXES.contains(&prefix)
 }
 
-/// RUC check digit: modulo 11 with weights 5,4,3,2,7,6,5,4,3,2.
+/// RUC check digit: modulo 11 with weights 5,4,3,2,7,6,5,4,3,2, the same
+/// computation as SUNAT's own form validator (remainder 0 gives 1, remainder 1
+/// gives 0).
 fn validate_ruc(chars: &[u8]) -> Result<(), ValidationError> {
     if chars.len() != 11 {
         return Err(ValidationError::InvalidLength {
