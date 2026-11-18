@@ -11,25 +11,32 @@ Uruguay identification validator.
 ## Validation algorithm
 
 CI: the identification number is a natural sequence starting at 1 followed by a
-module-10 check digit (Decreto 501/1978, art. 2). The body is left-padded to 7
-digits and multiplied by `[2,9,8,7,6,3,4]`; the check digit is
-`(10 - sum mod 10) mod 10`. A 6-digit body is therefore the same number with a
-leading zero, and both spellings validate.
+module-10 check digit (Decreto 501/1978, art. 2). The decree fixes only the
+modulus, not the weights or a width; the body is left-padded to 7 digits and
+multiplied by `[2,9,8,7,6,3,4]`, with the check digit
+`(10 - sum mod 10) mod 10`, as the public implementations document. A 6-digit
+body is therefore the same number with a leading zero, and both spellings
+validate.
 
 RUT: the first two digits must be `01-22`, positions 3-8 must not be all zero,
 positions 9-11 must be `001`, and the check digit uses weights
 `[4,3,2,9,8,7,6,5,4,3,2]` with `11 - remainder`; remainder 0 gives `0` and
-remainder 1 would give `10`, which no RUT can carry, so those eleven digits are
-rejected as `UnrepresentableCheckDigit`. Dots, hyphens and spaces are ignored.
+remainder 1 would give `10`, which no RUT can carry: the public implementations
+discard such a sequence instead of producing a digit, so those eleven digits
+are rejected as `UnrepresentableCheckDigit`. Dots, hyphens and spaces are
+ignored.
 
 ### Editable constants
 
 - `MAX_OFFICE_CODE = 22` (`src/validators/rut.rs`) — the first two RUT digits
-  are the DGI operating unit where the taxpayer registered. `01-21` are
-  historical and `22` is the only one assigned to new taxpayers since the week
-  of 21 October 2024.
-- `RUT_OFFICE_GROUP = b"001"` (`src/validators/rut.rs`) — middle group, a
-  constant per the DGI, `001` in every public sample.
+  are the DGI operating unit where the taxpayer registered, not the department
+  (the DGI now assigns `22` regardless of department). `01-21` belong to
+  taxpayers registered before October 2024 and keep their numbers; `22` is the
+  only prefix assigned since the week of 21 October 2024.
+- `RUT_OFFICE_GROUP = b"001"` (`src/validators/rut.rs`) — middle group, `001`
+  in every public sample and in both reference implementations. Some third-party
+  pages claim `002+` for branches; no DGI document says so, so only `001` is
+  accepted.
 
 ## References
 
@@ -38,9 +45,13 @@ rejected as `UnrepresentableCheckDigit`. Dots, hyphens and spaces are ignored.
   diez": https://www.impo.com.uy/bases/decretos/501-1978 — checked 2026-11-17.
 - **Official** — MEF, response to access-to-information request 2024-5-1-0002222
   (RUT = 2-digit prefix + 6 sequential + 3-digit suffix + check digit; the
-  check-digit algorithm is classified reserved by Resolución 836/2024 of
-  16 April 2024):
+  values and the check-digit algorithm are classified reserved by Resolución
+  836/2024 of 16 April 2024):
   https://www.gub.uy/ministerio-economia-finanzas/institucional/informacion-gestion/informes-solicitudes-acceso-informacion-publica/respuesta-100
+  — checked 2026-11-17.
+- **Official (secondary)** — UAIP, Resolución 145/024 of 21/08/2024, which
+  validates that same reservation and names Resolución 836/2024:
+  https://www.gub.uy/unidad-acceso-informacion-publica/institucional/normativa/resolucion-n-145024-sobre-reserva-informacion
   — checked 2026-11-17.
 - **Official** — DGI, *Nueva numeración del RUT* (from the week of 21 October
   2024 the first two digits of every new RUT are `22`, regardless of the
@@ -89,6 +100,7 @@ Idenumbra::infer("URY", "12345678")?;
 - CI: `1.234.567-2` (`12345672`)
 - CI with a 6-digit body: `123.456-1` (`1234561`, body padded to `0123456`)
 - RUT: `21-999983-001-9` (`219999830019`)
+- RUT with the 2024 prefix: `22-999983-001-6` (`229999830016`)
 
 These values are **synthetic** and do **not** correspond to any real person or
 company. Generated locally with this crate's validation algorithm.

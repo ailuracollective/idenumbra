@@ -44,6 +44,8 @@ mod tests {
         assert!(validate("12345672").is_ok());
         assert!(validate("21-999983-001-9").is_ok());
         assert!(validate("219999830019").is_ok());
+        // 22 is the only prefix the DGI assigns since October 2024.
+        assert!(validate("22-999983-001-6").is_ok());
     }
 
     #[test]
