@@ -21,8 +21,8 @@ fn all_zero(digits: &[u8]) -> bool {
 /// Validate a Bolivian identification number (CI or NIT).
 ///
 /// Neither document has a published check digit: the CI is the registry number
-/// and the NIT ends in a control code (`01`, `02` or `04`) plus one random
-/// digit, both assigned by the SIN.
+/// and the NIT ends in a control code (`01`, `02`, `04`, plus `03` seen in the
+/// SIN's supplier lists) plus one random digit, both assigned by the SIN.
 pub fn validate(value: &str) -> Result<(), ValidationError> {
     let value = value.trim();
     if value.is_empty() {

@@ -1,12 +1,14 @@
-/// NIT lengths seen in public supplier lists (9-11 digits). The SIN publishes
-/// no length bound; the range stays permissive. Edit when the SIN documents one.
-const NIT_MIN_LEN: usize = 7;
-const NIT_MAX_LEN: usize = 12;
+/// NIT lengths in the SIN's public supplier lists (9-11 digits). The SIN
+/// publishes no length bound; the range is the observed one. Edit when the SIN
+/// documents a range.
+const NIT_MIN_LEN: usize = 9;
+const NIT_MAX_LEN: usize = 11;
 
 /// Control codes the SIN appends after the CI: `01` natural person or
-/// unipersonal company, `02` legal person, `04` foreign person. Edit when the
-/// SIN publishes a new code on its "Generación del NIT" page.
-const NIT_CONTROL_CODES: [u8; 3] = [1, 2, 4];
+/// unipersonal company, `02` legal person, `04` foreign person; `03` also
+/// appears in the SIN's own supplier lists. Edit when the SIN publishes a new
+/// code on its "Generación del NIT" page.
+const NIT_CONTROL_CODES: [u8; 4] = [1, 2, 3, 4];
 
 /// Validate the structure of a Bolivian NIT.
 ///

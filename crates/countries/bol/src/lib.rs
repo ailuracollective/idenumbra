@@ -43,17 +43,33 @@ mod tests {
     #[test]
     fn checks_nit_control_codes() {
         // No check digit exists: the last three digits are the SIN control
-        // code (01, 02, 04) plus one random digit.
+        // code (01, 02, 04, plus 03 seen in SIN lists) and one random digit.
+        assert!(validate_with("123456012", "nit").is_ok()); // 01, 9 digits
         assert!(validate_with("12345670011", "nit").is_ok()); // 01, 11 digits
         assert!(validate_with("1234567029", "nit").is_ok());
+        assert!(validate_with("1234567037", "nit").is_ok()); // 03
         assert!(validate_with("1234567045", "nit").is_ok());
         assert_eq!(
-            validate_with("1234567037", "nit"),
-            Err(ValidationError::InvalidFormat) // undocumented code 03
+            validate_with("1234567057", "nit"),
+            Err(ValidationError::InvalidFormat) // undocumented code 05
         );
         assert_eq!(
             validate_with("1234567889", "nit"),
             Err(ValidationError::InvalidFormat) // no control code
+        );
+        assert_eq!(
+            validate_with("12345678", "nit"),
+            Err(ValidationError::InvalidLength {
+                expected: 11,
+                found: 8 // below the 9 digits of the shortest NIT in SIN lists
+            })
+        );
+        assert_eq!(
+            validate_with("123456701234", "nit"),
+            Err(ValidationError::InvalidLength {
+                expected: 11,
+                found: 12
+            })
         );
         assert!(validate("1234567890123").is_err()); // 13 digits
         assert!(validate("0000000").is_err()); // all-zero CI
