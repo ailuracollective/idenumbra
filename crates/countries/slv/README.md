@@ -54,14 +54,17 @@ only the current table applies (see the evidence below).
   https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/sv/nit.py
 - **Implementation** — https://github.com/avalon-tech/idsv-js (DUI weights and
   the DUI-as-NIT rule).
-- **Evidence** — 395 distinct 14-digit NITs taken from Salvadoran government
-  supplier and procurement PDFs, collected in
-  https://github.com/arthurdejong/python-stdnum/issues/133 and checked against
-  both tables on 2026-11-17: 382 pass at least one table; of the 272 with a
-  correlative of 101 or more, 271 match the current table and one (correlative
-  105) matches only the legacy table and is treated as a transcription error in
-  the source PDF; all 109 with a correlative of 13 or less match the legacy
-  table; the only sample in between (correlative 014) satisfies both.
+- **Evidence** — 395 distinct 14-digit numbers were taken from Salvadoran
+  government supplier and procurement PDFs, collected in
+  https://github.com/arthurdejong/python-stdnum/issues/133 and re-checked
+  against both tables on 2026-11-17: one is not a NIT (first digit `6`), and of
+  the remaining 394, 382 pass at least one table; of the 272 with a correlative
+  of 101 or more, 271 match the current table and one (correlative 105) matches
+  only the legacy table and is treated as a transcription error in the source
+  PDF; all 109 with a correlative of 13 or less match the legacy table; the two
+  samples in between (both correlative 014) discriminate nothing — one
+  satisfies both tables and the other neither. No public NIT in 015-100 was
+  found to settle the cut-off, so both tables are accepted up to 100.
 
 DGII publishes neither the NIT nor the DUI check-digit algorithm, so both are
 reverse-engineered from public implementations and sample numbers, not from a
@@ -94,6 +97,8 @@ Idenumbra::infer("SLV", "12345678")?;
 - DUI: `12345678-4` (`123456784`)
 - NIT: `0614-050707-104-8`
 - NIT, legacy correlative: `0614-010120-001-0`
+- NIT cut-off boundary: `0614-010120-100-1` (legacy table) and
+  `0614-010120-102-1` (current table)
 
 These values are **synthetic** and do **not** correspond to any real person or
 company, except `0614-050707-104-8`, which is the fictitious sample published in

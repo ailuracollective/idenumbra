@@ -55,8 +55,10 @@ fn validate_nit(digits: &[u8]) -> Result<(), ValidationError> {
     let expected = if legacy_correlative { legacy } else { current };
     let received = (digits[13] - b'0') as u32;
     // Every public sample with a correlative of 101 or more uses the current
-    // table, but the 014-100 band is unobserved, so either table is accepted
-    // there instead of rejecting numbers that may be legitimately issued.
+    // table, but no sample in the 014-100 band discriminates between the two
+    // (the two known ones at 014 match both tables or neither), so either
+    // table is accepted there instead of rejecting numbers that may be
+    // legitimately issued.
     if received == expected || (legacy_correlative && received == current) {
         return Ok(());
     }

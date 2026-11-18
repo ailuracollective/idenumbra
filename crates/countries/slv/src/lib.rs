@@ -71,6 +71,26 @@ mod tests {
     }
 
     #[test]
+    fn the_cut_off_is_inclusive_at_100() {
+        // Correlative 100 is the last legacy one: the legacy sum is 166
+        // (mod 11 = 1 -> 1) and the current one 94 (mod 11 = 6 -> 5); both are
+        // accepted.
+        assert!(validate("0614-010120-100-1").is_ok());
+        assert!(validate("0614-010120-100-5").is_ok());
+        // Correlative 102 (101 gives the same digit under both tables) already
+        // uses only the current table: legacy 170 (mod 11 = 5 -> 5), current 98
+        // (mod 11 = 10 -> 1).
+        assert!(validate("0614-010120-102-1").is_ok());
+        assert_eq!(
+            validate("0614-010120-102-5"),
+            Err(ValidationError::CheckDigitMismatch {
+                expected: 1,
+                received: 5
+            })
+        );
+    }
+
+    #[test]
     fn rejects_bad_check_digits() {
         assert_eq!(
             validate("123456785"),
