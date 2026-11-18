@@ -17,6 +17,11 @@ with one row per document a caller could plausibly pass, plus:
 
 - the recommended validation depth per document: full, structure only, or
   unsupported;
+- the abstractable components per document: the fields with published, stable
+  semantics that the number encodes (region, taxpayer type, serial, check
+  digit, embedded identifier, date, municipality, …), or an explicit
+  `none` / `opaque serial only`. A component is only abstractable when the
+  issuer publishes its meaning and range; an opaque counter is not;
 - the sources used, each with the date you opened it;
 - open questions and conflicts, with what each answer would change.
 
@@ -62,15 +67,33 @@ No code, no README rewrite, no opinion about Rust. Hand the verified rows to
    its published check digit. Issue dates, serial counters, municipality codes
    that are not constrained, and per-document suffixes are only checkable when
    the agency publishes the table — otherwise they are structure, or nothing.
-6. **Grade the evidence** (rubric in the template): primary official, official
+6. **Identify abstractable components.** For each document, list the fields the
+   number encodes (region/province, taxpayer or person type, municipality,
+   embedded identifier, birth date, century, sex, serial, check digit, …). A
+   field is a component only when the issuer publishes its meaning and its
+   allowed range; an opaque counter, an unconstrained municipality code or a
+   per-document suffix with no published table stays `opaque serial` and is not
+   exposed. For each component record the source and confidence the same way as
+   for the check digit, because a component with Low evidence must not be
+   exposed as a typed field. Note which components are stable (unlikely to
+   change) and which are catalogue data the agency can extend (department
+   tables, issuer prefixes); the latter become named `const`s, not free text.
+   Ecuador (`crates/countries/ecu`) is the reference implementation of this
+   step: its `components(value)` exposes `province`, `person_type`, `serial`,
+   `check_digit`, `taxpayer`, an embedded `id_card` and a public-entity
+   `serial`, and explicitly omits private-company sequentials as ambiguous.
+7. **Grade the evidence** (rubric in the template): primary official, official
    secondary, third-party implementation, anecdote. A check digit justified only
-   by a third-party implementation is not verified.
-7. **Log conflicts and gaps.** Record both sources, both dates, which one you
+   by a third-party implementation is not verified. A component justified only
+   by a third-party implementation is likewise not exposed.
+8. **Log conflicts and gaps.** Record both sources, both dates, which one you
    followed and why. Record what you could not establish — that list is a
    deliverable, not a failure.
-8. **Recommend depth.** Full (algorithm published and still applied), structure
+9. **Recommend depth.** Full (algorithm published and still applied), structure
    only (shape/date/region only), or unsupported (nothing verifiable). Say which
    and why, per document.
+   Also recommend, per document, whether components are exposed (`components`
+   returns `Some`) or `None`, and which fields are omitted and why.
 
 ## Rules
 
@@ -103,6 +126,24 @@ No code, no README rewrite, no opinion about Rust. Hand the verified rows to
   them third-party, and never let consensus promote a rule to official.
 - **Never fill a missing algorithm.** "The agency does not publish a check digit"
   is a finding. Report structure-only instead of inventing weights.
+- **Components are claims too.** A field is only a component when the issuer
+  publishes its meaning and range; an opaque serial, an unconstrained
+  municipality code or a counter with no published table stays `opaque serial`
+  and is not exposed. Do not invent a meaning for a digit the agency never
+  documented (Ecuador's person type is returned raw for exactly this reason).
+- **Components are graded like algorithms.** A component backed only by a
+  third-party implementation or by "everyone knows" is Low/None confidence and
+  must not be exposed as a typed field; expose it as raw digits or not at all.
+- **Components follow the delegation.** When a catalogue (department table,
+  issuer prefix, taxpayer-type digit) is "según lo establezca" an agency, cite
+  that instrument for the values, not only the law. If the instrument is
+  unpublished, the component is not exposed.
+- **Serials stay opaque.** A serial counter is not a component even when its
+  length is fixed, unless the agency publishes a meaning for it. Do not split an
+  opaque run of digits into named fields just because the layout looks regular.
+- **Components do not widen the validator.** Exposing a component never adds a
+  check the validator did not already perform. If a field's range is not
+  validated, it is not a component; it is unchecked structure.
 - **Delegated tables: follow the delegation.** When a law says a code, format or
   exception is "según lo establezca" an agency's directorate (RENAP for the
   Guatemalan CUI, DGT for the Costa Rican NITE), the law settles the *shape* and
@@ -141,8 +182,9 @@ No code, no README rewrite, no opinion about Rust. Hand the verified rows to
 ## Report
 
 Finish with the matrix, the depth recommendation, the dated sources, the
-conflicts/gaps, and one line per document on what remains uncertain. Then choose
-the next skill:
+conflicts/gaps, the abstractable components per document (or an explicit
+`none`/`opaque serial only`), and one line per document on what remains
+uncertain. Then choose the next skill:
 
 - rules verified and ready to implement → `identity-validation-algorithms`;
 - nothing verifiable → recommend structure-only or no validator, and stop before
