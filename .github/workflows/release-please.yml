@@ -13,3 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: googleapis/release-please-action@v5
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          # A dedicated PAT of the AiluraKitty account, not the workflow's
+          token: ${{ secrets.AILURA_RELEASE_TOKEN }}
