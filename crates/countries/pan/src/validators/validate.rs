@@ -7,6 +7,11 @@ const MAX_PROVINCE_CODE: u32 = 13;
 /// indígena. Edit when the Tribunal Electoral issues a new one.
 const ID_MARKERS: [&str; 5] = ["E", "N", "PE", "AV", "PI"];
 
+/// DGI tag for a *Número Tributario*: `province-NT-folio-asiento`, issued to
+/// resident foreigners and to entities without legal personality. Edit when
+/// the DGI changes its RUC structure.
+const NT_TAG: &str = "NT";
+
 /// Panamanian provinces are numbered 01-13.
 fn valid_province(digits: &[u8]) -> bool {
     let province = digits
@@ -37,8 +42,14 @@ fn all_digits(value: &str) -> bool {
     !value.is_empty() && value.bytes().all(|b| b.is_ascii_digit())
 }
 
+/// Folio/asiento pair shared by the cédula and RUC shapes: 1-4 digits for the
+/// folio and 1-9 digits for the asiento.
+fn valid_tail(folio: &str, asiento: &str) -> bool {
+    all_digits(folio) && folio.len() <= 4 && all_digits(asiento) && asiento.len() <= 9
+}
+
 fn validate_hyphenated(value: &str) -> Result<(), ValidationError> {
-    let mut parts = [""; 3];
+    let mut parts = [""; 4];
     let mut count = 0usize;
     for part in value.split('-') {
         if count == parts.len() {
@@ -47,19 +58,23 @@ fn validate_hyphenated(value: &str) -> Result<(), ValidationError> {
         parts[count] = part;
         count += 1;
     }
-    if count != 3 {
-        return Err(ValidationError::InvalidFormat);
+    let ok = match count {
+        3 => valid_first_part(parts[0]) && valid_tail(parts[1], parts[2]),
+        // RUC NT (DGI): province-NT-folio-asiento.
+        4 => {
+            parts[1] == NT_TAG
+                && all_digits(parts[0])
+                && parts[0].len() <= 2
+                && valid_province(parts[0].as_bytes())
+                && valid_tail(parts[2], parts[3])
+        }
+        _ => false,
+    };
+    if ok {
+        Ok(())
+    } else {
+        Err(ValidationError::InvalidFormat)
     }
-    let (first, folio, asiento) = (parts[0], parts[1], parts[2]);
-    if !valid_first_part(first)
-        || !all_digits(folio)
-        || folio.len() > 4
-        || !all_digits(asiento)
-        || asiento.len() > 9
-    {
-        return Err(ValidationError::InvalidFormat);
-    }
-    Ok(())
 }
 
 fn validate_passport(value: &str) -> Result<(), ValidationError> {
@@ -79,8 +94,12 @@ fn validate_passport(value: &str) -> Result<(), ValidationError> {
 
 /// Validate a Panamanian identification number (identity card or RUC).
 ///
-/// The DGI RUC check digits depend on the taxpayer type, which cannot be
-/// inferred from the number alone, so only the structure is validated.
+/// The DGI assigns a 2-digit check digit per RUC, and its value depends on the
+/// taxpayer type (natural, juridical, natural NT, juridical NT, finca) plus, for
+/// natural persons, the province and marker. The DGI publishes no algorithm:
+/// the DV is looked up in eTax 2.0 and it changes when the holder registers as
+/// a taxpayer, so it cannot be derived from the number alone. Only the
+/// structure is validated here.
 pub fn validate(value: &str) -> Result<(), ValidationError> {
     let value = value.trim();
     if value.is_empty() {
