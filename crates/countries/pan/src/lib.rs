@@ -62,10 +62,14 @@ mod tests {
 
     #[test]
     fn rejects_undocumented_series() {
-        // EE and SB are old transitory/San Blas series with no published shape;
-        // they stay rejected until the Tribunal Electoral documents them.
+        // EE and SB are old transitory/San Blas series: Decreto 53/1958 art. 9
+        // lists only province, PE, N and E, and no later rule defines them.
         assert!(validate("8SB-1-234").is_err());
+        assert!(validate("3SB-1-234").is_err());
         assert!(validate("EE-8-12345").is_err());
+        // E-NT is not a shape either: the DGI form has one "N° de Cédula o N.T"
+        // field, and an NT is written province-NT-folio-asiento.
+        assert!(validate("E-NT-8-123").is_err());
     }
 
     #[test]

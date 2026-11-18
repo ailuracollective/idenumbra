@@ -18,14 +18,16 @@ the second part has 1-4 digits and the third 1-9 digits. Four-part values
 with 7-13 digits.
 
 The Tribunal Electoral publishes no check digit for the cédula, and the DGI
-check digit cannot be computed from the number:
+check digit cannot be computed from the number. The DGI's own page says the DV
+"el sistema [lo] asigna de manera automática a cada RUC" per taxpayer type
+(natural, juridical, natural NT, juridical NT, finca) and that "su dígito
+verificador cambia al momento que se inscribe como contribuyente" — a DV held
+before registration changes on registration:
 
-- the DGI issues **two** digits per RUC and their value depends on the
+- the DGI issues **two** digits per RUC, and their value depends on the
   taxpayer type (persona natural, jurídica, natural NT, jurídica NT, finca)
   and, for natural persons, on the province and marker;
-- the DGI's own page warns that the DV changes when the holder registers as a
-  taxpayer, so it is a registry attribute rather than a function of the
-  number;
+- it is a registry attribute rather than a function of the number;
 - the algorithm is not published; the DGI looks the DV up in eTax 2.0.
 
 So the DV is documented but deliberately not validated here. Use the DGI eTax
@@ -44,10 +46,14 @@ So the DV is documented but deliberately not validated here. Use the DGI eTax
   vigencia, `PI` población indígena.
 - `NT_TAG = "NT"` (`src/validators/validate.rs`) — DGI tax-number tag.
 
-The `EE` (transitory foreigner) and `SB` (pre-1953 San Blas, now Guna Yala)
-series are **not** accepted: no official source documents their shape or their
-DV, and the DGI's own DV service does not compute them. Add them here only
-with a published rule.
+The `EE` (transitory foreigner) and `SB` (pre-1953 San Blas) series are **not**
+accepted, and neither is an `E-NT` prefix. Decreto 53/1958 art. 9 — still the
+rule that defines the numbering — lists exactly four shapes: province code,
+`PE`, `N` and `E`. No later norm, DGI form or OECD TIN profile adds `EE`, `SB`
+or `E-NT`: the DGI's RUC form has a single `N° de Cédula o N.T` field, and an
+NT is written `province-NT-folio-asiento`. `EE` and `SB` survive only in
+third-party compilations, so they stay rejected until the Tribunal Electoral
+publishes their shape.
 
 ## References
 
@@ -64,6 +70,10 @@ with a published rule.
   changes on registration: https://dgi.mef.gob.pa/DV — checked 2026-11-17
 - **Official** — DGI, eTax 2.0 *Consultar DV* (the only DV oracle):
   https://etax2.mef.gob.pa/etax2web/Ruc/ConsultarDV.aspx — checked 2026-11-17
+- **Official** — DGI, RUC registration form: one identification field,
+  `N° de Cédula o N.T` (no `EE`, `SB` or `E-NT` field/prefix):
+  https://dgi.mef.gob.pa/Form-Tramites/FormulariosPdf/Formulario-RUC.pdf
+  — checked 2026-11-17
 - **Official (international)** — OECD, *Panama TIN* (RUC = cédula for natural
   persons, 2-digit DV, `NT` prefix for foreigners, RUC NT example `3-NT-3-33`):
   https://www.oecd.org/content/dam/oecd/en/topics/policy-issue-focus/aeoi/panama-tin.pdf
@@ -112,4 +122,5 @@ These values are **synthetic** and do **not** correspond to any real person or c
 - Lazy loading: only compiled when the corresponding Cargo feature is enabled.
 - The DGI check digits (two digits, type-dependent) are not checked; use the
   DGI eTax 2.0 `DV` service for that.
-- `EE` and `SB` series are rejected: undocumented.
+- `EE` and `SB` series are rejected: no issuing rule defines them (Decreto
+  53/1958 art. 9 lists only province, `PE`, `N` and `E`).

@@ -5,6 +5,10 @@ const MAX_PROVINCE_CODE: u32 = 13;
 /// Markers written after the province code, or in its place: E extranjero,
 /// N naturalizado, PE nacido en el exterior, AV antes de vigencia, PI población
 /// indígena. Edit when the Tribunal Electoral issues a new one.
+///
+/// The old `EE` (foreigner) and `SB` (pre-1953 San Blas) series are absent on
+/// purpose: Decreto 53/1958 art. 9, still the numbering rule, lists just
+/// province, `PE`, `N` and `E`, and no later norm documents those two.
 const ID_MARKERS: [&str; 5] = ["E", "N", "PE", "AV", "PI"];
 
 /// DGI tag for a *Número Tributario*: `province-NT-folio-asiento`, issued to
