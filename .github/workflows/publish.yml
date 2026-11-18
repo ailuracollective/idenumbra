@@ -1,0 +1,229 @@
+name: Publish
+
+# Publishes the workspace to crates.io once per published GitHub Release.
+# release-please creates the Release when its release pull request merges, so a
+# human has already decided that this version ships.
+#
+# Modelled on ailuracollective/colander's publish.yml, with three differences:
+#
+#   1. This is a workspace of 21 crates. They are published in dependency order
+#      (idenumbra-core, then the 19 country crates, then the orchestrator),
+#      waiting for each version to appear in the crates.io sparse index before
+#      the next crate needs it. A version already in the index is skipped, so a
+#      rerun after a partial failure resumes instead of failing on "already
+#      uploaded".
+#   2. colander refuses to publish prereleases. This repository is in alpha
+#      (`versioning: prerelease` + `prerelease-type: alpha` in
+#      release-please-config.json), so skipping prereleases would mean this
+#      workflow never publishes anything. Every release is published;
+#      crates.io accepts `0.1.0-alpha.N`.
+#   3. There is no artifact to attach: every crate is a library.
+#
+# Bootstrap: crates.io only allows Trusted Publishing to be configured for a
+# crate that already exists, so the first release needs a repository secret
+# named CARGO_REGISTRY_TOKEN (a classic crates.io API token with publish scope).
+# Once every crate exists and each one lists this repository and workflow as a
+# trusted publisher, delete the secret and the OIDC exchange below takes over.
+# The workflow uses the token when it is present and Trusted Publishing when it
+# is not.
+#
+# Every guard runs before the first upload: the tagged tree is formatted,
+# linted and tested, and the tag is checked against the workspace version and
+# against every member's version. The irreversible step is the upload.
+
+on:
+  release:
+    types: [published]
+
+# One run per published tag, and not cancellable. Cancelling halfway would
+# leave a partially published workspace, which no retry can clean up (crates.io
+# versions can be yanked but not deleted). Letting a duplicate run finish is the
+# smaller risk; the index check makes it skip everything already published.
+concurrency:
+  group: publish-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  USER_AGENT: idenumbra-release-workflow (https://github.com/ailuracollective/idenumbra)
+
+jobs:
+  verify:
+    name: Verify the tagged tree
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the tagged commit
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Install the Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal \
+            --component rustfmt --component clippy
+          rustup default stable
+          rustc --version
+          cargo --version
+
+      - name: Check formatting
+        run: cargo fmt --all --check
+
+      - name: Lint
+        run: cargo clippy --workspace --all-features --examples
+
+      - name: Test
+        run: cargo test --workspace --all-features
+
+  publish:
+    name: Publish to crates.io
+    needs: verify
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      # Mints the OIDC token that crates.io exchanges for a short-lived upload
+      # credential. Unused when the CARGO_REGISTRY_TOKEN secret is set.
+      id-token: write
+    env:
+      HAS_PUBLISH_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN != '' }}
+    steps:
+      - name: Check out the tagged commit
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Install the Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustc --version
+          cargo --version
+
+      # release-please writes the tag, the workspace version and every member's
+      # version in the same commit. A mismatch means the tag was moved or cut
+      # from another commit, and publishing it would push a version the source
+      # tree does not claim, permanently. Fail before anything is uploaded.
+      - name: Verify the tag matches the workspace version
+        id: version
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          case "$TAG" in
+            v*) ;;
+            *)
+              echo "::error title=Unexpected tag::${TAG} does not start with v"
+              exit 1
+              ;;
+          esac
+          version="${TAG#v}"
+          declared="$(awk -F'"' '
+            /^\[/ { section = $0 }
+            section == "[workspace.package]" && /^version = "/ { print $2; exit }
+          ' Cargo.toml)"
+          if [ -z "$declared" ]; then
+            echo "::error title=No workspace version::could not read [workspace.package] version from Cargo.toml"
+            exit 1
+          fi
+          if [ "$version" != "$declared" ]; then
+            echo "::error title=Tag/version mismatch::tag ${TAG} is ${version}, Cargo.toml declares ${declared}"
+            exit 1
+          fi
+          # Every member inherits version.workspace, and every internal
+          # dependency must require that same version. A crate that pinned its
+          # own version, or a workspace.dependencies entry that release-please
+          # failed to bump, would publish a manifest the tag does not describe
+          # (or fail halfway through the workspace).
+          report="$(cargo metadata --no-deps --format-version 1 | python3 -c '
+          import json, sys
+          version = sys.argv[1]
+          packages = json.load(sys.stdin)["packages"]
+          names = {p["name"] for p in packages}
+          bad = [p["name"] for p in packages if p["version"] != version]
+          for p in packages:
+              for d in p["dependencies"]:
+                  if d["name"] in names and d["req"] != "^" + version:
+                      bad.append(p["name"] + "->" + d["name"] + " " + d["req"])
+          print(f"{len(packages)}|" + " ".join(bad))
+          ' "$version")"
+          count="${report%%|*}"
+          mismatch="${report#*|}"
+          if [ -n "$mismatch" ]; then
+            echo "::error title=Version mismatch::these crates or internal dependencies do not declare ${version}: ${mismatch}"
+            exit 1
+          fi
+          echo "tag ${TAG} matches workspace version ${version} in ${count} crates"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Authenticate with crates.io (trusted publishing)
+        if: env.HAS_PUBLISH_TOKEN != 'true'
+        id: auth
+        uses: rust-lang/crates-io-auth-action@v1
+
+      - name: Publish the workspace
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          CARGO_REGISTRY_TOKEN: ${{ env.HAS_PUBLISH_TOKEN == 'true' && secrets.CARGO_REGISTRY_TOKEN || steps.auth.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          # The sparse index is the source cargo itself reads, so waiting on it
+          # (rather than the web API) is what makes the next `cargo publish`
+          # able to resolve the dependency that was just uploaded.
+          index_url() {
+            local pkg="$1"
+            printf 'https://index.crates.io/%s/%s/%s' "${pkg:0:2}" "${pkg:2:2}" "$pkg"
+          }
+
+          published() {
+            local pkg="$1"
+            curl -fsS -A "$USER_AGENT" "$(index_url "$pkg")" 2>/dev/null \
+              | grep -Fq "\"vers\":\"${VERSION}\""
+          }
+
+          publish() {
+            local pkg="$1"
+            if published "$pkg"; then
+              echo "${pkg} ${VERSION} is already in the index; skipping"
+              return 0
+            fi
+            echo "::group::Publishing ${pkg} ${VERSION}"
+            cargo publish -p "$pkg" --locked
+            for _ in $(seq 1 60); do
+              if published "$pkg"; then
+                echo "${pkg} ${VERSION} is in the index"
+                echo "::endgroup::"
+                return 0
+              fi
+              sleep 5
+            done
+            echo "::error title=Registry timeout::${pkg} ${VERSION} did not appear in the crates.io index within 5 minutes"
+            return 1
+          }
+
+          publish idenumbra-core
+          for dir in crates/countries/*; do
+            publish "idenumbra-$(basename "$dir")"
+          done
+          publish idenumbra
+
+      - name: Summarise the release
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          VERSION: ${{ steps.version.outputs.version }}
+          HAS_PUBLISH_TOKEN: ${{ env.HAS_PUBLISH_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ "$HAS_PUBLISH_TOKEN" = "true" ]; then
+            auth="repository token (CARGO_REGISTRY_TOKEN)"
+          else
+            auth="Trusted Publishing (short-lived OIDC token)"
+          fi
+          {
+            echo "## idenumbra ${TAG}"
+            echo ""
+            echo "- Workspace version: \`${VERSION}\`"
+            echo "- Published: \`idenumbra-core\`, every country crate, and \`idenumbra\`"
+            echo "- Authentication: ${auth}"
+          } >> "$GITHUB_STEP_SUMMARY"
