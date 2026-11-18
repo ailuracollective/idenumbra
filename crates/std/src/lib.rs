@@ -56,6 +56,37 @@ type InferFn = fn(&str) -> Result<(), ValidationError>;
 /// Typed validator: checks the value as the given document kind.
 type TypedFn = fn(&str, &str) -> Result<(), ValidationError>;
 
+/// Components parser: validates the value and returns the country's parts.
+type ComponentsFn = fn(&str) -> Result<Option<CountryComponents>, ValidationError>;
+
+/// Country-specific parts returned by [`Idenumbra::components`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CountryComponents {}
+
+/// Result of a successful validation: the document kind that was validated and,
+/// when the number encodes any, its country-specific [`CountryComponents`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Validation {
+    /// Whether the value passed validation. Always `true` here, since this
+    /// struct is only built on success.
+    pub valid: bool,
+    /// Validated document kind when it is known (`"id_card"`, `"ruc"`,
+    /// `"passport"`, ...). `None` when the country validator did not report it.
+    pub kind: Option<&'static str>,
+    /// Parts encoded in the number, if any.
+    pub components: Option<CountryComponents>,
+}
+
+static COMPONENTS: OnceLock<BTreeMap<&'static str, ComponentsFn>> = OnceLock::new();
+
+fn components_registry() -> &'static BTreeMap<&'static str, ComponentsFn> {
+    COMPONENTS.get_or_init(|| {
+        #[allow(unused_mut)]
+        let mut m: BTreeMap<&'static str, ComponentsFn> = BTreeMap::new();
+        m
+    })
+}
+
 static REGISTRY: OnceLock<BTreeMap<&'static str, (InferFn, TypedFn)>> = OnceLock::new();
 
 fn registry() -> &'static BTreeMap<&'static str, (InferFn, TypedFn)> {
@@ -231,13 +262,50 @@ impl Idenumbra {
 
     /// Validate `value` as an explicit document `kind` (e.g. `"id_card"`,
     /// `"ruc"`, `"passport"`), skipping type inference.
-    pub fn validate(country: &str, value: &str, kind: &str) -> Result<(), ValidationError> {
-        lookup(country)?.1(value, kind)
+    pub fn validate(country: &str, value: &str, kind: &str) -> Result<Validation, ValidationError> {
+        lookup(country)?.1(value, kind)?;
+        let components = Idenumbra::components(country, value)?;
+        let kind = match kind {
+            "id_card" | "identity_card" => Some("id_card"),
+            "ruc" => Some("ruc"),
+            "passport" => Some("passport"),
+            _ => None,
+        };
+        Ok(Validation {
+            valid: true,
+            kind,
+            components,
+        })
     }
 
     /// Validate `value` letting the country validator infer the document kind.
-    pub fn infer(country: &str, value: &str) -> Result<(), ValidationError> {
-        lookup(country)?.0(value)
+    pub fn infer(country: &str, value: &str) -> Result<Validation, ValidationError> {
+        lookup(country)?.0(value)?;
+        let components = Idenumbra::components(country, value)?;
+        // The kind is not reported by the country validators yet; future
+        // countries that expose components can derive it here.
+        let kind = None;
+        Ok(Validation {
+            valid: true,
+            kind,
+            components,
+        })
+    }
+
+    /// Components encoded in a validated `value`.
+    ///
+    /// `Ok(None)` when the input is valid but has no structured components (a
+    /// passport) or when the country's validator does not expose them.
+    pub fn components(
+        country: &str,
+        value: &str,
+    ) -> Result<Option<CountryComponents>, ValidationError> {
+        lookup(country)?;
+        let code = country.trim().to_ascii_uppercase();
+        match components_registry().get(code.as_str()) {
+            Some(parse) => parse(value),
+            None => Ok(None),
+        }
     }
 }
 

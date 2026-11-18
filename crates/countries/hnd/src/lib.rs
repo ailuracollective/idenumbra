@@ -20,6 +20,7 @@ pub struct IdenumbraHND;
 
 impl Validator for IdenumbraHND {
     const COUNTRY: &'static str = COUNTRY;
+    type Validation = ();
     fn validate(value: &str) -> Result<(), ValidationError> {
         validate(value)
     }
