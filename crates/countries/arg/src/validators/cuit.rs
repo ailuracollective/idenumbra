@@ -21,7 +21,8 @@ fn validate_cuit(digits: &[u8]) -> Result<(), ValidationError> {
         .zip(weights)
         .map(|(d, w)| (d - b'0') as u32 * w)
         .sum();
-    // AFIP maps remainder 1 to check digit 9 and remainder 0 to 0.
+    // Public implementations map remainder 1 (11 - 1 = 10) to check digit 9 and
+    // remainder 0 to 0; ARCA publishes no algorithm, so this is the convention.
     let computed = match 11 - sum % 11 {
         11 => 0,
         10 => 9,

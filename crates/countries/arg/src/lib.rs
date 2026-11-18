@@ -45,7 +45,7 @@ mod tests {
         assert!(validate("12.345.678").is_ok());
         assert!(validate("20-12345678-6").is_ok());
         assert!(validate("20123456786").is_ok());
-        // Remainder 1 is issued as check digit 9, not rejected.
+        // Remainder 1 is accepted as check digit 9 (public convention).
         assert!(validate("20000000019").is_ok());
     }
 

@@ -11,8 +11,8 @@ Argentina identification validator.
 
 DNI: 7-8 digits, no check digit (older numbers have 7); all-zero placeholders
 are rejected. CUIT/CUIL: 11 digits, weights `[5,4,3,2,7,6,5,4,3,2]`, check
-digit `11 - (sum mod 11)` where `11 -> 0` and `10 -> 9` (remainder 1 is issued
-as 9, it is not rejected). The two-digit type prefix is not enforced: RG
+digit `11 - (sum mod 11)` where `11 -> 0` and `10 -> 9` (the public convention
+accepts `9`; see the note below). The two-digit type prefix is not enforced: RG
 Conjunta AFIP-ANSES 5007/2021 assigns `20`, `23`, `24`, `27` — "or those
 determined in the future" — at random since 2022, and `25`/`26` are contingency
 prefixes. Dots, hyphens, slashes and spaces are ignored.
@@ -27,8 +27,12 @@ exists or is active.
   10/06/2021), art. 1: the CUIT/CUIL prefix `20`, `23`, `24`, `27` "o los que en
   el futuro se determinen" is assigned at random, not by sex:
   https://www.argentina.gob.ar/normativa/nacional/norma-350854/texto
-- **Official** — ARCA/AFIP, CUIT concepts: https://servicioscf.afip.gob.ar/publico/abc/ABCpaso2.aspx?id_nivel1=3036&id_nivel2=3040&p=Conceptos%20b
-- **Official** — ARCA, constancia de inscripción: https://www.afip.gob.ar/constanciadeinscripcion/
+- **Official** — ARCA, *Constancia de Inscripción* record layout: the CUIT is
+  field 1/11, 11 positions: https://www.arca.gob.ar/genericos/cInscripcion/archivoCompleto.asp
+- **Official** — ARCA/AFIP, *Alta Ya — Errores frecuentes*: the CUIT/CUIL must be
+  11 digits and "correctos respecto a los primeros dos dígitos y su dígito
+  verificador":
+  https://www.afip.gob.ar/simplificacionregistral/alta-ya/ayuda/documentos/Errores-frecuentes-CUIL-o-CUIT-inexistente.pdf
 - **Implementation** — python-stdnum `ar.cuit` (cross-check of the weights and
   the `10 -> 9` mapping):
   https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/ar/cuit.py
@@ -36,7 +40,10 @@ exists or is active.
 No ARCA norm publishes the check-digit algorithm or the full prefix table
 (`30`/`33`/`34` for legal persons, `50`/`51`/`55` for foreign ones); that is why
 the prefix is not enforced and the algorithm is cross-checked against public
-implementations.
+implementations. In particular, no official source we found prints the
+`remainder 1 -> 9` mapping: it is the long-standing public convention
+(python-stdnum and most validators), while some validators reject remainder 1
+instead. The crate follows the convention and accepts check digit `9`.
 
 Official links were opened on 2026-11-17; the implementation link is a public
 cross-check, not dated.
