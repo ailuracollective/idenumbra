@@ -17,7 +17,7 @@ Generic (N validators):
 
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["arg", "mex"] }
+idenumbra = { version = "0.1", features = ["arg"] }
 ```
 
 ```rust
@@ -30,11 +30,11 @@ Single country (no orchestrator):
 
 ```toml
 [dependencies]
-idenumbra-ecu = "0.1"
+idenumbra-arg = "0.1"
 ```
 
 ```rust
-idenumbra_ecu::validate("1712345675")?;
+idenumbra_arg::validate("12345678")?;
 ```
 
 ## Validation scope
@@ -45,9 +45,9 @@ active, or belongs to the person presenting it: use the issuing registry (SII,
 DIAN, SUNAT, DGI, SAR, …) for that.
 
 Where the agency publishes no check digit, only the structure is validated:
-BO NIT, CO cédula, CR cédula/DIMEX, CU carné, HN RTN and PA cédula/RUC (the
-DGI check digits depend on the taxpayer type). For CO the NIT check digit and
-for PY the CI/RUC split require an explicit `kind`.
+BOL NIT, COL cédula, CRI cédula/DIMEX, CUB carné, HND RTN and PAN cédula/RUC (the
+DGI check digits depend on the taxpayer type). For COL the NIT check digit and
+for PRY the CI/RUC split require an explicit `kind`.
 
 [`LIMITATIONS.md`](LIMITATIONS.md) indexes the residual risks per country and
 links the official registry where a number can be verified.

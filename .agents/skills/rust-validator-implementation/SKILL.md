@@ -23,7 +23,7 @@ disagree, follow `AGENTS.md` and then fix this skill.
 
 - `src/lib.rs`: `#![no_std]`, `const COUNTRY`, `mod validators { include!(…) }`
   one `include!` per file, `pub use validators::{validate, validate_with};`,
-  the marker struct (`IdenumbraECU`), `impl Validator`, and the inline
+  the marker struct (`IdenumbraARG`), `impl Validator`, and the inline
   `#[cfg(test)] mod tests` at the bottom.
 - `src/validators/<document>.rs`: one document per file, its catalogue `const`s
   at the top, the check function below.

@@ -4,26 +4,27 @@ Reference for `rust-validator-implementation`. Missing one of these places
 compiles but leaves the validator unreachable, or makes the orchestrator tests
 fail. `AGENTS.md` lists the same steps in summary; this is the edit list.
 
-Assume `<iso>` is the ISO 3166-1 alpha-3 code (`ecu`) and `<ISO>` its uppercase
-form (`ECU`), which is also the marker suffix (`IdenumbraECU`).
+Assume `<iso>` is the ISO 3166-1 alpha-3 code (`arg`) and `<ISO>` its uppercase
+form (`ARG`), which is also the marker suffix (`IdenumbraARG`). The examples use
+`arg`; substitute the code you are actually adding.
 
 ## 1. Core constant
 
 `crates/core/src/country.rs`: add the constant and the `canonical` arm.
 
 ```rust
-/// Country code for ECU.
-pub const ECU: &str = "ECU";
+/// Country code for ARG.
+pub const ARG: &str = "ARG";
 ```
 
 ```rust
-} else if code.eq_ignore_ascii_case("ECU") {
-    Some(ECU)
+} else if code.eq_ignore_ascii_case("ARG") {
+    Some(ARG)
 }
 ```
 
-The doc comment on the existing constants has a stray colon ("Country code for
-ARG:.") — do not replicate it in new constants.
+Existing constants have a stray colon ("Country code for ARG:.") — do not
+replicate it in new constants.
 
 ## 2. Country crate
 
@@ -43,14 +44,14 @@ marker name and tests.
 
 ```toml
 [features]
-ecu = ["dep:idenumbra-ecu"]
-all = [..., "ecu", ...]
+arg = ["dep:idenumbra-arg"]
+all = [..., "arg", ...]
 
 [dependencies]
-idenumbra-ecu = { workspace = true, optional = true }
+idenumbra-arg = { workspace = true, optional = true }
 ```
 
-Also add `idenumbra-ecu = { version = "0.1.0", path = "crates/countries/ecu" }`
+Also add `idenumbra-arg = { version = "0.1.0", path = "crates/countries/arg" }`
 to `[workspace.dependencies]` in the root `Cargo.toml`.
 
 ## 4. Orchestrator source
@@ -59,40 +60,40 @@ to `[workspace.dependencies]` in the root `Cargo.toml`.
 
 ```rust
 // supported_countries()
-#[cfg(feature = "ecu")]
-"ECU",
+#[cfg(feature = "arg")]
+"ARG",
 ```
 
 ```rust
 // registry()
-#[cfg(feature = "ecu")]
+#[cfg(feature = "arg")]
 {
     m.insert(
-        "ECU",
-        (idenumbra_ecu::validate, idenumbra_ecu::validate_with),
+        "ARG",
+        (idenumbra_arg::validate, idenumbra_arg::validate_with),
     );
 }
 ```
 
 ```rust
 // re-export
-#[cfg(feature = "ecu")]
-pub use idenumbra_ecu::IdenumbraECU;
+#[cfg(feature = "arg")]
+pub use idenumbra_arg::IdenumbraARG;
 ```
 
 And the feature test, which has two halves that must both change or the test
 reports a count mismatch:
 
 ```rust
-#[cfg(feature = "ecu")]
-assert!(sc.contains(&"ECU"));
-#[cfg(not(feature = "ecu"))]
-assert!(!sc.contains(&"ECU"));
+#[cfg(feature = "arg")]
+assert!(sc.contains(&"ARG"));
+#[cfg(not(feature = "arg"))]
+assert!(!sc.contains(&"ARG"));
 ```
 
 ```rust
 let expected = 0usize
-    + cfg!(feature = "ecu") as usize;
+    + cfg!(feature = "arg") as usize;
 ```
 
 ## 5. README
@@ -111,8 +112,8 @@ Also update the root `README.md` crate list, feature list and the
 ```bash
 cargo build --workspace                      # default features: no countries
 cargo test -p idenumbra --all-features       # registry + feature test
-make test-features FEATURES="ecu"            # one feature only
-make test-features FEATURES="ecu arg"        # subset
+make test-features FEATURES="arg"            # one feature only
+make test-features FEATURES="arg bol"        # subset
 cargo run --example basic --all-features
 ```
 

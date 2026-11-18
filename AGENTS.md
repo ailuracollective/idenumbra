@@ -13,8 +13,7 @@ Guidance for coding agents working in this repository.
 - `crates/std`: orchestrator with one Cargo feature per country plus `all`.
   Builds a lazy `BTreeMap` registry on first use.
 
-Country codes and feature names use ISO 3166-1 alpha-3 (e.g. `ECU`, `COL`,
-`MEX`) and are matched case-insensitively.
+Country codes and feature names use ISO 3166-1 alpha-3 (e.g. `ARG`) and are matched case-insensitively.
 
 ## Layout
 
@@ -36,7 +35,7 @@ make build        # cargo build --workspace
 make build-all    # cargo build --workspace --all-features
 make test         # cargo test --workspace
 make test-all     # cargo test --workspace --all-features
-make test-features FEATURES="ecu arg"
+make test-features FEATURES="arg"
 make fmt          # cargo fmt --all
 make clippy       # cargo clippy --workspace --all-features --examples
 make doc          # cargo doc --workspace --all-features --no-deps
@@ -48,7 +47,7 @@ make clean
 Single country crate without the orchestrator:
 
 ```bash
-cargo test -p idenumbra-ecu
+cargo test -p idenumbra-arg
 ```
 
 ## Releases
@@ -85,7 +84,7 @@ Publishing to crates.io is not wired up.
   country. A disabled country is not compiled and returns
   `ValidationError::ValidatorNotAvailable`.
 - Each country crate exposes free functions `validate` and `validate_with`, plus
-  a zero-sized marker struct (e.g. `IdenumbraECU`) implementing `Validator`.
+  a zero-sized marker struct (e.g. `IdenumbraARG`) implementing `Validator`.
 - `validate_with(value, kind)` requires the document kind, e.g. `"id_card"`,
   `"ruc"`, `"passport"`, `"dni"`, `"cuit"`; `validate(value)` infers it from the
   input. There is no `Option` kind anywhere: pick the function you mean.
@@ -138,8 +137,8 @@ fix the skill.
 - `missing_docs` is a warning, not an error, but keep docs complete for public APIs.
 - Test values are derived from the algorithm in this repository, never copied
   from a person. The synthetic-numbers rule under Conventions is absolute.
-- Where no public check digit exists (BO NIT, CO cédula, CR cédula/DIMEX, CU
-  carné, HN RTN, PA cédula/RUC), only structure and encoded dates are validated.
+- Where no public check digit exists (BOL NIT, COL cédula, CRI cédula/DIMEX, CUB
+  carné, HND RTN, PAN cédula/RUC), only structure and encoded dates are validated.
   Do not invent a check digit for these.
 - Colombian 10-digit numbers are validated as cédulas (which have no check
   digit); the NIT check digit is only checked with `validate_with(.., "nit")`.
@@ -153,9 +152,10 @@ fix the skill.
 - Per-crate READMEs are copies of `templates/README.template.md`, not generated
   output: there is no script that renders them. Keep the `{{ }}` TOML escaping in
   the template, and update the root `README.md` lists when a country is added.
-- There is no CI that runs the build, tests or lints; `.github/workflows` only
-  publishes releases. `make test-all && make fmt && make clippy` locally is the
-  gate.
+- There is no CI that runs on ordinary pushes; `.github/workflows/publish.yml`
+  verifies the tagged tree (fmt, clippy, tests, tag/version) and then publishes
+  every crate to crates.io on a published release. `make test-all && make fmt &&
+  make clippy` locally is the gate.
 - Git hooks require `lefthook` and `commitlint` (`cargo install commitlint-rs`)
   on `PATH`; run `make hooks` once per clone.
 

@@ -60,8 +60,8 @@ No file layout and no Rust: hand the specification to
    check structure only and document the omission in the README plus one comment
    above the function. Never invent weights to fill a gap.
 7. **Draw the inference boundary.** `validate(value)` may infer only when the
-   shapes cannot collide. When two kinds share a shape (CO 10-digit cédula vs
-   NIT, PY CI vs RUC by length), infer the common one and require the explicit
+   shapes cannot collide. When two kinds share a shape (COL 10-digit cédula vs
+   NIT, PRY CI vs RUC by length), infer the common one and require the explicit
    `kind` for the other. Never infer from a passing checksum alone.
 8. **Attack your own rule.** List what it accepts that was never issued (false
    positives) and what it rejects that was issued (false negatives): contingency

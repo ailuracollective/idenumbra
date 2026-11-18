@@ -99,8 +99,8 @@ branch was removed as "dead code".
 ```bash
 cargo test -p idenumbra-<iso>                 # crate alone
 cargo test --workspace --all-features         # every country
-make test-features FEATURES="ecu"             # one enabled feature
-make test-features FEATURES="ecu arg"         # subset
+make test-features FEATURES="arg"             # one enabled feature
+make test-features FEATURES="arg bol"         # subset
 cargo build --workspace                       # default features: nothing enabled
 ```
 
