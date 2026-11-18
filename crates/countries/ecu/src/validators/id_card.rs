@@ -1,18 +1,14 @@
 /// Highest province code issued (01-24). Edit when provinces split or merge.
 const MAX_PROVINCE_CODE: u32 = 24;
 
-/// Code for people whose birth was registered abroad (Registro Civil,
-/// Resolución 140, Registro Oficial 681 of 2012).
+/// Code for people registered abroad (Registro Civil: cédula series `01`-`24`
+/// are issued in the country, `30` for Ecuadorians registered abroad).
 const ABROAD_PROVINCE_CODE: u32 = 30;
 
 fn number(digits: &[u8]) -> u32 {
     digits
         .iter()
         .fold(0u32, |acc, d| acc * 10 + (d - b'0') as u32)
-}
-
-fn all_zero(digits: &[u8]) -> bool {
-    digits.iter().all(|d| *d == b'0')
 }
 
 /// Validate an Ecuadorian cédula (10 digits, modulo 10).

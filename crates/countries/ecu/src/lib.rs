@@ -44,6 +44,11 @@ mod tests {
         assert!(validate("1712345675001").is_ok()); // natural person
         assert!(validate("1790012344001").is_ok()); // private company
         assert!(validate("1760001200001").is_ok()); // public company
+
+        // The SRI stopped guaranteeing the modulo 11 digit for private RUCs
+        // whose sequential passes six digits, so that digit is not checked.
+        assert!(validate("1790012345001").is_ok());
+        assert!(validate("5090012340001").is_ok()); // legacy code 50
     }
 
     #[test]
@@ -55,9 +60,7 @@ mod tests {
                 received: 6
             })
         );
-        assert!(validate("1712345675002").is_ok()); // any non-zero establishment
-        assert!(validate("1790012345001").is_err());
-        assert!(validate("1760001210001").is_err());
+        assert!(validate("1760001210001").is_err()); // public company
     }
 
     #[test]
@@ -66,7 +69,15 @@ mod tests {
             validate("2512345675"),
             Err(ValidationError::InvalidRegion { region: 25 })
         );
-        assert!(validate("1712345675000").is_err()); // establishment 000
+        assert_eq!(
+            validate("5012345675"),
+            Err(ValidationError::InvalidRegion { region: 50 })
+        );
+        // RUC always ends in 001 (art. 3 of the RUC reglamento).
+        assert!(validate("1712345675002").is_err());
+        assert!(validate("1790012344002").is_err());
+        assert!(validate("1760001200002").is_err());
+        assert!(validate("1770012340001").is_err()); // third digit 7
         assert!(validate("17123458").is_err());
     }
 
