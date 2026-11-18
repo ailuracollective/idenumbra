@@ -36,18 +36,28 @@ mod tests {
     fn accepts_ci_and_nit() {
         assert!(validate("1234567").is_ok());
         assert!(validate("1234567-1A").is_ok());
-        assert!(validate("123456789").is_ok());
-        assert!(validate_with("123456789", "nit").is_ok());
+        assert!(validate("1234567012").is_ok());
+        assert!(validate_with("1234567012", "nit").is_ok());
     }
 
     #[test]
-    fn checks_structure_only() {
-        // The NIT has no public check digit: any 7-12 digit value with the
-        // right shape is accepted.
-        assert!(validate_with("123456788", "nit").is_ok());
+    fn checks_nit_control_codes() {
+        // No check digit exists: the last three digits are the SIN control
+        // code (01, 02, 04) plus one random digit.
+        assert!(validate_with("12345670011", "nit").is_ok()); // 01, 11 digits
+        assert!(validate_with("1234567029", "nit").is_ok());
+        assert!(validate_with("1234567045", "nit").is_ok());
+        assert_eq!(
+            validate_with("1234567037", "nit"),
+            Err(ValidationError::InvalidFormat) // undocumented code 03
+        );
+        assert_eq!(
+            validate_with("1234567889", "nit"),
+            Err(ValidationError::InvalidFormat) // no control code
+        );
         assert!(validate("1234567890123").is_err()); // 13 digits
         assert!(validate("0000000").is_err()); // all-zero CI
-        assert!(validate_with("000000000", "nit").is_err());
+        assert!(validate_with("0000000000", "nit").is_err());
         assert_eq!(validate("1234567-ABC"), Err(ValidationError::InvalidFormat));
         assert!(validate("1234").is_err());
     }
