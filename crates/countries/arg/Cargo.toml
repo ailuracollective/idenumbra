@@ -8,7 +8,7 @@ license.workspace = true
 repository.workspace = true
 authors.workspace = true
 readme = "README.md"
-keywords = ["argentina", "dni", "cuit", "cuil", "validation", "no_std"]
+keywords = ["argentina", "dni", "cuit", "validation", "no_std"]
 categories = ["no-std", "parsing"]
 
 [lints]
