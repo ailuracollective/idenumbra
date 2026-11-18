@@ -18,6 +18,25 @@ pub fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
             validate_digits(chars)
         }
         "cedula_juridica" => validate_juridical(chars),
+        // Hacienda's *Anexos y Estructuras* v4.4: "El Documento de
+        // Identificación de la DGT (NITE) debe contener 10 dígitos y sin
+        // guiones". The 12-character field of the municipal reporting form and
+        // of the invoice key is that same 10-digit number zero-padded, not a
+        // longer identifier.
+        "nite" => {
+            if n != JURIDICAL_LEN {
+                return Err(ValidationError::InvalidLength {
+                    expected: JURIDICAL_LEN,
+                    found: n,
+                });
+            }
+            if !chars.iter().all(u8::is_ascii_digit) {
+                return Err(ValidationError::InvalidFormat);
+            }
+            // The annex states no leading-zero rule for the NITE, so a
+            // 10-digit value starting with 0 is accepted.
+            Ok(())
+        }
         "dimex" => {
             if !DIMEX_LENGTHS.contains(&n) {
                 return Err(ValidationError::InvalidLength {

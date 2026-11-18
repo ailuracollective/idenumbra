@@ -55,10 +55,32 @@ mod tests {
 
     #[test]
     fn rejects_leading_zeros() {
-        // Hacienda states every document is written without a leading zero.
+        // Anexos y Estructuras v4.4 forbids a leading zero only for the cédula
+        // física and the DIMEX; the 10-digit NITE has no such rule.
         assert!(validate("012345678").is_err());
-        assert!(validate("0123456789").is_err());
         assert!(validate("01234567890").is_err());
+        assert!(validate("012345678901").is_err());
+        assert!(validate("0123456789").is_ok()); // NITE or cédula jurídica
+    }
+
+    #[test]
+    fn honours_the_nite_kind() {
+        // "10 dígitos y sin guiones": the canonical NITE, not the 12-character
+        // reporting field and not the invoice-key zero padding.
+        assert!(validate_with("0123456789", "nite").is_ok());
+        assert!(validate_with("1234567890", "nite").is_ok());
+        assert!(validate_with("0-1234-56789", "nite").is_ok());
+        // The 12-character municipal/invoice field is the 10-digit number
+        // padded with two zeros; the padded value is not a document number.
+        assert!(validate_with("001234567890", "nite").is_err());
+        assert!(validate_with("12345678901", "nite").is_err());
+        // A cédula jurídica is 10 characters but its type digit is never 0 and
+        // its consecutive may contain letters.
+        assert_eq!(
+            validate_with("0123456789", "cedula_juridica"),
+            Err(ValidationError::InvalidFormat)
+        );
+        assert!(validate_with("3101A00001", "nite").is_err());
     }
 
     #[test]
