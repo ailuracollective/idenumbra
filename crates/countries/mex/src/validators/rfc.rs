@@ -1,7 +1,9 @@
 /// Sentinel used to keep Ñ as a single byte while parsing UTF-8 input.
 const ENYE: u8 = 0x80;
 
-/// Characters used for the RFC checksum, including space padding and Ñ.
+/// Character values for the RFC checksum: the public table
+/// `0123456789ABCDEFGHIJKLMN&OPQRSTUVWXYZ Ñ` (space = 37, Ñ = 38). The SAT
+/// documents the RFC shape and the check digit's existence but not the formula.
 fn rfc_value(b: u8) -> u32 {
     match b {
         b'0'..=b'9' => (b - b'0') as u32,
@@ -21,7 +23,9 @@ fn is_generic_rfc(chars: &[u8]) -> bool {
     GENERIC_RFCS.contains(&chars)
 }
 
-/// Validate a Mexican RFC (12 chars for companies, 13 for persons).
+/// Validate a Mexican RFC (12 chars for companies, 13 for persons). The
+/// 10-character "RFC sin homoclave" of some legacy systems is rejected: the SAT
+/// only accepts 12/13 positions in CFDI and nómina.
 fn validate_rfc(chars: &[u8]) -> Result<(), ValidationError> {
     if chars.len() != 12 && chars.len() != 13 {
         return Err(ValidationError::InvalidLength {
@@ -51,7 +55,9 @@ fn validate_rfc(chars: &[u8]) -> Result<(), ValidationError> {
     {
         return Err(ValidationError::InvalidFormat);
     }
-    // The SAT does not publish the century, so dates are checked as 20xx.
+    // The SAT does not encode the century, so dates are checked as 20xx. This
+    // only matters for 29/02 with YY = 00 (1900 is not a leap year); future
+    // dates are not rejected because the crate has no clock.
     let year = 2000 + number(&chars[date_at..date_at + 2]);
     if !valid_date(year, &chars[date_at..date_at + 6]) {
         return Err(ValidationError::InvalidFormat);
