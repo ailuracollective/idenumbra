@@ -66,20 +66,20 @@ SRI validates (ficha técnica de comprobantes electrónicos, warning 62) and fro
 the implementations above. Company RUCs are deliberately not check-digit
 validated.
 
-Links were opened on 2026-11-17.
+Links checked on 2026-11-17.
 
 ## Usage
 
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["ecu"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["ecu"] }
 ```
 
 ```rust

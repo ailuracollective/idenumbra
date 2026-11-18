@@ -29,6 +29,10 @@ The cédula carries no check digit: the Registraduría publishes none for the
 NUIP. The old 11-digit NIP of minors did end in a control digit, but that is the
 tarjeta de identidad number, not the cédula.
 
+### Editable constants
+
+None: this validator has no catalogue-derived constants; every check is algorithmic or structural.
+
 ## References
 
 Official sources are listed first; the `implementation` ones are the
@@ -65,13 +69,13 @@ annex 3 and are taken from the implementations above. Links were opened on
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["col"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["col"] }
 ```
 
 ```rust

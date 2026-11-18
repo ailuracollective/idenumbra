@@ -33,6 +33,8 @@ when the kind is known — a passport number of 8 digits is read as a CI.
 
 ## References
 
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
+
 - **Official** — SENIAT: http://www.seniat.gob.ve/ — checked 2026-11-17 (the site
   answers `403` to automated clients; open it in a browser). SENIAT publishes
   neither the letter table nor the check-digit formula.
@@ -69,13 +71,13 @@ carry the letter, and the migration itself, give `C = J = 12`.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["ven"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["ven"] }
 ```
 
 ```rust

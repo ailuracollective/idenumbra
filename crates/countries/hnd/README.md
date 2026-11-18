@@ -34,6 +34,8 @@ What is **not** validated, and why:
 
 ## References
 
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
+
 - **Official** — SAR, *Registro Tributario Nacional (RTN)*: "El RTN de Personas
   Naturales es su número de DNI con un dígito adicional", four taxpayer types,
   no algorithm:
@@ -59,7 +61,7 @@ An earlier version of this crate enforced the community weights; the two public
 RTNs, so the check was removed. Use the SAR "Verificación de RTN" service for
 existence.
 
-Official links were opened on 2026-11-17; the third-party links are public
+Official links checked on 2026-11-17; the third-party links are public
 cross-checks, not the rule source.
 
 ## Usage
@@ -67,13 +69,13 @@ cross-checks, not the rule source.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["hnd"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["hnd"] }
 ```
 
 ```rust

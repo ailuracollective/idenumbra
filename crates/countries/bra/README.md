@@ -28,7 +28,13 @@ only. The ENCAT joint technical note (NT 2025.001) mentions a request to also
 exclude `I`, `O`, `U`, `Q` and `F`; the note itself says that needs
 confirmation from the Receita Federal, so this crate does not exclude them.
 
+### Editable constants
+
+None: this validator has no catalogue-derived constants; every check is algorithmic or structural.
+
 ## References
+
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
 
 - **Official** — Receita Federal, *CNPJ Alfanumérico* (format `AA.AAA.AAA/AAAA-DV`,
   `A` = 0-9 or A-Z, from July 2026):
@@ -66,13 +72,13 @@ implementation links are only cross-checks.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["bra"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["bra"] }
 ```
 
 ```rust

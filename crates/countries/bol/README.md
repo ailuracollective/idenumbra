@@ -44,6 +44,8 @@ No check digit exists for either document:
 
 ## References
 
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
+
 - **Official** — SIN/SIAT, *Generación del NIT* (natural person born in Bolivia
   and unipersonal company: NIT = CI + code `01` + "un número aleatorio del 1 al
   9"; legal persons: the last three digits "incluyen el código `02`" + a random
@@ -74,7 +76,7 @@ An earlier version of this crate applied the SIAT CUF modulo 11 to the NIT; the
 public NIT samples in the python-stdnum issue do not validate with it, so the
 check was removed. Use the SIN "Verifica NIT" service for existence.
 
-Official links were opened on 2026-11-17, as were the SIN supplier lists; the
+Official links checked on 2026-11-17, as were the SIN supplier lists; the
 cross-checks are public implementations/data, not the rule source.
 
 ## Usage
@@ -82,13 +84,13 @@ cross-checks are public implementations/data, not the rule source.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["bol"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["bol"] }
 ```
 
 ```rust

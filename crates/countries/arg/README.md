@@ -21,7 +21,13 @@ Scale: the check digit catches single-digit typos and most transpositions; it
 does not prove the number was issued. A valid CUIT does not mean the taxpayer
 exists or is active.
 
+### Editable constants
+
+None: this validator has no catalogue-derived constants; every check is algorithmic or structural.
+
 ## References
+
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
 
 - **Official** — Resolución General Conjunta AFIP-ANSES 5007/2021 (BO
   10/06/2021), art. 1: the CUIT/CUIL prefix `20`, `23`, `24`, `27` "o los que en
@@ -45,7 +51,7 @@ implementations. In particular, no official source we found prints the
 (python-stdnum and most validators), while some validators reject remainder 1
 instead. The crate follows the convention and accepts check digit `9`.
 
-Official links were opened on 2026-11-17; the implementation link is a public
+Official links checked on 2026-11-17; the implementation link is a public
 cross-check, not dated.
 
 ## Usage
@@ -53,13 +59,13 @@ cross-check, not dated.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["arg"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["arg"] }
 ```
 
 ```rust

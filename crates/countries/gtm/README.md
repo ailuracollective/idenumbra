@@ -85,6 +85,9 @@ as a CUI.
 
 ## References
 
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
+
+
 Official:
 
 - SAT, *Reglas y validaciones* (Régimen FEL), versión 2.1, octubre 2026 —
@@ -182,13 +185,13 @@ Cross-checks (not authority):
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["gtm"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["gtm"] }
 ```
 
 ```rust

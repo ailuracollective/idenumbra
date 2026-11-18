@@ -40,6 +40,8 @@ ignored.
 
 ## References
 
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
+
 - **Official** — Decreto 501/1978, art. 2: the identification number is a
   sequence from 1 plus the check digit "resultante de la aplicación del módulo
   diez": https://www.impo.com.uy/bases/decretos/501-1978 — checked 2026-11-17.
@@ -73,7 +75,7 @@ The DGI classifies the RUT check-digit algorithm as reserved information, so the
 weights above come from public implementations, not from a norm. No agency
 publishes the CI weights either; Decreto 501/1978 only fixes the modulus.
 
-Official links were opened on 2026-11-17; the implementation links are public
+Official links checked on 2026-11-17; the implementation links are public
 cross-checks, not dated.
 
 ## Usage
@@ -81,13 +83,13 @@ cross-checks, not dated.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["ury"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["ury"] }
 ```
 
 ```rust

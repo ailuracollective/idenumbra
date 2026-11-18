@@ -62,6 +62,8 @@ publishes their shape.
 
 ## References
 
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
+
 - **Official** — Tribunal Electoral, Dirección Nacional de Cedulación:
   https://www.tribunal-electoral.gob.pa/direccion-nacional-de-cedulacion/la-cedula
   — checked 2026-11-17 (the site answers `403` to automated clients and was read
@@ -110,13 +112,13 @@ cedulación rules and its press.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["pan"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["pan"] }
 ```
 
 ```rust

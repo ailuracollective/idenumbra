@@ -1,6 +1,6 @@
 [package]
 name = "idenumbra-core"
-description = "Country-agnostic identification validation: shared contract, registry helpers and error model"
+description = "Country-agnostic identification validation: shared contract and error model"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

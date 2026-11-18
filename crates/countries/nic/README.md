@@ -26,7 +26,14 @@ ignored.
 Pasaporte. Only the shape is checked: 6–12 ASCII alphanumerics. No issuing
 agency publishes a passport-number algorithm, so nothing else is verifiable.
 
+### Editable constants
+
+None: this validator has no catalogue-derived constants; every check is algorithmic or structural.
+
 ## References
+
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
+
 
 Official:
 
@@ -95,13 +102,13 @@ check when issuing; the municipality table below is deliberately absent.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["nic"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["nic"] }
 ```
 
 ```rust

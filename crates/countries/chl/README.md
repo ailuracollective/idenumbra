@@ -13,7 +13,13 @@ RUT/RUN: modulo 11 with weights 2..7 cycling from the right; check digit
 check character, so 2-9 characters once compacted. Dots, hyphens and spaces are
 ignored; lowercase `k` is accepted. All-zero bodies are rejected as placeholders.
 
+### Editable constants
+
+None: this validator has no catalogue-derived constants; every check is algorithmic or structural.
+
 ## References
+
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
 
 - https://www.sii.cl/declaraciones_juradas/ingreso_upload_f3500.html — checked 2026-11-17
   (official SII layout: "Rut Declarante debe cumplir Modulo 11", "Dígito
@@ -41,13 +47,13 @@ RUT, passes this validator (its digit is correct); it identifies no person.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["chl"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["chl"] }
 ```
 
 ```rust

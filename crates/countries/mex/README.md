@@ -37,6 +37,8 @@ SAT generic RFCs `XAXX010101000` and `XEXX010101000` are accepted as-is.
 
 ## References
 
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
+
 - **Official** — DOF 23/10/1996, Acuerdo with the CURP structure and the Anexo I
   state table (`QT` for Querétaro is called out explicitly, to avoid confusion
   with `QR` Quintana Roo): https://dof.gob.mx/nota_detalle.php?codigo=4903440&fecha=23/10/1996
@@ -124,7 +126,7 @@ Open questions resolved conservatively (checked 2026-11-17):
   negative on a document RENAPO did issue, so nothing is checked (python-stdnum
   rejects them with the 2006 list; this crate deliberately does not).
 
-Official links were opened on 2026-11-17; the implementation links are public
+Official links checked on 2026-11-17; the implementation links are public
 cross-checks, not dated.
 
 ## Usage
@@ -132,13 +134,13 @@ cross-checks, not dated.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["mex"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["mex"] }
 ```
 
 ```rust

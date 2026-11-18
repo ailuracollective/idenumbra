@@ -51,7 +51,7 @@ all = [..., "arg", ...]
 idenumbra-arg = { workspace = true, optional = true }
 ```
 
-Also add `idenumbra-arg = { version = "0.1.0", path = "crates/countries/arg" }`
+Also add `idenumbra-arg = { version = "0.1.0-alpha.1", path = "crates/countries/arg" }`
 to `[workspace.dependencies]` in the root `Cargo.toml`.
 
 ## 4. Orchestrator source
@@ -102,7 +102,7 @@ let expected = 0usize
 no generator: copy the template, replace the single-brace placeholders
 (`{code}`, `{country}`, `{documents}`, `{algorithm}`, `{constants}`,
 `{references}`, `{synthetic}`, `{source}`, `{iso}`, `{feature}`) and keep the
-doubled braces in the TOML examples (`{{ version = "0.1" }}`) intact.
+doubled braces in the TOML examples (`{{ version = "0.1.0-alpha.1" }}`) intact.
 
 Also update the root `README.md` crate list, feature list and the
 "Validation scope" paragraph when the new country changes them.

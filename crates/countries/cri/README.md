@@ -59,6 +59,8 @@ lowercase letters are uppercased.
 
 ## References
 
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
+
 - **Official** — Ministerio de Hacienda, *Anexos y Estructuras* v4.4 (in force
   since 2025-09-01, log updated 2026-04-22): cédula física = 9 digits without a
   leading zero, cédula jurídica = 10 characters (alphanumeric allowed), DIMEX =
@@ -108,7 +110,7 @@ lowercase letters are uppercased.
   — checked 2026-11-17
 - **Implementation** — python-stdnum `cr.cpj` (cédula jurídica: validates the
   class/type catalog and requires digits) and `cr.cr` (DIMEX: requires first
-  digit `1`): https://github.com/arthurdejong/python-stdnum/tree/master/stdnum/cr.
+  digit `1`): https://github.com/arthurdejong/python-stdnum/tree/master/stdnum/cr
   Neither computes a check digit and there is no NITE module — no public package
   found implements a NITE check character. The class catalog is not applied here
   because the Registro Nacional revises it and the alphanumeric consecutive
@@ -123,13 +125,13 @@ this crate validates structure only.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["cri"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["cri"] }
 ```
 
 ```rust

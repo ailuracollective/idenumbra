@@ -35,7 +35,13 @@ digit); the DNIT algorithm replaces it with its ASCII code. That form is not
 supported here: only digits are accepted. This is a documented limitation, not
 an official restriction.
 
+### Editable constants
+
+None: this validator has no catalogue-derived constants; every check is algorithmic or structural.
+
 ## References
+
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
 
 - **Official** — DNIT, *Dígito Verificador*: reference implementation of the RUC
   check digit (weights 2..11 from the right, `11 - remainder`, remainders 0 and 1
@@ -64,7 +70,7 @@ an official restriction.
 The RUC check digit is published; the CI length is not, so the 6-8 digit range is
 observed practice rather than a norm.
 
-Official links were opened on 2026-11-17; the implementation links are public
+Official links checked on 2026-11-17; the implementation links are public
 cross-checks, not dated.
 
 ## Usage
@@ -72,13 +78,13 @@ cross-checks, not dated.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["pry"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["pry"] }
 ```
 
 ```rust

@@ -41,6 +41,8 @@ still pending, so the 11-digit layout above is the one in circulation.
 
 ## References
 
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
+
 - **Official** — Gaceta Oficial No. 43 Extraordinaria de 16/10/2014, MININT
   Resolución No. 14 (new carné; the anexo lists the permanent identity number
   among the card data):
@@ -73,13 +75,13 @@ the control digit is deliberately not checked.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["cub"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["cub"] }
 ```
 
 ```rust

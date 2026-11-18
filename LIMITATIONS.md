@@ -51,7 +51,7 @@ sources that were checked on the date shown there.
 
 | Country | Registry |
 |---|---|
-| ARG | ARCA/AFIP, constancia de inscripción: https://www.afip.gob.ar/constanciadeinscripcion/ |
+| ARG | ARCA/AFIP, constancia de inscripción: https://www.arca.gob.ar/ |
 | BOL | SIN/SIAT, "Verifica NIT": https://siatinfo.impuestos.gob.bo/ |
 | BRA | Receita Federal, CPF/CNPJ: https://www.gov.br/receitafederal/ |
 | CHL | SII, consulta de RUT: https://www.sii.cl/ |

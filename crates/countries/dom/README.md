@@ -20,7 +20,13 @@ Depth: structure and check digit only. The first three digits encode the
 municipality/registry and the sequence encodes the sex, but the DGII does not
 publish a table to validate either, so they are not checked.
 
+### Editable constants
+
+None: this validator has no catalogue-derived constants; every check is algorithmic or structural.
+
 ## References
+
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
 
 - **Official** — DGII portal: https://dgii.gov.do/ — checked 2026-11-17. The DGII
   issues the RNC and consumes the cédula, but publishes no check-digit
@@ -50,13 +56,13 @@ passport instead of a checksum error.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["dom"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["dom"] }
 ```
 
 ```rust

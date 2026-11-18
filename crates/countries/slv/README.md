@@ -41,6 +41,8 @@ only the current table applies (see the evidence below).
 
 ## References
 
+Official sources are listed first; the `implementation` ones are the cross-checks used where the agency does not publish the check-digit algorithm.
+
 - **Official** — Ministerio de Hacienda, DTE JSON schemas: the `nit` field is
   `^([0-9]{14}|[0-9]{9})$`, i.e. 14 digits or the 9-digit DUI:
   https://factura.gob.sv/ (read through the byte-identical mirror
@@ -83,7 +85,7 @@ confirm that previously assigned physical NITs remain valid; it could not be
 opened in this session (HTTP 403) and in any case would not be evidence for the
 weights or the correlative cut-off.
 
-Official links were opened on 2026-11-17; the implementation links are public
+Official links checked on 2026-11-17; the implementation links are public
 cross-checks, not dated.
 
 ## Usage
@@ -91,13 +93,13 @@ cross-checks, not dated.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["slv"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["slv"] }
 ```
 
 ```rust

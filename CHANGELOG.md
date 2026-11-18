@@ -11,8 +11,7 @@
 * initial commit of the idenumbra workspace ([c0335db](https://github.com/ailuracollective/idenumbra/commit/c0335dbc6dcfa88bcd4d476742cf78296ff5d18d))
 * **pan:** accept the DGI RUT NT series ([6db7c1e](https://github.com/ailuracollective/idenumbra/commit/6db7c1e51fda7c9be93e4547453b9f72adfb87ac))
 
-
-### Bug Fixes
+### Bug Fixes:
 
 * **bol:** constrain NITs to 9-11 digits and add control code 03 ([5f8625c](https://github.com/ailuracollective/idenumbra/commit/5f8625c9c3b352ded31149dbdd39c2a70c3485d7))
 * **bra:** document and test alphanumeric CNPJ rules ([7d710ce](https://github.com/ailuracollective/idenumbra/commit/7d710cec7f78101076a29ce0fa3b7f9fe2b7596b))

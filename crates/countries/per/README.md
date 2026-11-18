@@ -47,27 +47,26 @@ cross-checks used where the agency does not publish the check-digit algorithm.
   https://identidad.reniec.gob.pe/preguntas-frecuentes-dni
 - **Implementation** — python-stdnum `pe.ruc` (prefix table with `17` and the
   modulo 11 weights; SUNAT publishes neither):
-  https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/per/ruc.py
+  https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/pe/ruc.py
 - **Implementation** — https://es.wikipedia.org/wiki/Documento_Nacional_de_Identidad_(Per%C3%BA)
 
 SUNAT publishes no prefix table and no check-digit algorithm; it only names the
 eleventh digit "dígito verificador", and its own form code computes it with the
 weights above. `17` is accepted on implementation evidence only, and `16` (seen
-in a few ports and blogs, not in python-stdnum) is not accepted. Links were
-opened on 2026-11-17.
+in a few ports and blogs, not in python-stdnum) is not accepted. Links checked on 2026-11-17.
 
 ## Usage
 
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["all"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1", features = ["per"] }
+idenumbra = { version = "0.1.0-alpha.1", features = ["per"] }
 ```
 
 ```rust
