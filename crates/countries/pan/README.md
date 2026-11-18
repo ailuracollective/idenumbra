@@ -17,21 +17,26 @@ the second part has 1-4 digits and the third 1-9 digits. Four-part values
 `province-NT-folio-asiento` are accepted as RUC NT. Plain numbers are accepted
 with 7-13 digits.
 
-The Tribunal Electoral publishes no check digit for the cédula, and the DGI
-check digit cannot be computed from the number. The DGI's own page says the DV
-"el sistema [lo] asigna de manera automática a cada RUC" per taxpayer type
-(natural, juridical, natural NT, juridical NT, finca) and that "su dígito
-verificador cambia al momento que se inscribe como contribuyente" — a DV held
-before registration changes on registration:
+The Tribunal Electoral publishes no check digit for the cédula. The DGI does
+issue a two-digit DV per RUC, and its value depends on the taxpayer type
+(persona natural, jurídica, natural NT, jurídica NT, finca) and, for natural
+persons, on the province and marker; the DGI's own page says "el sistema [lo]
+asigna de manera automática a cada RUC" and that "su dígito verificador cambia
+al momento que se inscribe como contribuyente". The DGI's electronic-invoice
+*Ficha Técnica* nevertheless refers to "el algoritmo del RUC publicado por la
+DGI" and exposes a WS *Consulta de RUC y DV*. The algorithm document itself
+("Algoritmo para el cálculo del dígito verificador de la RUC y recibo") could
+not be opened in this session — the copies found are behind blocked hosts — so
+this crate does not compute the DV: a type-dependent DV is a registry attribute,
+and applying an unverified table would reject valid numbers. Two independent
+implementations reproduce the algorithm (see below), but both need the taxpayer
+type, which this crate's API does not carry. Use the DGI eTax 2.0 *Dígito
+Verificador* service.
 
-- the DGI issues **two** digits per RUC, and their value depends on the
-  taxpayer type (persona natural, jurídica, natural NT, jurídica NT, finca)
-  and, for natural persons, on the province and marker;
-- it is a registry attribute rather than a function of the number;
-- the algorithm is not published; the DGI looks the DV up in eTax 2.0.
-
-So the DV is documented but deliberately not validated here. Use the DGI eTax
-2.0 *Dígito Verificador* service for it.
+The same *Ficha Técnica* sizes the RUC field at **5-21 alphanumeric**
+characters and the DV at 2 digits. This crate validates only the documented
+printed shapes (province/marker-folio-asiento, `NT`, and plain 7-13 digits), so
+an alphanumeric RUC outside those shapes is a known false negative.
 
 ### Editable constants
 
@@ -65,6 +70,11 @@ publishes their shape.
   29/07/1958, art. 9: province code + tomo + asiento, `PE-`, `N-`, `E-`):
   https://web.archive.org/web/20100728085351/http:/www.tribunal-electoral.gob.pa/cedulacion/index.html
   — checked 2026-11-17
+- **Official** — DGI, *Ficha Técnica de la Factura Electrónica* (WS
+  `feConsRucDV`, field `dRuc` 5-21 alphanumeric, `dDV` 2 digits, "Debe ser
+  calculado en base al algoritmo del RUC publicado por la DGI"):
+  https://dgi.mef.gob.pa/_7FacturaElectronica/source/4-Anexo-3-Ficha-T%C3%A9cnica-Factura-Electr%C3%B3nica-Proveedores-Autorizaci%C3%B3n-Calificados-V1.0.pdf
+  — checked 2026-11-17
 - **Official** — DGI, *Dígito Verificador (D.V)*: the DV is assigned per RUC
   and per taxpayer type (Natural, Jurídica, Natural NT, Jurídica NT, Finca) and
   changes on registration: https://dgi.mef.gob.pa/DV — checked 2026-11-17
@@ -78,6 +88,13 @@ publishes their shape.
   persons, 2-digit DV, `NT` prefix for foreigners, RUC NT example `3-NT-3-33`):
   https://www.oecd.org/content/dam/oecd/en/topics/policy-issue-focus/aeoi/panama-tin.pdf
   — checked 2026-11-17
+- **Implementation** — https://github.com/apple314159/panama-dv (Python: the
+  full two-round DV algorithm with the taxpayer-type cross-reference table,
+  citing the ANIP document *Algoritmo para el cálculo del dígito verificador de
+  la RUC y recibo*; the NT branch is marked TODO)
+- **Implementation** — https://github.com/leira2985/panama-ruc (TypeScript: the
+  same DV, and its API needs a `typeHint` to disambiguate NT and short RUCs —
+  evidence that the DV is not a function of the number alone)
 - **Implementation** — province codes and marker meanings, collected from
   Tribunal Electoral forms and press: https://oobrien.com/2017/05/panamas-population-geographies
   — checked 2026-11-17
@@ -122,5 +139,9 @@ These values are **synthetic** and do **not** correspond to any real person or c
 - Lazy loading: only compiled when the corresponding Cargo feature is enabled.
 - The DGI check digits (two digits, type-dependent) are not checked; use the
   DGI eTax 2.0 `DV` service for that.
+- `validate_with("id_card" | "ruc" | "passport")` forces the kind. `id_card`
+  rejects the four-part NT (a tax number, not an identity card); `ruc` accepts
+  the cédula (a natural person's RUC is their cédula) and the NT; neither
+  accepts a passport.
 - `EE` and `SB` series are rejected: no issuing rule defines them (Decreto
   53/1958 art. 9 lists only province, `PE`, `N` and `E`).

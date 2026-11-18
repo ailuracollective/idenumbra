@@ -73,6 +73,30 @@ mod tests {
     }
 
     #[test]
+    fn kinds_are_strict() {
+        // A passport is neither a cédula nor a RUC.
+        assert_eq!(
+            validate_with("AB123456", "id_card"),
+            Err(ValidationError::InvalidFormat)
+        );
+        assert_eq!(
+            validate_with("AB123456", "ruc"),
+            Err(ValidationError::InvalidFormat)
+        );
+        // The four-part NT is a tax number, not a cédula.
+        assert_eq!(
+            validate_with("8-NT-1-24", "id_card"),
+            Err(ValidationError::InvalidFormat)
+        );
+        assert!(validate_with("8-NT-1-24", "ruc").is_ok());
+        // A natural person's RUC is their cédula.
+        assert!(validate_with("8-123-4567", "ruc").is_ok());
+        assert!(validate_with("8-123-4567", "id_card").is_ok());
+        assert!(validate_with("81234567", "ruc").is_ok());
+        assert!(validate_with("81234567", "id_card").is_ok());
+    }
+
+    #[test]
     fn rejects_malformed_parts() {
         assert!(validate("0-123-4567").is_err());
         assert!(validate("8-123-4567890123").is_err());

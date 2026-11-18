@@ -52,7 +52,9 @@ fn valid_tail(folio: &str, asiento: &str) -> bool {
     all_digits(folio) && folio.len() <= 4 && all_digits(asiento) && asiento.len() <= 9
 }
 
-fn validate_hyphenated(value: &str) -> Result<(), ValidationError> {
+/// Returns `Ok(true)` when the value is the four-part RUC NT shape
+/// (`province-NT-folio-asiento`), `Ok(false)` for the three-part cédula shape.
+fn validate_hyphenated(value: &str) -> Result<bool, ValidationError> {
     let mut parts = [""; 4];
     let mut count = 0usize;
     for part in value.split('-') {
@@ -62,22 +64,41 @@ fn validate_hyphenated(value: &str) -> Result<(), ValidationError> {
         parts[count] = part;
         count += 1;
     }
-    let ok = match count {
-        3 => valid_first_part(parts[0]) && valid_tail(parts[1], parts[2]),
+    let (ok, is_nt) = match count {
+        3 => (valid_first_part(parts[0]) && valid_tail(parts[1], parts[2]), false),
         // RUC NT (DGI): province-NT-folio-asiento.
-        4 => {
+        4 => (
             parts[1] == NT_TAG
                 && all_digits(parts[0])
                 && parts[0].len() <= 2
                 && valid_province(parts[0].as_bytes())
-                && valid_tail(parts[2], parts[3])
-        }
-        _ => false,
+                && valid_tail(parts[2], parts[3]),
+            true,
+        ),
+        _ => (false, false),
     };
     if ok {
-        Ok(())
+        Ok(is_nt)
     } else {
         Err(ValidationError::InvalidFormat)
+    }
+}
+
+/// Plain (unhyphenated) number: 7-13 digits, never all zeros.
+fn validate_plain(value: &str) -> Result<(), ValidationError> {
+    if !all_digits(value) {
+        return Err(ValidationError::InvalidFormat);
+    }
+    if value.bytes().all(|b| b == b'0') {
+        return Err(ValidationError::InvalidFormat);
+    }
+    if (7..=13).contains(&value.len()) {
+        Ok(())
+    } else {
+        Err(ValidationError::InvalidLength {
+            expected: 10,
+            found: value.len(),
+        })
     }
 }
 
@@ -96,34 +117,45 @@ fn validate_passport(value: &str) -> Result<(), ValidationError> {
     Ok(())
 }
 
+/// Validate a Panamanian identity card: a hyphenated cédula or a plain number.
+/// The four-part `province-NT-folio-asiento` tax number is not a cédula.
+fn validate_id_card(value: &str) -> Result<(), ValidationError> {
+    if value.contains('-') {
+        return match validate_hyphenated(value)? {
+            true => Err(ValidationError::InvalidFormat),
+            false => Ok(()),
+        };
+    }
+    validate_plain(value)
+}
+
+/// Validate a Panamanian RUC: a cédula (a natural person's RUC is their cédula),
+/// the four-part NT, or a plain number. A passport is not a RUC.
+fn validate_ruc(value: &str) -> Result<(), ValidationError> {
+    if value.contains('-') {
+        return validate_hyphenated(value).map(|_| ());
+    }
+    validate_plain(value)
+}
+
 /// Validate a Panamanian identification number (identity card or RUC).
 ///
 /// The DGI assigns a 2-digit check digit per RUC, and its value depends on the
 /// taxpayer type (natural, juridical, natural NT, juridical NT, finca) plus, for
-/// natural persons, the province and marker. The DGI publishes no algorithm:
-/// the DV is looked up in eTax 2.0 and it changes when the holder registers as
-/// a taxpayer, so it cannot be derived from the number alone. Only the
-/// structure is validated here.
+/// natural persons, the province and marker. The DGI publishes the algorithm,
+/// but applying it needs the taxpayer type, which this crate does not carry, and
+/// it changes when the holder registers as a taxpayer, so it cannot be derived
+/// from the number alone. Only the structure is validated here.
 pub fn validate(value: &str) -> Result<(), ValidationError> {
     let value = value.trim();
     if value.is_empty() {
         return Err(ValidationError::Empty);
     }
     if value.contains('-') {
-        return validate_hyphenated(value);
+        return validate_hyphenated(value).map(|_| ());
     }
     if all_digits(value) {
-        if value.bytes().all(|b| b == b'0') {
-            return Err(ValidationError::InvalidFormat);
-        }
-        return if (7..=13).contains(&value.len()) {
-            Ok(())
-        } else {
-            Err(ValidationError::InvalidLength {
-                expected: 10,
-                found: value.len(),
-            })
-        };
+        return validate_plain(value);
     }
     validate_passport(value)
 }
