@@ -22,10 +22,16 @@ ignored; lowercase `k` is accepted. All-zero bodies are rejected as placeholders
   (official SII FAQ on the "Dígito Verificador Erróneo" message; updated
   20/10/2025)
 - https://www.sii.cl/factura_electronica/factura_mercado/formato_boleta_electronica.pdf — checked 2026-11-17
-  (official RUT field format: digits plus a check character 0-9 or K)
+  (official "Formato Boletas Electrónicas", version 4.2 of 2025-09-08: the RUT
+  field is a numeric body plus a check character 0-9 or `K`; it also names the
+  generic `66.666.666-6`)
 - https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/cl/rut.py — checked 2026-11-17
   (cross-check; the SII states that a "módulo 11" check exists but does not
   publish the weights, which are the long-standing public specification)
+
+The SII prints the modulus and the `0-9`/`K` alphabet, but not the residue
+mapping: `10 -> K` follows from modulo 11 because 10 is not a digit, and the
+boleta format independently allows `K` as the check character.
 
 `66.666.666-6`, the generic RUT the SII requires on boletas without a customer
 RUT, passes this validator (its digit is correct); it identifies no person.

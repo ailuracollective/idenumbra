@@ -20,6 +20,7 @@ fn validate_rut(chars: &[u8]) -> Result<(), ValidationError> {
     }
     let expected = match 11 - sum % 11 {
         11 => b'0',
+        // 10 is not a digit; the SII layout fixes the check character as 0-9 or K.
         10 => b'K',
         digit => b'0' + digit as u8,
     };
