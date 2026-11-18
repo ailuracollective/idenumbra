@@ -24,7 +24,8 @@ publish a table to validate either, so they are not checked.
 
 - **Official** — DGII portal: https://dgii.gov.do/ — checked 2026-11-17. The DGII
   issues the RNC and consumes the cédula, but publishes no check-digit
-  specification for it.
+  specification for it, and no rule describing the cédulas that predate the
+  check digit. The JCE is the issuer; neither agency publishes such a list.
 - **Implementation** — python-stdnum `do.cedula` (delegates to the standard Luhn
   implementation): https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/do/cedula.py
   — checked 2026-11-17
@@ -33,10 +34,12 @@ publish a table to validate either, so they are not checked.
   https://dgiiapicloud.com/blog/validar-cedula-rnc-ncf-republica-dominicana —
   checked 2026-11-17
 
-Known limit: python-stdnum carries a whitelist of roughly 700 cédulas in
-circulation that do **not** match Luhn (issued before the check digit was
-enforced). They are not part of this crate — they are real people's numbers —
-so those cédulas are rejected here.
+Known limit: python-stdnum carries a hard-coded list of 576 issued cédulas that
+do **not** match Luhn (checked 2026-11-17; none of them passes the checksum).
+Those are real people's numbers, so they cannot be shipped here and, since the
+DGII/JCE publish no rule that identifies them by their digits, there is nothing
+to validate instead: those cédulas are rejected. This is a deliberate
+false-negative policy — the alternative is to accept any 11-digit number.
 
 Inference: anything that is not digits plus `-`/space is treated as a passport
 (6-12 alphanumerics), so a cédula mistyped with a letter is reported as a
