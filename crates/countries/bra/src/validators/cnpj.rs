@@ -5,8 +5,10 @@ fn validate_cnpj(chars: &[u8]) -> Result<(), ValidationError> {
             found: chars.len(),
         });
     }
-    // Since July 2026 the root and branch may contain letters; the check
-    // digits are always numeric.
+    // Since July 2026 the root (8) and branch (4) may contain the 26 letters
+    // A-Z; the check digits stay numeric. ENCAT asked the Receita Federal to
+    // also exclude I, O, U, Q and F, but that exclusion is not confirmed in
+    // IN RFB 2.229/2024, so every A-Z letter is accepted here.
     if !chars[..12].iter().all(u8::is_ascii_alphanumeric)
         || !chars[12..].iter().all(u8::is_ascii_digit)
     {
