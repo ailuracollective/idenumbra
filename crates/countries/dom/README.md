@@ -9,18 +9,38 @@ Dominican Republic identification validator.
 
 ## Validation algorithm
 
-Cédula: 11 digits validated with the Luhn (mod 10) algorithm; digits are
-doubled from the right (the 10 payload digits), products above 9 have 9
-subtracted, and the check digit is `(10 - sum mod 10) mod 10`. Hyphens and
-spaces are ignored.
+Cédula: 11 digits validated with the Luhn (mod 10) algorithm over all 11
+digits: starting from the check digit (never doubled), every second digit to the
+left is doubled, products above 9 have their digits summed (equivalent to
+subtracting 9), and the check digit is `(10 - sum mod 10) mod 10`. Equivalently,
+the ten payload digits carry weights `1,2,1,2,...` from the left. Hyphens and
+spaces are ignored. All-zero numbers are rejected as placeholders.
+
+Depth: structure and check digit only. The first three digits encode the
+municipality/registry and the sequence encodes the sex, but the DGII does not
+publish a table to validate either, so they are not checked.
 
 ## References
 
-- https://dgii.gov.do/ — checked 2026-11-17
-- https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/do/cedula.py — checked 2026-11-17
-- https://es.wikipedia.org/wiki/C%C3%A9dula_de_identidad_(Rep%C3%BAblica_Dominicana) — checked 2026-11-17
+- **Official** — DGII portal: https://dgii.gov.do/ — checked 2026-11-17. The DGII
+  issues the RNC and consumes the cédula, but publishes no check-digit
+  specification for it.
+- **Implementation** — python-stdnum `do.cedula` (delegates to the standard Luhn
+  implementation): https://raw.githubusercontent.com/arthurdejong/python-stdnum/master/stdnum/do/cedula.py
+  — checked 2026-11-17
+- **Cross-check** — weights `1,2,1,2,...` over the ten payload digits and
+  `(10 - sum mod 10) mod 10`:
+  https://dgiiapicloud.com/blog/validar-cedula-rnc-ncf-republica-dominicana —
+  checked 2026-11-17
 
-The DGII does not publish the Luhn rule; it is cross-checked against python-stdnum and the DGII online validator.
+Known limit: python-stdnum carries a whitelist of roughly 700 cédulas in
+circulation that do **not** match Luhn (issued before the check digit was
+enforced). They are not part of this crate — they are real people's numbers —
+so those cédulas are rejected here.
+
+Inference: anything that is not digits plus `-`/space is treated as a passport
+(6-12 alphanumerics), so a cédula mistyped with a letter is reported as a
+passport instead of a checksum error.
 
 ## Usage
 
