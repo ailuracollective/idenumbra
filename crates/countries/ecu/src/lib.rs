@@ -6,9 +6,8 @@
 
 #![no_std]
 
-use idenumbra_core::{ValidationError, Validator};
-
-const COUNTRY: &str = "ECU";
+#[cfg(test)]
+use idenumbra_core::ValidationError;
 
 mod validators {
     use idenumbra_core::ValidationError;
@@ -21,19 +20,7 @@ mod validators {
 
 pub use validators::{validate, validate_with};
 
-/// Zero-sized marker type implementing [`Validator`] for Ecuador.
-pub struct IdenumbraECU;
-
-impl Validator for IdenumbraECU {
-    const COUNTRY: &'static str = COUNTRY;
-    type Validation = ();
-    fn validate(value: &str) -> Result<Self::Validation, ValidationError> {
-        validate(value)
-    }
-    fn validate_with(value: &str, kind: &str) -> Result<Self::Validation, ValidationError> {
-        crate::validate_with(value, kind)
-    }
-}
+idenumbra_core::country_validator!(IdenumbraECU, "ECU");
 
 #[cfg(test)]
 mod tests {

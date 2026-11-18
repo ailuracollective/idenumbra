@@ -25,3 +25,29 @@ pub trait Validator {
         Self::validate(value)
     }
 }
+
+/// Generate the zero-sized marker struct and [`Validator`] implementation for a
+/// country crate, removing the per-crate boilerplate.
+///
+/// `$marker` is the marker type name (e.g. `IdenumbraARG`), `$code` the ISO
+/// 3166-1 alpha-3 code. The generated `validate`/`validate_with` delegate to
+/// the crate's free functions of the same names, which must be in scope.
+#[macro_export]
+#[allow(clippy::crate_in_macro_def)]
+macro_rules! country_validator {
+    ($marker:ident, $code:literal) => {
+        /// Zero-sized marker type implementing [`$crate::Validator`].
+        pub struct $marker;
+
+        impl $crate::Validator for $marker {
+            const COUNTRY: &'static str = $code;
+            type Validation = ();
+            fn validate(value: &str) -> Result<(), $crate::ValidationError> {
+                validate(value)
+            }
+            fn validate_with(value: &str, kind: &str) -> Result<(), $crate::ValidationError> {
+                crate::validate_with(value, kind)
+            }
+        }
+    };
+}
