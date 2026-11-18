@@ -1,6 +1,9 @@
 /// Validate a Guatemalan CUI/DPI.
 ///
 /// Layout: correlativo (8) + check digit + departamento (2) + municipio (2).
+/// RENAP publishes the layout and states that the last four digits are the
+/// department and then the municipality, but not the check-digit formula; the
+/// weights 2..9 over the correlativo are the community rule (see the README).
 fn validate_cui(digits: &[u8]) -> Result<(), ValidationError> {
     if digits.len() != 13 {
         return Err(ValidationError::InvalidLength {
@@ -18,6 +21,9 @@ fn validate_cui(digits: &[u8]) -> Result<(), ValidationError> {
     let computed = sum % 11;
     let received = (digits[8] - b'0') as u32;
     if computed != received {
+        // A remainder of 10 is not a digit. Some community formulas map it to 0
+        // (11 - sum instead of sum); no source from RENAP settles it, so it is
+        // rejected like the reference implementations do.
         return Err(ValidationError::CheckDigitMismatch {
             expected: computed,
             received,
@@ -30,6 +36,12 @@ fn validate_cui(digits: &[u8]) -> Result<(), ValidationError> {
             region: department,
         });
     };
+    // Index 0 of the table is unused, so department 00 lands here.
+    if municipalities == 0 {
+        return Err(ValidationError::InvalidRegion {
+            region: department,
+        });
+    }
     if municipality == 0 || municipality > municipalities as u32 {
         return Err(ValidationError::InvalidFormat);
     }

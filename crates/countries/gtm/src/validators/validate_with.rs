@@ -10,7 +10,8 @@ pub fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
             }
         }
         "nit" => {
-            // Since 2026 the DPI/CUI number is also used as NIT.
+            // Since 2023-10-04 a natural person's NIT is built from the CUI, and
+            // SAT accepts the full 13-digit CUI (Resolución SAT-DSI-393-2025).
             if value.len() == 13 && value.bytes().all(|b| b.is_ascii_digit()) {
                 return validate_cui(value.as_bytes());
             }
