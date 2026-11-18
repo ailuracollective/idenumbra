@@ -25,9 +25,11 @@ when the kind is known — a passport number of 8 digits is read as a CI.
 
 - `RIF_PREFIXES` (`src/validators/validate.rs`) — letter → checksum base:
   `V` venezolano, `E` extranjero, `J` jurídico, `P` pasaporte, `G` gobierno,
-  `C` comuna/consejo comunal. `C` is an alias of `J` (same base `12`), so a
-  comuna keeps the check digit of the `J` RIF it replaced. Edit when SENIAT
-  issues a new letter.
+  `C` comuna/consejo comunal. `C` is an alias of `J` (same base `12`): SENIAT
+  introduced it in 2015 by migrating the comunas that already had a `J` RIF, so
+  the eight digits and the check digit stayed, and the base cannot differ from
+  `J`. These six are the letters in circulation; edit when SENIAT issues a new
+  one.
 
 ## References
 
@@ -43,13 +45,24 @@ when the kind is known — a passport number of 8 digits is read as a CI.
   example (`J-30468971-3`):
   https://es.wikipedia.org/wiki/Registro_%C3%9Anico_de_Informaci%C3%B3n_Fiscal
   — checked 2026-11-17
+- **Cross-check** — CDQ `VE_RIF` data-quality specification: letter weights
+  `V=1, E=2, J=3, C=3, P=4, G=5`, multiplied by 4 (so `C` = `J` = 12):
+  https://meta.cdq.com/DataModel:CDQ/Business_Partner/Identifier/VE_RIF
+  — checked 2026-11-17
+- **Secondary** — press report of the 2015 launch: the comunas and consejos
+  comunales already registered were migrated from the letter `J` to `C`, which
+  is why both keep the same base:
+  https://elestimulo.com/venezuela/2015-08-15/seniat-imprime-primer-rif-para-comunas-con-la-letra-c/
+  — checked 2026-11-17
 - **Cross-check** — "SENIAT does not publish the formula; the common mod-11
   method matches live RIFs":
   https://lookuptax.com/validate/venezuela/rif — checked 2026-11-17
 
 Watch out for implementations that give the letter a value and multiply it by 4
-(`V=1 ... C=3 × 4 = 12`): that is the same thing. A popular variant uses
-`C = 24`, which produces a wrong check digit for comunas.
+(`V=1 ... G=5 × 4`): that is the same thing. A popular variant uses `C = 24`
+(letter value 6), which produces a wrong check digit for comunas; it would reject
+every one of the comunas migrated from `J` in 2015. The published tables that do
+carry the letter, and the migration itself, give `C = J = 12`.
 
 ## Usage
 
