@@ -24,6 +24,13 @@ Length, alphabet and leading-zero based:
 Costa Rican cédulas and the DIMEX carry no public check digit, so no
 arithmetic check is applied. The cédula jurídica does not carry one either.
 
+The 12-digit DIMEX with a leading zero is rejected. Hacienda's identification
+field forbids a leading zero, and the zero-padded form exists only inside the
+50-character invoice key (*nota 4.1*: "se debe agregar un cero al inicio con el
+fin de completar 12 dígitos"), not as a document number. A NITE is 10 digits
+and is accepted through the same shape as the cédula jurídica: the number alone
+does not tell them apart.
+
 Hyphens, dots and spaces are dropped (`1-0234-0567`, `3-101-123456`) and
 lowercase letters are uppercased.
 
@@ -31,9 +38,8 @@ lowercase letters are uppercased.
 
 - `ID_CARD_LEN = 9`, `JURIDICAL_LEN = 10`, `DIMEX_LENGTHS = [11, 12]`
   (`src/validators/validate.rs`) — accepted lengths. The DIMEX is 11 digits in
-  the legacy format and 12 in the newer one; the tax authority accepts both and
-  tells filers to left-pad the 11-digit ones with a zero. Drop `11` only if the
-  legacy format is retired.
+  the legacy format and 12 in the newer one; the tax authority accepts both,
+  always without a leading zero. Drop `11` only if the legacy format is retired.
 - `JURIDICAL_LEN = 10` must stay 10 when the consecutive turns alphanumeric:
   the Registro Nacional keeps the same character count (`3-101-A00001`).
 
@@ -41,8 +47,9 @@ lowercase letters are uppercased.
 
 - **Official** — Ministerio de Hacienda, *Anexos y Estructuras* v4.4 (in force
   since 2025-09-01, log updated 2026-04-22): cédula física = 9 digits without a
-  leading zero, cédula jurídica = 10 characters, DIMEX = 11 or 12 digits
-  without leading zeros, NITE = 10 digits:
+  leading zero, cédula jurídica = 10 characters (alphanumeric allowed), DIMEX =
+  11 or 12 digits without leading zeros, NITE = 10 digits; *nota 4.1* pads the
+  DIMEX to 12 only to build the 50-character key:
   https://www.hacienda.go.cr/docs/ANEXOS_Y_ESTRUCTURAS_V4.4.pdf — checked 2026-11-17
 - **Official** — Ministerio de Hacienda, circular MH-DGA-CIR-0005-2026
   (2026-02-26) forwarding the alphanumeric cédula jurídica:

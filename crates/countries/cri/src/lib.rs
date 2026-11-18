@@ -62,6 +62,16 @@ mod tests {
     }
 
     #[test]
+    fn rejects_the_invoice_key_padded_dimex() {
+        // An 11-digit DIMEX is left-padded with one zero only to fill the
+        // 50-character invoice key; the number itself has no leading zero, so
+        // the padded 12-digit form is not a valid document.
+        assert!(validate("012345678901").is_err());
+        assert!(validate_with("012345678901", "dimex").is_err());
+        assert!(validate_with("01234567890", "dimex").is_err());
+    }
+
+    #[test]
     fn accepts_the_separators_people_type() {
         assert!(validate("1-0234-0567").is_ok());
         assert!(validate("1 0234 0567").is_ok());

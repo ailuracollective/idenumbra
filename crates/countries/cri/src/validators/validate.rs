@@ -2,8 +2,9 @@
 const ID_CARD_LEN: usize = 9;
 /// Cédula jurídica (and the NITE, which shares the 10-character shape).
 const JURIDICAL_LEN: usize = 10;
-/// DIMEX lengths in use: 11 (legacy) and 12 digits; the tax authority accepts
-/// both and tells filers to left-pad the 11-digit ones with a zero.
+/// DIMEX lengths in use: 11 (legacy) and 12 digits. The tax authority accepts
+/// both and forbids a leading zero; the zero-padded 12-digit form exists only
+/// inside the 50-character invoice key, not as a document number.
 const DIMEX_LENGTHS: [usize; 2] = [11, 12];
 
 /// Copy the characters of `value` into `buf`, dropping the separators people
@@ -28,7 +29,8 @@ fn compact(value: &str, buf: &mut [u8]) -> Result<usize, ValidationError> {
 }
 
 /// Numeric documents: cédula física (9), cédula jurídica/NITE (10) and DIMEX
-/// (11 or 12). Hacienda requires no leading zero in any of them.
+/// (11 or 12). Hacienda requires no leading zero in any of them, which also
+/// rules out the zero-padded 12-digit DIMEX used inside the invoice key.
 fn validate_digits(digits: &[u8]) -> Result<(), ValidationError> {
     if digits[0] == b'0' {
         return Err(ValidationError::InvalidFormat);
