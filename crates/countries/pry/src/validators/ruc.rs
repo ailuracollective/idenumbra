@@ -1,6 +1,7 @@
 /// Paraguay RUC check digit: modulo 11 with weights 2..11 from the right.
 fn validate_ruc(digits: &[u8]) -> Result<(), ValidationError> {
-    if !(3..=9).contains(&digits.len()) {
+    // SIFEN: the RUC without the check digit is 3-8 characters.
+    if !(4..=9).contains(&digits.len()) {
         return Err(ValidationError::InvalidLength {
             expected: 9,
             found: digits.len(),
