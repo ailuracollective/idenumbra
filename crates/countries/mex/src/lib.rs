@@ -2,10 +2,6 @@
 
 #![no_std]
 
-use idenumbra_core::{ValidationError, Validator};
-
-const COUNTRY: &str = "MEX";
-
 mod validators {
     use idenumbra_core::ValidationError;
     include!("validators/date.rs");
@@ -17,19 +13,7 @@ mod validators {
 
 pub use validators::{validate, validate_with};
 
-/// Country validator marker.
-pub struct IdenumbraMEX;
-
-impl Validator for IdenumbraMEX {
-    const COUNTRY: &'static str = COUNTRY;
-    type Validation = ();
-    fn validate(value: &str) -> Result<(), ValidationError> {
-        validate(value)
-    }
-    fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
-        crate::validate_with(value, kind)
-    }
-}
+idenumbra_core::country_validator!(IdenumbraMEX, "MEX");
 
 #[cfg(test)]
 mod tests {

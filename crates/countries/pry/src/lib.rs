@@ -2,9 +2,8 @@
 
 #![no_std]
 
-use idenumbra_core::{ValidationError, Validator};
-
-const COUNTRY: &str = "PRY";
+#[cfg(test)]
+use idenumbra_core::ValidationError;
 
 mod validators {
     use idenumbra_core::ValidationError;
@@ -15,19 +14,7 @@ mod validators {
 
 pub use validators::{validate, validate_with};
 
-/// Country validator marker.
-pub struct IdenumbraPRY;
-
-impl Validator for IdenumbraPRY {
-    const COUNTRY: &'static str = COUNTRY;
-    type Validation = ();
-    fn validate(value: &str) -> Result<(), ValidationError> {
-        validate(value)
-    }
-    fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
-        crate::validate_with(value, kind)
-    }
-}
+idenumbra_core::country_validator!(IdenumbraPRY, "PRY");
 
 #[cfg(test)]
 mod tests {
