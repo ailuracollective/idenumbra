@@ -4,43 +4,63 @@ Uruguay identification validator.
 
 ## Documents
 
-- CI (6-7 digit body plus check digit).
+- CI (7-digit body plus check digit; the oldest numbers have a 6-digit body).
 - RUT (12 digits, modulo 11).
 - Passport (6-12 alphanumerics).
 
 ## Validation algorithm
 
-CI: the body is left-padded to 7 digits and multiplied by
-`[2,9,8,7,6,3,4]`; the check digit is `(10 - sum mod 10) mod 10`. RUT: the
-first two digits must be `01-22`, positions 3-8 must not be all zero,
+CI: the identification number is a natural sequence starting at 1 followed by a
+module-10 check digit (Decreto 501/1978, art. 2). The body is left-padded to 7
+digits and multiplied by `[2,9,8,7,6,3,4]`; the check digit is
+`(10 - sum mod 10) mod 10`. A 6-digit body is therefore the same number with a
+leading zero, and both spellings validate.
+
+RUT: the first two digits must be `01-22`, positions 3-8 must not be all zero,
 positions 9-11 must be `001`, and the check digit uses weights
-`[4,3,2,9,8,7,6,5,4,3,2]` with `11 - remainder` (`11 -> 0`; a check digit of 10
-is not representable). Dots, hyphens and spaces are ignored.
+`[4,3,2,9,8,7,6,5,4,3,2]` with `11 - remainder`; remainder 0 gives `0` and
+remainder 1 would give `10`, which no RUT can carry, so those eleven digits are
+rejected as `UnrepresentableCheckDigit`. Dots, hyphens and spaces are ignored.
 
 ### Editable constants
 
-- `MAX_OFFICE_CODE = 22` (`src/validators/rut.rs`) — first two RUT digits are
-  the DGI operating unit where the taxpayer registered. `01-21` are historical
-  and `22` is the only one assigned since October 2024.
+- `MAX_OFFICE_CODE = 22` (`src/validators/rut.rs`) — the first two RUT digits
+  are the DGI operating unit where the taxpayer registered. `01-21` are
+  historical and `22` is the only one assigned to new taxpayers since the week
+  of 21 October 2024.
 - `RUT_OFFICE_GROUP = b"001"` (`src/validators/rut.rs`) — middle group, a
-  constant per the DGI.
+  constant per the DGI, `001` in every public sample.
 
 ## References
 
-- **Official** — DGI, *Nueva numeración del RUT* (since October 2024 every new
-  RUT starts with `22`): https://www.gub.uy/direccion-general-impositiva/comunicacion/noticias/nueva-numeracion-del-rut
+- **Official** — Decreto 501/1978, art. 2: the identification number is a
+  sequence from 1 plus the check digit "resultante de la aplicación del módulo
+  diez": https://www.impo.com.uy/bases/decretos/501-1978 — checked 2026-11-17.
 - **Official** — MEF, response to access-to-information request 2024-5-1-0002222
-  (RUT = 2-digit operating unit + 6 sequential + 3 fixed + check digit; the
-  check-digit algorithm itself is withheld by Resolución 836/2024):
+  (RUT = 2-digit prefix + 6 sequential + 3-digit suffix + check digit; the
+  check-digit algorithm is classified reserved by Resolución 836/2024 of
+  16 April 2024):
   https://www.gub.uy/ministerio-economia-finanzas/institucional/informacion-gestion/informes-solicitudes-acceso-informacion-publica/respuesta-100
-- **Official** — AGESIC, *Framework para la Gestión de la Calidad de Datos*
-  (cédula = 7 digits + check digit):
-  https://www.gub.uy/agencia-gobierno-electronico-sociedad-informacion-conocimiento/sites/agencia-gobierno-electronico-sociedad-informacion-conocimiento/files/documentos/publicaciones/Framework%20para%20la%20Gestio%CC%81n%20de%20la%20Calidad%20de%20Datos%20v1.4.pdf
-- **Implementation** — https://ciuy.readthedocs.io/es/latest/about.html
-- **Implementation** — https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/uy/rut.py
+  — checked 2026-11-17.
+- **Official** — DGI, *Nueva numeración del RUT* (from the week of 21 October
+  2024 the first two digits of every new RUT are `22`, regardless of the
+  department; existing taxpayers keep theirs):
+  https://www.gub.uy/direccion-general-impositiva/comunicacion/noticias/nueva-numeracion-del-rut
+  — checked 2026-11-17.
+- **Implementation** — python-stdnum `uy.rut` (12 digits, prefix `01`-`22`,
+  `001` group, weights `[4,3,2,9,8,7,6,5,4,3,2]`):
+  https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/uy/rut.py
+- **Implementation** — ciuy, which documents the CI digit as the dot product
+  with `<8,1,2,3,4,7,6>` modulo 10 (for the 7-digit body) and `<1,2,3,4,7,6>`
+  (for the 6-digit one); each pair of weights adds up to 10 with the ones used
+  here, and `(10 - sum mod 10) mod 10` is `-sum mod 10`, so the two formulations
+  agree: https://ciuy.readthedocs.io/es/latest/about.html
+- **Implementation** — https://github.com/picandocodigo/ci_uy (CI weights
+  `2,9,8,7,6,3,4`, 6 or 7 digit body).
 
-The DGI treats the RUT and CI check-digit algorithms as reserved information,
-so the weights below come from public implementations, not from a norm.
+The DGI classifies the RUT check-digit algorithm as reserved information, so the
+weights above come from public implementations, not from a norm. No agency
+publishes the CI weights either; Decreto 501/1978 only fixes the modulus.
 
 Official links were opened on 2026-11-17; the implementation links are public
 cross-checks, not dated.
@@ -67,9 +87,11 @@ Idenumbra::infer("URY", "12345678")?;
 ## Test numbers (synthetic, not real)
 
 - CI: `1.234.567-2` (`12345672`)
+- CI with a 6-digit body: `123.456-1` (`1234561`, body padded to `0123456`)
 - RUT: `21-999983-001-9` (`219999830019`)
 
-These values are **synthetic** and do **not** correspond to any real person or company. Generated locally with this crate's validation algorithm. Source: generated locally with the DGI modulo 10/11 rules.
+These values are **synthetic** and do **not** correspond to any real person or
+company. Generated locally with this crate's validation algorithm.
 
 ## Notes
 

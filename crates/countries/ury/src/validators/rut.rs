@@ -1,8 +1,9 @@
-/// First two digits: the DGI "unidad operativa" code, 1..=22. 01-21 are
-/// historical and 22 is used for every new RUT since October 2024.
+/// First two digits: the DGI operating-unit code, 1..=22. 01-21 are historical
+/// and 22 is used for every new RUT since October 2024. Edit when the DGI
+/// changes the prefix.
 const MAX_OFFICE_CODE: u32 = 22;
 
-/// Middle group, a constant per the DGI; `001` in practice.
+/// Middle group, a constant per the DGI; `001` in every public sample.
 const RUT_OFFICE_GROUP: &[u8] = b"001";
 
 /// Validate a Uruguayan RUT (12 digits).

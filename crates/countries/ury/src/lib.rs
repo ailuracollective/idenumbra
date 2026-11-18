@@ -47,6 +47,30 @@ mod tests {
     }
 
     #[test]
+    fn pads_six_digit_ci_to_seven() {
+        // Body 123456 pads to 0123456, sum 109, digit 1.
+        assert!(validate("1234561").is_ok());
+        assert!(validate("01234561").is_ok());
+        assert_eq!(
+            validate("1234562"),
+            Err(ValidationError::CheckDigitMismatch {
+                expected: 1,
+                received: 2
+            })
+        );
+    }
+
+    #[test]
+    fn rejects_unrepresentable_rut_check_digit() {
+        // These eleven digits leave remainder 1, so the digit would be 10 and
+        // no RUT with them can exist.
+        assert_eq!(
+            validate("219999740019"),
+            Err(ValidationError::UnrepresentableCheckDigit)
+        );
+    }
+
+    #[test]
     fn rejects_bad_ci_and_rut() {
         assert_eq!(
             validate("12345673"),
