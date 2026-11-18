@@ -3,7 +3,8 @@ pub fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
     let value = value.trim();
     match kind {
         "id_card" => {
-            if value.bytes().all(|b| b.is_ascii_digit()) && (6..=8).contains(&value.len()) {
+            let digits = value.bytes().all(|b| b.is_ascii_digit());
+            if digits && (6..=8).contains(&value.len()) && !value.bytes().all(|b| b == b'0') {
                 Ok(())
             } else {
                 Err(ValidationError::InvalidFormat)

@@ -60,5 +60,7 @@ mod tests {
         );
         assert!(validate_with("V123456781", "rif").is_ok());
         assert!(validate_with("12345678", "rif").is_err());
+        // The all-zero placeholder is rejected for an explicit kind too.
+        assert!(validate_with("000000", "id_card").is_err());
     }
 }

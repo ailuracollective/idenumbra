@@ -1,6 +1,7 @@
 /// RIF prefixes and the base value each adds to the checksum: V venezolano,
-/// E extranjero, J jurídico, P pasaporte, G gobierno, C comuna (checksums like
-/// J). Edit when SENIAT issues a new letter.
+/// E extranjero, J jurídico, P pasaporte, G gobierno, C comuna (same base as
+/// J). SENIAT publishes no letter table or formula; edit when a new letter
+/// appears.
 const RIF_PREFIXES: [(u8, u32); 6] = [
     (b'V', 4),
     (b'E', 8),
