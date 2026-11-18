@@ -3,9 +3,9 @@
 Copy this table into the task report. One row per document. Fill every column;
 write `unknown` rather than leaving a cell blank.
 
-| Document | Local name / kind | Issuer | Norm (level, date) | Shape | Algorithm | Depth | Confidence | Source |
-|---|---|---|---|---|---|---|---|---|
-| National ID | cédula / `id_card` | Registro Civil | Ley X (2019, art. 4) | 10 digits | mod 10, weights 2..2, fold | full | High | https://… — checked 2026-11-17 |
+| Document | Local name / kind | Issuer | Norm (level, date) | Shape | Algorithm | Depth | Components | Confidence | Source |
+|---|---|---|---|---|---|---|---|---|---|
+| National ID | cédula / `id_card` | Registro Civil | Ley X (2019, art. 4) | 10 digits | mod 10, weights 2..2, fold | full | province (code+name), person_type, serial, check_digit | High | https://… — checked 2026-11-17 |
 
 - **Document**: the document, not the number.
 - **Local name / kind**: the name locals use and the `kind` string the crate uses
@@ -15,8 +15,10 @@ write `unknown` rather than leaving a cell blank.
 - **Shape**: length, alphabet, separators people type.
 - **Algorithm**: check digit or "none published". Not the code.
 - **Depth**: full / structure only / unsupported.
-- **Confidence**: see below.
-- **Source**: primary link with `checked YYYY-MM-DD`; put secondary and
+- **Components**: comma-separated fields with published, stable semantics, or
+  `none` / `opaque serial only`. Each must be justified and graded like the
+  algorithm. See the `## Components column` section below.
+- **Confidence**: see below.- **Source**: primary link with `checked YYYY-MM-DD`; put secondary and
   implementation links in the README, not all of them here.
 
 ## Confidence rubric
@@ -62,3 +64,32 @@ still in circulation — that decision belongs in the matrix, not in a guess mad
 while coding. Examples already documented in this repository: Costa Rica's
 cédula jurídica consecutive turning alphanumeric in late 2026, and Argentina's
 CUIT/CUIL contingency prefixes 25/26.
+
+## Components column
+
+List the fields the number encodes with published, stable semantics, as a
+comma-separated list, or an explicit `none` / `opaque serial only`. Each field
+must be justified by a source and graded in the same confidence rubric as the
+algorithm. A field whose range is not validated is not a component (it is
+unchecked structure, and must not be exposed). Examples:
+
+- Ecuador cédula: `province (code+name), person_type, serial, check_digit`.
+- Ecuador RUC (natural person): `province, taxpayer, id_card (embedded
+  cédula)`.
+- Ecuador RUC (public entity): `province, taxpayer, serial (5 digits)`.
+- Ecuador RUC (private company): `province, taxpayer` (serial omitted: 6 vs 7
+  digits cannot be split from the check digit).
+- Guatemala CUI: `correlativo (8), check_digit, department (code), municipality
+  (code)`.
+- Nicaragua cédula: `municipality (code), birth_date, serial, check_letter`.
+- Cuba carné: `birth_date (YYMMDD), century_code, serial, sex` (sex is
+  published but not a constraint, so it is returned raw).
+- Argentina DNI: `none` (no published structure beyond length).
+- Argentina CUIT: `prefix (taxpayer type), dni (8), check_digit` (prefix is
+  assigned at random, so it is returned raw and never enforced).
+- Brazil CPF: `region_code (state), base, check_digit (×2)`.
+- Brazil CNPJ: `root (8), branch (4), check_digit (×2)`.
+
+Catalogue fields (department tables, issuer prefixes, taxpayer-type digits) are
+listed here too, but become named `const`s in the crate, not free text. An
+opaque serial counter is never listed, even when its length is fixed.
