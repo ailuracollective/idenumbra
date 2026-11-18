@@ -2,7 +2,7 @@
 pub fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
     let value = value.trim();
     match kind {
-"id_card" => validate(value),
+        "id_card" => validate(value),
         "passport" => validate_passport(value),
         _ => Err(ValidationError::InvalidFormat),
     }

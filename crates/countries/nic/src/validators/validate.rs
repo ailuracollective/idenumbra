@@ -23,7 +23,9 @@ fn number(digits: &[u8]) -> u32 {
 /// Validate a Nicaraguan cédula.
 ///
 /// Layout: municipio (3) + birth date DDMMYY (6) + serial (4) + letter. The
-/// letter is the first 13 digits modulo 23, indexed in `LETTERS`.
+/// letter is the first 13 digits modulo 23, indexed in `LETTERS`. The CSE does
+/// not publish the letter rule or the municipality codes, so only the letter
+/// and the encoded birth date are checked here.
 fn validate_id_card(chars: &[u8]) -> Result<(), ValidationError> {
     if chars.len() != 14 {
         return Err(ValidationError::InvalidLength {
