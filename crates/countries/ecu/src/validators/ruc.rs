@@ -64,8 +64,8 @@ fn validate_ruc(digits: &[u8]) -> Result<(), ValidationError> {
             found: digits.len(),
         });
     }
-    if !digits.iter().all(u8::is_ascii_digit) {
-        return Err(ValidationError::NonNumeric { index: 0 });
+    if let Some(index) = digits.iter().position(|b| !b.is_ascii_digit()) {
+        return Err(ValidationError::NonNumeric { index });
     }
     let province = number(&digits[0..2]);
     if !(1..=MAX_PROVINCE_CODE).contains(&province)

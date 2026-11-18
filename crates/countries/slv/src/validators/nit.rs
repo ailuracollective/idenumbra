@@ -34,8 +34,8 @@ fn validate_nit(digits: &[u8]) -> Result<(), ValidationError> {
             found: digits.len(),
         });
     }
-    if !digits.iter().all(u8::is_ascii_digit) {
-        return Err(ValidationError::NonNumeric { index: 0 });
+    if let Some(index) = digits.iter().position(|b| !b.is_ascii_digit()) {
+        return Err(ValidationError::NonNumeric { index });
     }
     // Nationals use 0/1; 9 is used for foreigners.
     if !TAXPAYER_TYPES.contains(&digits[0]) {

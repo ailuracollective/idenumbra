@@ -16,8 +16,8 @@ fn validate_rtn(digits: &[u8]) -> Result<(), ValidationError> {
             found: digits.len(),
         });
     }
-    if !digits.iter().all(u8::is_ascii_digit) {
-        return Err(ValidationError::NonNumeric { index: 0 });
+    if let Some(index) = digits.iter().position(|b| !b.is_ascii_digit()) {
+        return Err(ValidationError::NonNumeric { index });
     }
     if all_zero(digits) {
         return Err(ValidationError::InvalidFormat);
@@ -32,8 +32,8 @@ fn validate_dni(digits: &[u8]) -> Result<(), ValidationError> {
             found: digits.len(),
         });
     }
-    if !digits.iter().all(u8::is_ascii_digit) {
-        return Err(ValidationError::NonNumeric { index: 0 });
+    if let Some(index) = digits.iter().position(|b| !b.is_ascii_digit()) {
+        return Err(ValidationError::NonNumeric { index });
     }
     if all_zero(digits) {
         return Err(ValidationError::InvalidFormat);

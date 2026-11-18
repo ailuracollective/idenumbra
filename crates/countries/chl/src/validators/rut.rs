@@ -6,8 +6,8 @@ fn validate_rut(chars: &[u8]) -> Result<(), ValidationError> {
             found: body.len(),
         });
     }
-    if !body.iter().all(u8::is_ascii_digit) {
-        return Err(ValidationError::NonNumeric { index: 0 });
+    if let Some(index) = body.iter().position(|b| !b.is_ascii_digit()) {
+        return Err(ValidationError::NonNumeric { index });
     }
     if body.iter().all(|d| *d == b'0') {
         return Err(ValidationError::InvalidFormat);

@@ -6,8 +6,8 @@ fn validate_dui(digits: &[u8]) -> Result<(), ValidationError> {
             found: digits.len(),
         });
     }
-    if !digits.iter().all(u8::is_ascii_digit) {
-        return Err(ValidationError::NonNumeric { index: 0 });
+    if let Some(index) = digits.iter().position(|b| !b.is_ascii_digit()) {
+        return Err(ValidationError::NonNumeric { index });
     }
     // A DUI made only of zeros does not exist.
     if digits.iter().all(|d| *d == b'0') {

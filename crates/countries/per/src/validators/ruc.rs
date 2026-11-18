@@ -17,8 +17,8 @@ fn validate_ruc(chars: &[u8]) -> Result<(), ValidationError> {
             found: chars.len(),
         });
     }
-    if !chars.iter().all(u8::is_ascii_digit) {
-        return Err(ValidationError::NonNumeric { index: 0 });
+    if let Some(index) = chars.iter().position(|b| !b.is_ascii_digit()) {
+        return Err(ValidationError::NonNumeric { index });
     }
     if !valid_ruc_prefix(&chars[..2]) {
         return Err(ValidationError::InvalidFormat);

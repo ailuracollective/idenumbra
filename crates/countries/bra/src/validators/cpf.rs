@@ -5,8 +5,8 @@ fn validate_cpf(chars: &[u8]) -> Result<(), ValidationError> {
             found: chars.len(),
         });
     }
-    if !chars.iter().all(u8::is_ascii_digit) {
-        return Err(ValidationError::NonNumeric { index: 0 });
+    if let Some(index) = chars.iter().position(|b| !b.is_ascii_digit()) {
+        return Err(ValidationError::NonNumeric { index });
     }
     // Repeated digits pass the arithmetic but are never issued.
     if chars.iter().all(|b| *b == chars[0]) {

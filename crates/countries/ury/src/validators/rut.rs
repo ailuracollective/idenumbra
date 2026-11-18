@@ -14,8 +14,8 @@ fn validate_rut(digits: &[u8]) -> Result<(), ValidationError> {
             found: digits.len(),
         });
     }
-    if !digits.iter().all(u8::is_ascii_digit) {
-        return Err(ValidationError::NonNumeric { index: 0 });
+    if let Some(index) = digits.iter().position(|b| !b.is_ascii_digit()) {
+        return Err(ValidationError::NonNumeric { index });
     }
     let first = (digits[0] - b'0') as u32 * 10 + (digits[1] - b'0') as u32;
     if !(1..=MAX_OFFICE_CODE).contains(&first) {
