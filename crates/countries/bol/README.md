@@ -44,10 +44,13 @@ No check digit exists for either document:
 
 ## References
 
-- **Official** — SIN/SIAT, *Generación del NIT* (NIT = CI + `01` + one random
-  digit for natural persons and unipersonals; `02` for legal persons, `04` for
-  foreigners):
-  https://siatinfo.impuestos.gob.bo/index.php/requisitos-para-la-inscripcion/conceptos-generales/generacion-del-nit
+- **Official** — SIN/SIAT, *Generación del NIT* (natural person born in Bolivia
+  and unipersonal company: NIT = CI + code `01` + "un número aleatorio del 1 al
+  9"; legal persons: the last three digits "incluyen el código `02`" + a random
+  digit; foreign natural person with foreigner CI: code `04`):
+  https://siatanexo.impuestos.gob.bo/index.php/requisitos-para-la-inscripcion/conceptos-generales/generacion-del-nit
+  — checked 2026-11-17. The page publishes neither a length range nor codes
+  `03`/`00`, and says the random digit starts at 1.
 - **Official** — SIN/SIAT, *Algoritmo Módulo 11* (the autoverifier of the CUF;
   its input string includes the NIT, it is not a NIT checksum):
   https://siatinfo.impuestos.gob.bo/index.php/facturacion-en-linea/algoritmos-utilizados/algoritmo-modulo-11

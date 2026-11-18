@@ -5,9 +5,10 @@ const NIT_MIN_LEN: usize = 9;
 const NIT_MAX_LEN: usize = 11;
 
 /// Control codes the SIN appends after the CI: `01` natural person or
-/// unipersonal company, `02` legal person, `04` foreign person; `03` also
-/// appears in the SIN's own supplier lists. Edit when the SIN publishes a new
-/// code on its "Generación del NIT" page.
+/// unipersonal company, `02` legal person, `04` foreign person (SIAT
+/// "Generación del NIT", checked 2026-11-17); `03` also appears in the SIN's
+/// own supplier lists but no SIN page documents it, so it is retained as
+/// observed data only. Edit when the SIN publishes a new code.
 const NIT_CONTROL_CODES: [u8; 4] = [1, 2, 3, 4];
 
 /// Validate the structure of a Bolivian NIT.
@@ -25,8 +26,8 @@ fn validate_nit(digits: &[u8]) -> Result<(), ValidationError> {
             found: digits.len(),
         });
     }
-    if !digits.iter().all(u8::is_ascii_digit) {
-        return Err(ValidationError::NonNumeric { index: 0 });
+    if let Some(index) = digits.iter().position(|b| !b.is_ascii_digit()) {
+        return Err(ValidationError::NonNumeric { index });
     }
     if all_zero(digits) {
         return Err(ValidationError::InvalidFormat);

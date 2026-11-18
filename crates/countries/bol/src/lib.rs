@@ -49,6 +49,10 @@ mod tests {
         assert!(validate_with("1234567029", "nit").is_ok());
         assert!(validate_with("1234567037", "nit").is_ok()); // 03
         assert!(validate_with("1234567045", "nit").is_ok());
+        // The SIAT page says the final digit is 1-9; SIN supplier lists also
+        // contain 0, so it is accepted (compatibility, not the published rule).
+        assert!(validate_with("1234567010", "nit").is_ok());
+        assert!(validate_with("123456030", "nit").is_ok()); // 03 and final 0
         assert_eq!(
             validate_with("1234567057", "nit"),
             Err(ValidationError::InvalidFormat) // undocumented code 05
