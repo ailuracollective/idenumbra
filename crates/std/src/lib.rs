@@ -61,7 +61,11 @@ type ComponentsFn = fn(&str) -> Result<Option<CountryComponents>, ValidationErro
 
 /// Country-specific parts returned by [`Idenumbra::components`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum CountryComponents {}
+pub enum CountryComponents {
+    /// Ecuador: see [`idenumbra_ecu::components`].
+    #[cfg(feature = "ecu")]
+    ECU(idenumbra_ecu::Components),
+}
 
 /// Result of a successful validation: the document kind that was validated and,
 /// when the number encodes any, its country-specific [`CountryComponents`].
@@ -83,6 +87,10 @@ fn components_registry() -> &'static BTreeMap<&'static str, ComponentsFn> {
     COMPONENTS.get_or_init(|| {
         #[allow(unused_mut)]
         let mut m: BTreeMap<&'static str, ComponentsFn> = BTreeMap::new();
+        #[cfg(feature = "ecu")]
+        m.insert("ECU", |value| {
+            idenumbra_ecu::components(value).map(|c| c.map(CountryComponents::ECU))
+        });
         m
     })
 }
@@ -153,7 +161,10 @@ fn registry() -> &'static BTreeMap<&'static str, (InferFn, TypedFn)> {
         {
             m.insert(
                 "ECU",
-                (idenumbra_ecu::validate, idenumbra_ecu::validate_with),
+                (
+                    |value| idenumbra_ecu::validate(value).map(|_| ()),
+                    |value, kind| idenumbra_ecu::validate_with(value, kind).map(|_| ()),
+                ),
             );
         }
         #[cfg(feature = "gtm")]
@@ -282,9 +293,22 @@ impl Idenumbra {
     pub fn infer(country: &str, value: &str) -> Result<Validation, ValidationError> {
         lookup(country)?.0(value)?;
         let components = Idenumbra::components(country, value)?;
-        // The kind is not reported by the country validators yet; future
-        // countries that expose components can derive it here.
-        let kind = None;
+        let kind = match components {
+            #[cfg(feature = "ecu")]
+            Some(CountryComponents::ECU(idenumbra_ecu::Components::IdCard(_))) => Some("id_card"),
+            #[cfg(feature = "ecu")]
+            Some(CountryComponents::ECU(idenumbra_ecu::Components::Ruc(_))) => Some("ruc"),
+            None => {
+                #[cfg(feature = "ecu")]
+                if country.trim().eq_ignore_ascii_case("ECU") {
+                    Some("passport")
+                } else {
+                    None
+                }
+                #[cfg(not(feature = "ecu"))]
+                None
+            }
+        };
         Ok(Validation {
             valid: true,
             kind,
@@ -374,6 +398,20 @@ mod tests {
         assert!(Idenumbra::validate("ECU", "1712345675", "ruc").is_err());
         assert!(Idenumbra::validate("ECU", "171234567-5", "id_card").is_ok());
     }
+    #[cfg(feature = "ecu")]
+    #[test]
+    fn components_ecu() {
+        match Idenumbra::components("ecu", "1712345675") {
+            Ok(Some(CountryComponents::ECU(idenumbra_ecu::Components::IdCard(card)))) => {
+                assert_eq!(card.province.code, 17);
+                assert_eq!(card.check_digit, 5);
+            }
+            other => panic!("expected a cédula, got {other:?}"),
+        }
+        assert_eq!(Idenumbra::components("ECU", "A123456"), Ok(None));
+        assert!(Idenumbra::components("ECU", "1712345676").is_err());
+    }
+
     #[cfg(feature = "arg")]
     #[test]
     fn validate_arg_typed() {
