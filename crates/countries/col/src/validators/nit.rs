@@ -1,9 +1,11 @@
 /// DIAN NIT check digit: modulo 11 with prime weights from the right.
 ///
-/// Orden Administrativa 4/1989 (annex 3) publishes weights for a 9-digit body;
-/// the 10th and 11th (43, 47) cover natural persons whose NIT is their cédula
-/// or the 11-digit civil registry number, and are the continuation every
-/// implementation uses.
+/// Orden Administrativa 4/1989 (annex 3) publishes the weights for a 9-digit
+/// body; the 10th and 11th (43, 47) cover natural persons whose NIT is their
+/// cédula or the 11-digit civil registry number, and are the continuation every
+/// implementation uses. Bodies of 12 or more digits are rejected: the DIAN
+/// publishes nothing longer, and the 15-prime table some implementations carry
+/// (padding the NIT to 15 digits) has no official source.
 fn validate_nit(digits: &[u8]) -> Result<(), ValidationError> {
     if !(2..=12).contains(&digits.len()) {
         return Err(ValidationError::InvalidLength {

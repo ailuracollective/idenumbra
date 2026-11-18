@@ -67,11 +67,22 @@ mod tests {
         assert!(validate_with("123456788", "nit").is_ok());
         assert!(validate_with("10987654329", "nit").is_ok());
         assert!(validate_with("10987654328", "nit").is_err());
+        // The longest body the DIAN describes: an 11-digit civil registry
+        // number, 12 digits with the check digit.
+        assert!(validate_with("109876543214", "nit").is_ok());
+        assert_eq!(
+            validate_with("109876543215", "nit"),
+            Err(ValidationError::CheckDigitMismatch {
+                expected: 4,
+                received: 5
+            })
+        );
     }
 
     #[test]
     fn rejects_bad_lengths() {
         assert!(validate("12345").is_err());
         assert!(validate("12345678901").is_err());
+        assert!(validate_with("1234567890123", "nit").is_err()); // 13 digits
     }
 }
