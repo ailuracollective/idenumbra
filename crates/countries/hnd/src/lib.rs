@@ -46,9 +46,11 @@ mod tests {
         // The SAR does not publish the RTN verifier algorithm: the last digit
         // is not checked.
         assert!(validate("12345678901231").is_ok());
+        assert!(validate("12345678901239").is_ok());
         assert!(validate("123456789012").is_err());
         assert!(validate("0000000000000").is_err());
         assert!(validate("00000000000000").is_err());
         assert!(validate_with("1234567890123", "rtn").is_err());
+        assert!(validate_with("12345678901230", "dni").is_err());
     }
 }

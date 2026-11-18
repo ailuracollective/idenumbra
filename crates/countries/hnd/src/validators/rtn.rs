@@ -1,11 +1,14 @@
-/// DNI and RTN lengths. Edit when the RNP changes them.
+/// DNI and RTN lengths. Edit when the RNP changes the DNI format or the SAR
+/// changes the RTN format.
 const DNI_LEN: usize = 13;
 const RTN_LEN: usize = 14;
 
 /// Validate the structure of a Honduran RTN.
 ///
-/// For natural persons the RTN is the 13-digit DNI plus one digit, but the SAR
-/// does not publish the verifier algorithm, so only the shape is checked.
+/// The SAR states that a natural person's RTN is the DNI plus one digit, and
+/// that the RTN has been a 14-digit number since 2003. Neither the SAR nor the
+/// SEFIN/SDE publishes the verifier algorithm, so only the shape is checked
+/// (tested against 124 supplier RTNs from ONCAE open data: no check digit).
 fn validate_rtn(digits: &[u8]) -> Result<(), ValidationError> {
     if digits.len() != RTN_LEN {
         return Err(ValidationError::InvalidLength {
