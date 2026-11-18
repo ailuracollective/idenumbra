@@ -48,6 +48,19 @@ mod tests {
     }
 
     #[test]
+    fn century_digit_selects_the_century() {
+        // The 7th digit is a century marker: 9 = 18xx, 0-5 = 19xx, 6-8 = 20xx.
+        assert!(validate("01010190000").is_ok()); // 1801-01-01
+        assert!(validate("01010100000").is_ok()); // 1901-01-01
+        assert!(validate("99123150000").is_ok()); // 1999-12-31, 19xx with 5
+        assert!(validate("01010160000").is_ok()); // 2001-01-01
+        assert!(validate("99123180000").is_ok()); // 2099-12-31, 20xx with 8
+
+        // 1800 was not a leap year.
+        assert!(validate("00022990000").is_err());
+    }
+
+    #[test]
     fn sex_digit_constrains_nothing() {
         // 10th digit: even = male, odd = female. Both are valid digits, so the
         // position cannot reject anything without the person's registered sex.

@@ -22,6 +22,8 @@ fn validate_passport(value: &str) -> Result<(), ValidationError> {
 /// serial (2) + sex (1) + control digit. The control digit algorithm is not
 /// public, so only the encoded birth date is checked here.
 ///
+/// The 7th digit marks the century, it is not a range check on the two year
+/// digits: 19xx numbers use 0-5 for any year (1972 -> 0, 1991 -> 2, 1999 -> 5).
 /// The sex digit (10th) is even for men and odd for women. Every digit is even
 /// or odd, so it constrains nothing: without the person's sex there is no way
 /// to reject a number on that position, and the MININT reassigns the number
@@ -36,7 +38,7 @@ fn validate_id_card(digits: &[u8]) -> Result<(), ValidationError> {
     let yy = number(&digits[0..2]);
     let month = number(&digits[2..4]);
     let day = number(&digits[4..6]);
-    // 7th digit: 9 = 18xx, 0-5 = 19xx, 6-8 = 21st.
+    // 7th digit: 9 = 18xx, 0-5 = 19xx, 6-8 = 20xx.
     let century = digits[6] - b'0';
     let year = (if century == CENTURY_19TH {
         1800
