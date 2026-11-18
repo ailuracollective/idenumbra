@@ -49,11 +49,20 @@ only the current table applies (see the evidence below).
   material: the emitter NIT field is numeric with a length of 14 or 9 digits:
   https://www.taiia.gob.sv/wp-content/uploads/2023/03/FE-TAIIA-v2-28-03-2023-con-videos.pdf
   — checked 2026-11-17.
+- **Official (blocked)** — Ministerio de Hacienda, *Inscripción, modificación o
+  reposición de tarjeta de sociedades por acciones simplificadas (SAS)*: returns
+  HTTP 403 to automated requests, so it was not read. Even if opened it would
+  confirm validity of previously assigned physical NITs, not the checksum:
+  https://www.mh.gob.sv/servicios/inscripcion-modificacion-o-reposicion-de-tarjeta-de-sociedades-por-acciones-simplificadas-sas-en-los-registros-de-nit-e-iva/
+  — attempted 2026-11-17, blocked
 - **Implementation** — python-stdnum `sv.nit` (first digit `0`/`1`/`9`, both
   weight tables and the `<= 100` cut-off; DGII publishes none of it):
   https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/sv/nit.py
 - **Implementation** — https://github.com/avalon-tech/idsv-js (DUI weights and
   the DUI-as-NIT rule).
+- **Implementation** — https://github.com/batressc/Batressc.DocumentValidators
+  (`NITValidator.cs`: the same two weight tables and the `<= 100` cut-off, but
+  only one table per number — no dual acceptance in the unobserved band).
 - **Evidence** — 395 distinct 14-digit numbers were taken from Salvadoran
   government supplier and procurement PDFs, collected in
   https://github.com/arthurdejong/python-stdnum/issues/133 and re-checked
@@ -68,7 +77,11 @@ only the current table applies (see the evidence below).
 
 DGII publishes neither the NIT nor the DUI check-digit algorithm, so both are
 reverse-engineered from public implementations and sample numbers, not from a
-specification.
+specification. No official NIT generation or checksum specification was found
+(searched 2026-11-17). The Ministry's 2026 SAS registration service would only
+confirm that previously assigned physical NITs remain valid; it could not be
+opened in this session (HTTP 403) and in any case would not be evidence for the
+weights or the correlative cut-off.
 
 Official links were opened on 2026-11-17; the implementation links are public
 cross-checks, not dated.

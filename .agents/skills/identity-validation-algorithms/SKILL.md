@@ -32,14 +32,19 @@ No file layout and no Rust: hand the specification to
 1. **Write down current behaviour first.** Read the crate's `validators/` and
    README. Distinguish "the code does X" from "the source says X"; the gap is
    usually the bug.
-2. **Normalize.** Trim in every public entry point. Accept only the separators
+2. **Normalize.** Trim in every public entry point. Follow the issuing agency's
+   own *depuración* rules where it publishes them: SAT removes spaces and dots
+   from the NIT and the CUI and a hyphen before the check character, so the
+   printed `AAAA BBBBB CCCC` form must be accepted. Accept only the separators
    the document really is written with (dots in ARG DNI, hyphens in ARG
    CUIT, a hyphen right before ECU's last digit, dots/hyphens/spaces in CRI), and
    reject the nearby ones. Decide this before counting characters, and make the
    error index point at the byte the user actually typed.
 3. **Fix the shape.** Lengths in use today *and* legacy lengths still in
    circulation. Character set per document. Reject all-zero placeholders
-   explicitly: they are never issued.
+   explicitly: they are never issued. Keep each document's shape rules its own:
+   a leading-zero ban or length stated for one document does not transfer to a
+   sibling that the same annex describes differently.
 4. **Check structural fields.** Region/province/municipality codes against the
    published table; encoded dates as real calendar dates (month 1-12, day valid
    for that month and year). Treat century ambiguity as a documented limitation,

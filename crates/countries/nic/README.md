@@ -14,11 +14,14 @@ Nicaragua identification validator.
 Cédula. Layout: `municipio(3) + birth date DDMMYY(6) + serial(4) + letter`. The
 law (Ley 152, art. 31) defines the 13 digits as the municipality code, the birth
 date and four progressive digits; the final check letter is not mentioned there
-and is not part of the legal number. As in the independent validators, the letter
-is the 13-digit number modulo 23, indexed in `ABCDEFGHJKLMNPQRSTUVWXY` (23
-letters, no `I`, `O` or `Z`), and the encoded birth date must be a real calendar
-date. Years are read as `20YY`, which only misjudges 29 February 1900. Hyphens
-and spaces are ignored.
+and is not part of the legal number. The letter rule is **community-derived**:
+the CSE publishes no check-character algorithm, so the rule below is taken from
+independent validators and from the arithmetic they agree on, not from an
+official specification. As in those validators, the letter is the 13-digit
+number modulo 23, indexed in `ABCDEFGHJKLMNPQRSTUVWXY` (23 letters, no `I`, `O`
+or `Z`), and the encoded birth date must be a real calendar date. Years are read
+as `20YY`, which only misjudges 29 February 1900. Hyphens and spaces are
+ignored.
 
 Pasaporte. Only the shape is checked: 6–12 ASCII alphanumerics. No issuing
 agency publishes a passport-number algorithm, so nothing else is verifiable.
@@ -73,6 +76,15 @@ Implementations (cross-checks, not authority):
   https://www.roderickzapata.com/herramientas/codigo-cedula-municipio-nicaragua/
   (2026-10-22, 153 codes plus 888) and
   https://es.scribd.com/document/748003621/CODIGO-MUNICIPALES-CEDULA-DE-IDENTIDAD-docx
+- https://github.com/berroteran/valida-Cedula-nicaragua (JS: `mod 23` over the
+  13 digits with the same 23-letter alphabet, no municipality check)
+- https://github.com/bnorvinjosue/cedula-nicaragua-validator (JS: same letter
+  rule and a date check that accepts 29 February in every year; no municipality
+  check)
+- https://github.com/johs7/validador-cedula-nicaragua (TS: validates the
+  municipality against a 154-code map without `888` and reads `YY < 30` as
+  20YY, but **does not check the letter at all** — the opposite trade-off; not
+  followed)
 
 The CSE publishes neither the modulo-23 letter rule nor the municipality codes.
 The letter is implemented by independent validators and matches the CSE's own

@@ -40,9 +40,19 @@ SAT generic RFCs `XAXX010101000` and `XEXX010101000` are accepted as-is.
 - **Official** — DOF 23/10/1996, Acuerdo with the CURP structure and the Anexo I
   state table (`QT` for Querétaro is called out explicitly, to avoid confusion
   with `QR` Quintana Roo): https://dof.gob.mx/nota_detalle.php?codigo=4903440&fecha=23/10/1996
+- **Official** — DOF 13/06/2018, *Instructivo Normativo para la asignación de la
+  CURP* (base text; position 11 = "H para hombre y M para mujer", position 17 =
+  `0-9` hasta 1999 / `A-J` desde 2000, position 18 = verification digit):
+  https://dof.gob.mx/nota_detalle_popup.php?codigo=5526717 — checked 2026-11-17
 - **Official** — SEGOB, *Instructivo Normativo para la asignación de la CURP*
-  (DOF 18/10/2021), positions 1-18, `NE`, and the 0-9 / A-J century
-  differentiator: https://www.gob.mx/cms/uploads/attachment/file/337251/Instructivo_Normativo_para_la_Asignacion_de_la_CURP.pdf
+  (DOF 18/10/2021, consolidated text), positions 1-18, `NE`, and the 0-9 / A-J
+  century differentiator: https://www.gob.mx/cms/uploads/attachment/file/337251/Instructivo_Normativo_para_la_Asignacion_de_la_CURP.pdf
+- **Official** — SEGOB, *Memoria Documental 2018-2024, Política de Registro de
+  Población*: records the "No Binario" option and the `X` "en la posición número
+  11 de la CURP, correspondiente al sexo":
+  https://www.gob.mx/cms/uploads/attachment/file/944642/3_MD_POL_TICA_DE_REGISTRO_DE_POBLACI_N_compressed.pdf
+  — checked 2026-11-17 (the PDF is image-heavy; the quoted sentence was read
+  through the search index)
 - **Official** — RENAPO, *Reglas para la ejecución de los procedimientos para la
   asignación de la CURP* (22/10/2021), character 17: 0-9 up to 1999, A-J from
   2000: https://www.gob.mx/cms/uploads/attachment/file/681698/reglas_para_la_ejecucion_de_los_procedimientos_asignacion_de_la_curp.pdf

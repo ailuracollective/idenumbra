@@ -95,8 +95,43 @@ No code, no README rewrite, no opinion about Rust. Hand the verified rows to
   projects can point at an algorithm; they cannot make it official. If a rule
   exists only in a library, it is Low confidence and not enough for a check
   digit.
+- **Survey implementations when a rule is blocked.** Three independent packages
+  agreeing on a shape (the Guatemalan CUI department table, the Nicaraguan
+  mod-23 letter) is useful evidence that no other interpretation is in
+  circulation, and it can show the rule is not implementable with your inputs
+  (the Panamanian RUC DV needs the taxpayer type). Record what they do, label
+  them third-party, and never let consensus promote a rule to official.
 - **Never fill a missing algorithm.** "The agency does not publish a check digit"
   is a finding. Report structure-only instead of inventing weights.
+- **Delegated tables: follow the delegation.** When a law says a code, format or
+  exception is "según lo establezca" an agency's directorate (RENAP for the
+  Guatemalan CUI, DGT for the Costa Rican NITE), the law settles the *shape* and
+  the agency's acuerdo, circular or technical annex settles the *values*. Find
+  that instrument before deciding a code cannot exist, and cite the instrument,
+  not only the law. If it is unpublished, say so; never invent a special code or
+  accept every unknown one to be safe.
+- **An identifier is not its representation.** Zero padding, a 12-character
+  reporting field, an invoice key, a database column or a concatenated type code
+  is a format the *consumer* uses. The canonical number is the one the issuer's
+  own document format defines; when two agency documents disagree (for example a
+  municipal reporting annex saying "NITE 12 caracteres (10 y 2 verificadores)"
+  against the tax authority's "10 dígitos" plus zero padding), prefer the one
+  scoped to the identifier, quote both, and mark the conflict unresolved.
+- **Per-document rules stay per document.** A leading-zero ban, a length or an
+  alphabet stated for one document in a shared annex (cédula física, DIMEX) does
+  not extend to another (NITE) that the same annex describes without it.
+- **A search-index snippet is not the document.** If the PDF is scanned and the
+  text cannot be read, the indexed line is *official secondary*: label it that
+  way, cite what was read, and keep the rule out of "officially verified".
+- **Blocked is not unpublished.** A Cloudflare challenge, a `403` or a scan is an
+  access problem, not a finding that the agency publishes nothing. Try a
+  text-extraction proxy (for example `https://r.jina.ai/<url>`), the agency's
+  alternate host, or a legal gazette copy; cite the official URL and say how the
+  text was obtained. Only after those fail may the rule be called unavailable.
+- **Read the depuration section.** Tax and registry annexes often specify how to
+  clean what the user types (spaces, dots, a hyphen before the check character,
+  lowercase `k`). That section decides what the validator must accept, and a
+  printed identifier such as `AAAA BBBBB CCCC` is only accepted if it is applied.
 - **Quote the operative sentence** in the matrix or README when the wording
   decides a rule (for example "the check digit applies while the sequential has
   up to six digits"). Paraphrase loses the condition.
