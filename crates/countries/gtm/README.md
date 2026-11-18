@@ -26,9 +26,9 @@ would be a false negative (about one body in eleven).
 
 The annex also allows a CUI of 12 digits (§5.1.4.1): the same layout with the
 correlativo's leading zero dropped. `validate_with("cui" | "dpi")` accepts it by
-left-padding that zero. `validate` cannot infer it, because a 12-digit number is
-also a valid NIT shape, so it is checked as a NIT; pass the kind when the value
-is a CUI.
+left-padding that zero. A 12-digit number is also a valid NIT shape, so
+`validate` tries the more specific CUI layout first and falls back to the NIT
+rule.
 
 The department must be `01-22` and the municipality must exist for that
 department (`01` up to the department's count). §5.1.5 puts the department
@@ -173,10 +173,11 @@ company. They were generated locally with this crate's validation algorithm.
 - Country code (ISO 3166-1 alpha-3): `GTM`.
 - Lazy loading: only compiled when the corresponding Cargo feature is enabled.
 - `validate_with("cui" | "dpi" | "nit" | "passport")` forces the document type.
-  `validate` infers: 13 digits are a CUI; 2-12 digits, a hyphen before the check
-  character or a final `K` are a NIT; anything else alphanumeric is a passport.
+  `validate` infers: 13 digits are a CUI; 12 digits are tried as a CUI and then
+  as a NIT; other 2-12 digit values, a hyphen before the check character or a
+  final `K` are a NIT; anything else alphanumeric is a passport.
 - What is not validated: whether the CUI exists in RENAP's registry, and the
   literal department/municipality of people registered abroad or naturalised,
   whose last four digits may follow their place of registration rather than the
-  place of birth. The 12-digit CUI needs the explicit kind, since its shape
-  collides with the NIT.
+  place of birth. The 12-digit CUI shares its shape with the NIT; inference
+  tries the CUI layout first.

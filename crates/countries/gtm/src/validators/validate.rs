@@ -38,12 +38,14 @@ pub fn validate(value: &str) -> Result<(), ValidationError> {
     }
     let bytes = value.as_bytes();
     if bytes.iter().all(u8::is_ascii_digit) {
-        // A 12-digit CUI (a correlativo that lost its leading zero) shares the
-        // 2-12 digit NIT shape; only `validate_with(.., "cui")` tells them apart.
-        return if bytes.len() == 13 {
-            validate_cui(bytes)
-        } else {
-            validate_nit(bytes)
+        // SAT §5.1.4.1: a CUI has 12 or 13 digits. A 12-digit CUI (a
+        // correlativo that lost its leading zero) shares the 2-12 digit NIT
+        // shape, so try the more specific CUI layout first and fall back to
+        // the NIT rule.
+        return match bytes.len() {
+            13 => validate_cui(bytes),
+            12 => validate_cui(bytes).or_else(|_| validate_nit(bytes)),
+            _ => validate_nit(bytes),
         };
     }
     // SAT §5.1.1(d): the printed NIT keeps a hyphen before the check character.

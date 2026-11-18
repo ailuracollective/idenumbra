@@ -105,9 +105,9 @@ mod tests {
         );
         // Escuintla has 14 municipalities.
         assert!(validate_with("123456790515", "cui").is_err());
-        // Depth: a 12-digit value is only a CUI when the kind says so, since it
-        // shares the NIT shape.
-        assert!(validate("123456790101").is_err());
+        // The 12-digit form is a CUI in circulation: inference tries the CUI
+        // layout first and falls back to the NIT rule.
+        assert!(validate("123456790101").is_ok());
     }
 
     #[test]
