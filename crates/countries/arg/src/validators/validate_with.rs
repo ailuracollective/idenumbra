@@ -5,11 +5,7 @@ pub fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
         "dni" => {
             let mut buf = [0u8; 11];
             let n = compact_digits(value, &mut buf)?;
-            if n == 7 || n == 8 {
-                Ok(())
-            } else {
-                Err(ValidationError::InvalidFormat)
-            }
+            validate_dni(&buf[..n])
         }
         "cuit" | "cuil" => {
             let mut buf = [0u8; 11];

@@ -18,6 +18,20 @@ fn compact_digits(value: &str, buf: &mut [u8]) -> Result<usize, ValidationError>
     Ok(n)
 }
 
+/// DNI: 7-8 digits, no check digit; all-zero placeholders are never issued.
+fn validate_dni(digits: &[u8]) -> Result<(), ValidationError> {
+    if !(7..=8).contains(&digits.len()) {
+        return Err(ValidationError::InvalidLength {
+            expected: 8,
+            found: digits.len(),
+        });
+    }
+    if digits.iter().all(|d| *d == b'0') {
+        return Err(ValidationError::InvalidFormat);
+    }
+    Ok(())
+}
+
 /// Validate an Argentine identification number (DNI or CUIT/CUIL).
 pub fn validate(value: &str) -> Result<(), ValidationError> {
     let value = value.trim();
@@ -27,12 +41,7 @@ pub fn validate(value: &str) -> Result<(), ValidationError> {
     let mut buf = [0u8; 11];
     let n = compact_digits(value, &mut buf)?;
     match n {
-        7 | 8 => {
-            if buf[..n].iter().all(|d| *d == b'0') {
-                return Err(ValidationError::InvalidFormat);
-            }
-            Ok(()) // DNI
-        }
+        7 | 8 => validate_dni(&buf[..n]),
         11 => validate_cuit(&buf[..11]),
         _ => Err(ValidationError::InvalidLength {
             expected: 8,

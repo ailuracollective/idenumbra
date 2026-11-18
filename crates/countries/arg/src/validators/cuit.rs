@@ -1,6 +1,7 @@
-// AFIP/ARCA prefixes (20/23/24/25/26/27 for people, 30/33/34 companies,
-// 50/51/55 foreign) are not enforced: since 2026 ARCA assigns the prefix
-// randomly to new CUIT/CUIL numbers, so only the check digit is reliable.
+// The type prefix is not enforced: RG Conjunta AFIP-ANSES 5007/2021 (BO
+// 10/06/2021) assigns 20/23/24/27, "or those determined in the future", at
+// random to new CUIT/CUIL numbers, and 25/26 are contingency prefixes. Only the
+// check digit is reliable.
 fn validate_cuit(digits: &[u8]) -> Result<(), ValidationError> {
     if digits.len() != 11 {
         return Err(ValidationError::InvalidLength {

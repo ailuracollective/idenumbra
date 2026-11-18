@@ -69,5 +69,7 @@ mod tests {
         assert!(validate_with("12345678", "cuit").is_err());
         assert!(validate_with("20-12345678-6", "cuil").is_ok());
         assert!(validate_with("12345678", "passport").is_err());
+        // The all-zero placeholder is rejected for an explicit kind too.
+        assert!(validate_with("0000000", "dni").is_err());
     }
 }
