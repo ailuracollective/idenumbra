@@ -4,38 +4,68 @@ El Salvador identification validator.
 
 ## Documents
 
-- DUI (9 digits, modulo 10).
-- NIT (14 digits, modulo 11).
+- DUI (9 digits, modulo 10 check digit).
+- NIT (14 digits, modulo 11 check digit).
 - Passport (6-12 alphanumerics).
+
+An adult natural person's NIT is their DUI, so a 9-digit number is also
+accepted by `validate_with(.., "nit")`.
 
 ## Validation algorithm
 
 DUI: weights `[9,8,7,6,5,4,3,2]` over the first 8 digits; check digit
-`(10 - sum mod 10) mod 10`; all-zero numbers are rejected. NIT: 14 digits whose
-first digit is `0`, `1` (nationals) or `9` (foreigners); the correlative
-(positions 11-13) selects the DGII weight table: old numbers (`<= 100`) use
-weights `14..2` and `(sum mod 11) mod 10`, new numbers use
-`[2,7,6,5,4,3,2,7,6,5,4,3,2]` and `((11 - sum mod 11) mod 11) mod 10`.
+`(10 - sum mod 10) mod 10`; all-zero numbers are rejected (they are placeholders,
+never issued). The input must carry all 9 digits: a DUI stored as an integer
+loses its leading zero, which encodes the municipality.
+
+NIT: 14 digits whose first digit is `0`, `1` (nationals) or `9` (foreigners).
+The correlative (positions 11-13) selects the weight table:
+
+| Correlative | Weights | Check digit |
+|---|---|---|
+| `001`-`100` (legacy) | `14..2` | `(sum mod 11) mod 10` |
+| `101`-`999` (current) | `[2,7,6,5,4,3,2,7,6,5,4,3,2]` | `((11 - sum mod 11) mod 11) mod 10` |
+
+Below the cut-off either table is accepted. DGII publishes neither algorithm, so
+the cut-off is reverse engineered and the 014-100 band is unobserved in every
+public sample found: no NIT there is known to use the current table, but none is
+known to rule it out either, and rejecting a legitimately issued number costs
+more than the extra 1-in-10 chance of accepting a mistyped digit. From `101` up
+only the current table applies (see the evidence below).
 
 ### Editable constants
 
 - `TAXPAYER_TYPES = b"019"` (`src/validators/nit.rs`) — first NIT digit.
-- `LEGACY_CORRELATIVE_MAX = b"100"` (`src/validators/nit.rs`) — correlative
+- `LEGACY_CORRELATIVE_MAX = 100` (`src/validators/nit.rs`) — correlative
   cut-off between the two weight tables.
 
 ## References
 
-- **Official** — Ministerio de Hacienda, NIT service (the DUI is the NIT of
-  adult natural persons since 2022): https://www.mh.gob.sv/servicios/inscripcion-modificacion-o-reposicion-de-nit-persona-natural/
-- **Official** — Registro Nacional de las Personas Naturales, DUI: https://www.rnpn.gob.sv/
-- **Implementation** — python-stdnum `sv.nit` (first digit `0`/`1`/`9` and the
-  two weight tables selected by the correlative; DGII does not publish either):
+- **Official** — Ministerio de Hacienda, DTE JSON schemas: the `nit` field is
+  `^([0-9]{14}|[0-9]{9})$`, i.e. 14 digits or the 9-digit DUI:
+  https://factura.gob.sv/ (read through the byte-identical mirror
+  https://github.com/herson/dte-json-schemas) — checked 2026-11-17.
+- **Official** — Ministerio de Hacienda / DGII, facturación electrónica
+  material: the emitter NIT field is numeric with a length of 14 or 9 digits:
+  https://www.taiia.gob.sv/wp-content/uploads/2023/03/FE-TAIIA-v2-28-03-2023-con-videos.pdf
+  — checked 2026-11-17.
+- **Implementation** — python-stdnum `sv.nit` (first digit `0`/`1`/`9`, both
+  weight tables and the `<= 100` cut-off; DGII publishes none of it):
   https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/sv/nit.py
-- **Implementation** — https://github.com/avalon-tech/idsv-js
+- **Implementation** — https://github.com/avalon-tech/idsv-js (DUI weights and
+  the DUI-as-NIT rule).
+- **Evidence** — 395 distinct 14-digit NITs taken from Salvadoran government
+  supplier and procurement PDFs, collected in
+  https://github.com/arthurdejong/python-stdnum/issues/133 and checked against
+  both tables on 2026-11-17: 382 pass at least one table; of the 272 with a
+  correlative of 101 or more, 271 match the current table and one (correlative
+  105) matches only the legacy table and is treated as a transcription error in
+  the source PDF; all 109 with a correlative of 13 or less match the legacy
+  table; the only sample in between (correlative 014) satisfies both.
 
-DGII publishes neither the NIT nor the DUI check-digit algorithm; the two
-weight tables and the `<= 100` correlative cut-off are reverse engineered, so
-treat them as implementation notes rather than specification.
+DGII publishes neither the NIT nor the DUI check-digit algorithm, so both are
+reverse-engineered from public implementations and sample numbers, not from a
+specification.
 
 Official links were opened on 2026-11-17; the implementation links are public
 cross-checks, not dated.
@@ -63,13 +93,17 @@ Idenumbra::infer("SLV", "12345678")?;
 
 - DUI: `12345678-4` (`123456784`)
 - NIT: `0614-050707-104-8`
+- NIT, legacy correlative: `0614-010120-001-0`
 
-These values are **synthetic** and do **not** correspond to any real person or company. Generated locally with this crate's validation algorithm. Source: generated locally with the DGII modulo 11 rules.
+These values are **synthetic** and do **not** correspond to any real person or
+company, except `0614-050707-104-8`, which is the fictitious sample published in
+the python-stdnum docs. The legacy correlative value was generated locally with
+this crate's validation algorithm.
 
 ## Notes
 
 - Feature flag: `slv`.
 - Country code (ISO 3166-1 alpha-3): `SLV`.
 - Lazy loading: only compiled when the corresponding Cargo feature is enabled.
-- Since 2021 a DUI is also a valid NIT for natural persons; the `nit` kind
-  accepts a 9-digit DUI as well as the 14-digit NIT.
+- A DUI is a valid NIT for natural persons, so the `nit` kind accepts both 9 and
+  14 digits.

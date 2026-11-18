@@ -48,6 +48,29 @@ mod tests {
     }
 
     #[test]
+    fn accepts_both_nit_tables_for_legacy_correlatives() {
+        // Correlative 001: the legacy table gives 0 and the current one 7.
+        // The 014-100 band is unobserved in public samples, so either passes.
+        assert!(validate("0614-010120-001-0").is_ok());
+        assert!(validate("0614-010120-001-7").is_ok());
+    }
+
+    #[test]
+    fn uses_only_the_current_table_above_the_cut_off() {
+        // Correlative 200: the current table gives 1; the legacy 5 is not
+        // accepted, because every public sample with a correlative of 101 or
+        // more follows the current table.
+        assert!(validate("0614-010120-200-1").is_ok());
+        assert_eq!(
+            validate("0614-010120-200-5"),
+            Err(ValidationError::CheckDigitMismatch {
+                expected: 1,
+                received: 5
+            })
+        );
+    }
+
+    #[test]
     fn rejects_bad_check_digits() {
         assert_eq!(
             validate("123456785"),

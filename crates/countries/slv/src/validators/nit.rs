@@ -3,7 +3,28 @@
 const TAXPAYER_TYPES: &[u8] = b"019";
 
 /// Correlatives up to and including this value use the legacy weight table.
-const LEGACY_CORRELATIVE_MAX: &[u8] = b"100";
+const LEGACY_CORRELATIVE_MAX: u32 = 100;
+
+/// Legacy table: weights 14..2, digit `(sum mod 11) mod 10`.
+fn legacy_check_digit(digits: &[u8]) -> u32 {
+    const WEIGHTS: [u32; 13] = [14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
+    let mut total = 0u32;
+    for (d, w) in digits[..13].iter().zip(WEIGHTS) {
+        total += (d - b'0') as u32 * w;
+    }
+    (total % 11) % 10
+}
+
+/// Current table: weights `2,7,6,5,4,3,2` repeated, digit `(11 - sum mod 11)`
+/// with 10 and 11 collapsing to 0.
+fn current_check_digit(digits: &[u8]) -> u32 {
+    const WEIGHTS: [u32; 13] = [2, 7, 6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+    let mut total = 0u32;
+    for (d, w) in digits[..13].iter().zip(WEIGHTS) {
+        total += (d - b'0') as u32 * w;
+    }
+    ((11 - total % 11) % 11) % 10
+}
 
 /// NIT check digit: modulo 11, with a different weight set for old numbers.
 fn validate_nit(digits: &[u8]) -> Result<(), ValidationError> {
@@ -23,26 +44,21 @@ fn validate_nit(digits: &[u8]) -> Result<(), ValidationError> {
     if digits.iter().all(|d| *d == b'0') {
         return Err(ValidationError::InvalidFormat);
     }
-    // The correlative decides which weight table applies (DGII rule).
-    let old = &digits[10..13] <= LEGACY_CORRELATIVE_MAX;
-    let old_weights = [14u32, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
-    let new_weights = [2u32, 7, 6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
-    let weights: &[u32] = if old { &old_weights } else { &new_weights };
-    let mut total = 0u32;
-    for (d, w) in digits[..13].iter().zip(weights) {
-        total += (d - b'0') as u32 * w;
-    }
-    let computed = if old {
-        (total % 11) % 10
-    } else {
-        ((11 - total % 11) % 11) % 10
-    };
+    // The correlative (positions 11-13) selects the weight table. The cut-off
+    // is reverse engineered: see the README for the public samples behind it.
+    let correlative = (digits[10] - b'0') as u32 * 100
+        + (digits[11] - b'0') as u32 * 10
+        + (digits[12] - b'0') as u32;
+    let legacy_correlative = correlative <= LEGACY_CORRELATIVE_MAX;
+    let legacy = legacy_check_digit(digits);
+    let current = current_check_digit(digits);
+    let expected = if legacy_correlative { legacy } else { current };
     let received = (digits[13] - b'0') as u32;
-    if computed != received {
-        return Err(ValidationError::CheckDigitMismatch {
-            expected: computed,
-            received,
-        });
+    // Every public sample with a correlative of 101 or more uses the current
+    // table, but the 014-100 band is unobserved, so either table is accepted
+    // there instead of rejecting numbers that may be legitimately issued.
+    if received == expected || (legacy_correlative && received == current) {
+        return Ok(());
     }
-    Ok(())
+    Err(ValidationError::CheckDigitMismatch { expected, received })
 }
