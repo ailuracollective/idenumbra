@@ -26,10 +26,11 @@ pub struct IdenumbraECU;
 
 impl Validator for IdenumbraECU {
     const COUNTRY: &'static str = COUNTRY;
-    fn validate(value: &str) -> Result<(), ValidationError> {
+    type Validation = ();
+    fn validate(value: &str) -> Result<Self::Validation, ValidationError> {
         validate(value)
     }
-    fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
+    fn validate_with(value: &str, kind: &str) -> Result<Self::Validation, ValidationError> {
         crate::validate_with(value, kind)
     }
 }

@@ -22,6 +22,7 @@ pub struct IdenumbraBRA;
 
 impl Validator for IdenumbraBRA {
     const COUNTRY: &'static str = COUNTRY;
+    type Validation = ();
     fn validate(value: &str) -> Result<(), ValidationError> {
         validate(value)
     }
