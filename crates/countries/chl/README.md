@@ -9,16 +9,26 @@ Chile identification validator.
 ## Validation algorithm
 
 RUT/RUN: modulo 11 with weights 2..7 cycling from the right; check digit
-`11 - (sum mod 11)`, where `11 -> 0` and `10 -> K`. Dots, hyphens and spaces
-are ignored; lowercase `k` is accepted.
+`11 - (sum mod 11)`, where `11 -> 0` and `10 -> K`. A 1-8 digit body plus one
+check character, so 2-9 characters once compacted. Dots, hyphens and spaces are
+ignored; lowercase `k` is accepted. All-zero bodies are rejected as placeholders.
 
 ## References
 
-- https://www.sii.cl/preguntas_frecuentes/catastro/001_012_5548.htm — checked 2026-11-17
-- https://es.wikipedia.org/wiki/Rol_%C3%9Anico_Tributario — checked 2026-11-17
+- https://www.sii.cl/declaraciones_juradas/ingreso_upload_f3500.html — checked 2026-11-17
+  (official SII layout: "Rut Declarante debe cumplir Modulo 11", "Dígito
+  verificador ... Módulo 11")
+- https://www.sii.cl/preguntas_frecuentes/preguntas_generales/001_430_5071.htm — checked 2026-11-17
+  (official SII FAQ on the "Dígito Verificador Erróneo" message; updated
+  20/10/2025)
+- https://www.sii.cl/factura_electronica/factura_mercado/formato_boleta_electronica.pdf — checked 2026-11-17
+  (official RUT field format: digits plus a check character 0-9 or K)
 - https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/cl/rut.py — checked 2026-11-17
+  (cross-check; the SII states that a "módulo 11" check exists but does not
+  publish the weights, which are the long-standing public specification)
 
-The SII does not publish the check-digit algorithm; it is the long-standing public specification, cross-checked against python-stdnum.
+`66.666.666-6`, the generic RUT the SII requires on boletas without a customer
+RUT, passes this validator (its digit is correct); it identifies no person.
 
 ## Usage
 
@@ -51,3 +61,7 @@ These values are **synthetic** and do **not** correspond to any real person. Gen
 - Feature flag: `chl`.
 - Country code (ISO 3166-1 alpha-3): `CHL`.
 - Lazy loading: only compiled when the corresponding Cargo feature is enabled.
+- RUT and RUN share the number and the check digit for natural persons; the
+  same modulo 11 applies to both.
+- A correct digit only means the number is well formed; existence is confirmed
+  by the SII or the Registro Civil.
