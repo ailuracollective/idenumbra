@@ -54,8 +54,17 @@ cargo test -p idenumbra-ecu
 ## Releases
 
 Automated by Google's release-please (`.github/workflows/release-please.yml`).
-It runs on `main`, opens a `chore(main): release X.Y.Z` PR from the conventional
-commits, and on merge tags `vX.Y.Z` and writes `CHANGELOG.md`.
+It runs on `main`, opens a `chore(main): release X.Y.Z-alpha.N` PR from the
+conventional commits, and on merge tags `vX.Y.Z-alpha.N` and writes
+`CHANGELOG.md`.
+
+The project is in alpha: `versioning: prerelease` + `prerelease-type: alpha` +
+`prerelease: true` keep every version a prerelease (`0.1.0-alpha.1`, then
+`0.1.0-alpha.2`, ...) and mark the GitHub release as a prerelease. To cut a
+stable version, add a `Release-As: 0.1.0` commit (or remove those three
+settings); nothing becomes stable on its own. The `release-as` pin in the
+config only exists to bootstrap `0.1.0-alpha.1`: it overrides the computed
+version, so remove it once that tag exists or every later release repeats it.
 
 One version for the whole workspace: `release-please-config.json` bumps
 `[workspace.package].version`, every `[workspace.dependencies]` version, the

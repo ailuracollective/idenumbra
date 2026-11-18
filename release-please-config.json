@@ -2,9 +2,12 @@
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "release-type": "simple",
   "bump-minor-pre-major": true,
+  "versioning": "prerelease",
+  "prerelease-type": "alpha",
+  "prerelease": true,
   "packages": {
     ".": {
-      "release-as": "0.1.0",
+      "release-as": "0.1.0-alpha.1",
       "extra-files": [
         {
           "type": "toml",
