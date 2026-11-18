@@ -44,14 +44,18 @@ fn validate_curp(chars: &[u8]) -> Result<(), ValidationError> {
         || !chars[4..10].iter().all(u8::is_ascii_digit)
         || !chars[10..13].iter().all(u8::is_ascii_uppercase)
         || !chars[13..16].iter().all(|c| is_consonant(*c))
-        || !chars[16].is_ascii_alphanumeric()
         || !chars[17].is_ascii_digit()
     {
         return Err(ValidationError::InvalidFormat);
     }
-    // Position 17 (homonimia + century) is a digit 0-9 up to 1999 and a letter
-    // from 2000 on, so its class tells the century (Reglas RENAPO, 22/10/2021).
-    let century = if chars[16].is_ascii_digit() { 1900 } else { 2000 };
+    // Position 17 (homonimia + century): 0-9 for births up to 31/12/1999 and
+    // A-J from 01/01/2000 (Instructivo Normativo, DOF 18/10/2021, position 17;
+    // Reglas RENAPO 22/10/2021, "Carácter 17"). Nothing else is issued.
+    let century = match chars[16] {
+        b'0'..=b'9' => 1900,
+        b'A'..=b'J' => 2000,
+        _ => return Err(ValidationError::InvalidFormat),
+    };
     let year = century + number(&chars[4..6]);
     if !valid_date(year, &chars[4..10]) {
         return Err(ValidationError::InvalidFormat);
