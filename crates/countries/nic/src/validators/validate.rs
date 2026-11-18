@@ -20,6 +20,26 @@ fn number(digits: &[u8]) -> u32 {
         .fold(0u32, |acc, d| acc * 10 + (d - b'0') as u32)
 }
 
+/// Copy alphanumerics into `buf` uppercased, skipping hyphens and spaces.
+fn compact(value: &str, buf: &mut [u8; 14]) -> Result<usize, ValidationError> {
+    let mut n = 0usize;
+    for (i, b) in value.bytes().enumerate() {
+        if b.is_ascii_alphanumeric() {
+            if n >= buf.len() {
+                return Err(ValidationError::InvalidLength {
+                    expected: buf.len(),
+                    found: n + 1,
+                });
+            }
+            buf[n] = b.to_ascii_uppercase();
+            n += 1;
+        } else if !matches!(b, b'-' | b' ') {
+            return Err(ValidationError::NonAlphanumeric { index: i });
+        }
+    }
+    Ok(n)
+}
+
 /// Validate a Nicaraguan cédula.
 ///
 /// Layout: municipio (3) + birth date DDMMYY (6) + serial (4) + letter. The
@@ -33,14 +53,16 @@ fn validate_id_card(chars: &[u8]) -> Result<(), ValidationError> {
             found: chars.len(),
         });
     }
-    if !chars[..13].iter().all(u8::is_ascii_digit) {
-        return Err(ValidationError::NonNumeric { index: 0 });
+    if let Some(index) = chars[..13].iter().position(|b| !b.is_ascii_digit()) {
+        return Err(ValidationError::NonNumeric { index });
     }
     if !chars[13].is_ascii_alphabetic() {
         return Err(ValidationError::InvalidFormat);
     }
     let day = number(&chars[3..5]);
     let month = number(&chars[5..7]);
+    // YY is read as 20YY, right for anyone cedulable today; it would only
+    // misjudge 29 February 1900.
     let year = 2000 + number(&chars[7..9]);
     if !(1..=12).contains(&month) || day < 1 || day > days_in_month(year, month) {
         return Err(ValidationError::InvalidFormat);
@@ -76,27 +98,19 @@ fn validate_passport(value: &str) -> Result<(), ValidationError> {
     Ok(())
 }
 
-/// Validate a Nicaraguan identification number (identity card).
+/// Validate a Nicaraguan identification number (identity card or passport).
 pub fn validate(value: &str) -> Result<(), ValidationError> {
     let value = value.trim();
     if value.is_empty() {
         return Err(ValidationError::Empty);
     }
     let mut buf = [0u8; 14];
-    let mut n = 0usize;
-    for (i, b) in value.bytes().enumerate() {
-        if b.is_ascii_alphanumeric() {
-            if n >= buf.len() {
-                return Err(ValidationError::InvalidLength {
-                    expected: 14,
-                    found: n + 1,
-                });
-            }
-            buf[n] = b.to_ascii_uppercase();
-            n += 1;
-        } else if !matches!(b, b'-' | b' ') {
-            return Err(ValidationError::NonAlphanumeric { index: i });
-        }
+    let n = compact(value, &mut buf)?;
+    // A cédula is 13 digits plus a check letter, so 13 or 14 characters go to
+    // the cédula path (and a shorter digit-only run is reported as a cédula
+    // length error, not silently accepted as a passport).
+    if n >= 13 || !value.bytes().any(|b| b.is_ascii_alphabetic()) {
+        return validate_id_card(&buf[..n]);
     }
-    validate_id_card(&buf[..n])
+    validate_passport(value)
 }

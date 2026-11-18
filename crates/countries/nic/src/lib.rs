@@ -36,8 +36,8 @@ mod tests {
         assert!(validate("0010101900001N").is_ok());
         assert!(validate("001-010190-0001N").is_ok());
         assert!(validate("001 010190 0001n").is_ok());
-        // Municipality codes are not validated; 888 is the code reported for
-        // people born abroad.
+        // Municipality codes are not validated, including 888 (born abroad,
+        // single third-party source).
         assert!(validate("8880101900001P").is_ok());
     }
 
@@ -50,19 +50,69 @@ mod tests {
                 received: 0
             })
         );
-        // I, O and Z are not in the 23-letter alphabet.
-        assert!(validate("0010101900001I").is_err());
+        // I, O and Z are not in the 23-letter alphabet, so they have no index.
+        assert_eq!(
+            validate("0010101900001I"),
+            Err(ValidationError::CheckDigitMismatch {
+                expected: 12,
+                received: 23
+            })
+        );
         assert!(validate("0013201900001N").is_err()); // month 32
         assert!(validate("0012902300001N").is_err()); // no 29 February in 2023
         assert!(validate("0012902400001C").is_ok()); // 29 February 2024
-        assert!(validate("001010190000").is_err());
-        assert!(validate("001010190001").is_err()); // missing letter
-        assert!(validate("00101019000011").is_err()); // digit instead of letter
+        assert_eq!(
+            validate("001010190000"),
+            Err(ValidationError::InvalidLength {
+                expected: 14,
+                found: 12
+            })
+        );
+        assert_eq!(
+            validate("0010101900001"),
+            Err(ValidationError::InvalidLength {
+                expected: 14,
+                found: 13
+            })
+        );
+        assert_eq!(
+            validate("00101019000011"),
+            Err(ValidationError::InvalidFormat) // digit instead of letter
+        );
+        assert_eq!(
+            validate("0A10101900001N"),
+            Err(ValidationError::NonNumeric { index: 1 })
+        );
     }
 
     #[test]
-    fn passport_kind() {
+    fn passport_inferred_and_explicit() {
+        assert!(validate("A1234567").is_ok());
         assert!(validate_with("A1234567", "passport").is_ok());
+        // A digit-only run shorter than a cédula is a malformed cédula, not a
+        // passport.
+        assert_eq!(
+            validate("12345678"),
+            Err(ValidationError::InvalidLength {
+                expected: 14,
+                found: 8
+            })
+        );
+        // The kind is strict: neither document passes as the other.
+        assert_eq!(
+            validate_with("A1234567", "id_card"),
+            Err(ValidationError::InvalidLength {
+                expected: 14,
+                found: 8
+            })
+        );
+        assert_eq!(
+            validate_with("0010101900001N", "passport"),
+            Err(ValidationError::InvalidLength {
+                expected: 6,
+                found: 14
+            })
+        );
     }
 
     #[test]
