@@ -1,12 +1,16 @@
 /// Validate `value` as an explicit document `kind`; use `validate` to infer.
 pub fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
     let value = value.trim();
+    let mut buf = [0u8; 14];
+    let n = depurate(value, &mut buf)?;
+    let bytes = &buf[..n];
     match kind {
         // A CUI has 12 or 13 digits (SAT §5.1.4.1); the 12-digit form is a
-        // correlativo that lost its leading zero.
+        // correlativo that lost its leading zero. §5.1.2 depuration is applied
+        // first, so the printed "AAAA BBBBB CCCC" form is accepted.
         "cui" | "dpi" => {
-            if value.bytes().all(|b| b.is_ascii_digit()) {
-                validate_cui(value.as_bytes())
+            if bytes.iter().all(u8::is_ascii_digit) {
+                validate_cui(bytes)
             } else {
                 Err(ValidationError::InvalidFormat)
             }
@@ -15,14 +19,10 @@ pub fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
         // CUI, and Resolución SAT-DSI-393-2025 also accepts the full 13-digit
         // CUI, which is therefore checked as a CUI.
         "nit" => {
-            if value.len() == 13 && value.bytes().all(|b| b.is_ascii_digit()) {
-                return validate_cui(value.as_bytes());
+            if n == 13 && bytes.iter().all(u8::is_ascii_digit) {
+                return validate_cui(bytes);
             }
-            if value.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-') {
-                validate_nit(value.as_bytes())
-            } else {
-                Err(ValidationError::InvalidFormat)
-            }
+            validate_nit(bytes)
         }
         "passport" => validate_passport(value),
         _ => Err(ValidationError::InvalidFormat),

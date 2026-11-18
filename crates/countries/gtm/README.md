@@ -6,7 +6,8 @@ Guatemala identification validator.
 
 - CUI/DPI (13 digits, plus the 12-digit form SAT still describes) — full: check
   digit plus department and municipality.
-- NIT (2-12 characters, last one `0-9` or `K`, optional hyphen before it) — full.
+- NIT (2-12 characters, last one `0-9` or `K`; spaces, dots and the separator
+  before the check character are dropped) — full.
 - Passport (6-12 alphanumerics) — structure only.
 
 ## Validation algorithm
@@ -16,7 +17,10 @@ SAT's FEL technical annex, *Reglas y validaciones* 2.1 (October 2026), §5.1.4
 states that the check digit is computed from the seven or eight correlativo
 digits, that the last four digits never take part, and that they are multiplied
 by weights 9 to 2, the products summed, the sum multiplied by 10 and taken
-`mod 11`. The annex prints the position labels but not the coefficients; label
+`mod 11`. The annex is the electronic-invoice rulebook, but it validates the
+canonical CUI/NIT themselves — §2.2.4 numeral 3 makes SAT reject a document
+whose CUI has an invalid check digit — so the rule describes the identifier, not
+only an invoice field. The annex prints the position labels but not the coefficients; label
 + 1 is the set every implementation uses, and with it the rule is algebraically
 `sum(first 8 digits × 2..9) mod 11`, which this crate computes. When the residue
 is `10` no digit satisfies the rule, so the value is rejected with
@@ -30,11 +34,29 @@ left-padding that zero. A 12-digit number is also a valid NIT shape, so
 `validate` tries the more specific CUI layout first and falls back to the NIT
 rule.
 
+§5.1.1 and §5.1.2 also tell issuers how to *depurate* what the user types:
+spaces and dots are dropped anywhere, the hyphen or underscore right before the
+check character is dropped, and a lowercase `k` becomes `K`. The CUI is normally
+printed as `AAAA BBBBB CCCC`, so both entry points apply that depuration before
+classifying. A separator anywhere else is still rejected.
+
 The department must be `01-22` and the municipality must exist for that
 department (`01` up to the department's count). §5.1.5 puts the department
 before the municipality and prints a table of counts; this crate uses INE's
 current 340 municipalities, which keeps 33 for Huehuetenango (SAT's 2.1 edition
 already has Sipacate's 14 for Escuintla but still prints 32).
+
+Special registrations do not need a special code. Decreto 39-2010 art. 1
+(reforming art. 4 of Decreto 90-2005) keeps the 13-digit CUI and says that for
+"inscripciones consulares, inscripciones por naturalización o de residentes
+extranjeros u otras" the department and municipality boxes are used "según lo
+establezca el Directorio del RENAP". Acuerdo de Directorio 55-2014 (and 36-2023
+for minors) assigns a naturalized Guatemalan or domiciled foreigner the code of
+the department and municipality **where the inscription was made** — an ordinary
+`01-22` / municipality pair. So the municipality table can legitimately reject a
+nonexistent code; what it cannot do is reject a valid registration place. The
+consular case (a birth registered abroad, where no municipality of birth
+exists) is not published and is listed under Notes.
 
 NIT: each body digit is multiplied by a factor that starts at `body length + 1`
 and decreases; the check character is `(11 - total mod 11) mod 11`, where `11`
@@ -66,13 +88,15 @@ as a CUI.
 Official:
 
 - SAT, *Reglas y validaciones* (Régimen FEL), versión 2.1, octubre 2026 —
-  §5.1.1 NIT depuration (hyphen before the check character), §5.1.3 NIT of 2 to
-  12 characters with check character `0-9`/`K`, §5.1.4 CUI of 12 or 13 digits,
-  check digit = products × 10 mod 11, §5.1.5 department then municipality and the
-  table of counts; §2.2.4 numeral 3 makes SAT itself reject a CUI whose check
-  digit is invalid:
+  §5.1.1 NIT depuration (spaces, dots, hyphen before the check character), §5.1.3
+  NIT of 2 to 12 characters with check character `0-9`/`K`, §5.1.4 CUI of 12 or
+  13 digits, check digit = products × 10 mod 11 with the coefficients not
+  printed, §5.1.5 department then municipality and the table of counts (the
+  annex notes the table "podrá ser actualizada" when a municipality is created);
+  §2.2.4 numeral 3 makes SAT itself reject a CUI whose check digit is invalid:
   https://portal.sat.gob.gt/portal/descarga/14852/reglas-y-validaciones/97423/fel_reglas_y_validaciones-3 —
-  checked 2026-11-17
+  checked 2026-11-17 (the portal blocks automated clients with Cloudflare; the
+  PDF text was read through a text-extraction proxy)
 - SAT, *Preguntas frecuentes — Información de Contribuyentes* (from 04/10/2023 a
   NIT is the first 9 digits of the CUI; only for Guatemalans and domiciled
   foreigners; earlier NITs unchanged):
@@ -85,6 +109,21 @@ Official:
 - RENAP, *¿Qué es el CUI?* (13 digits; the last four are the department and then
   the municipality of birth): https://www.renap.gob.gt/noticias/que-es-el-cui —
   checked 2026-11-17
+- Congreso de la República, Decreto 39-2010, art. 1 (13 digits = 8 + 1 verifier
+  + 2 department + 2 municipality; consular, naturalization and foreign-resident
+  registrations use those boxes "según lo establezca el Directorio del RENAP"):
+  https://www.renap.gob.gt/sites/default/files/informacion-publica/1_decreto_39-2010_reformas_a_la_ley_del_registro_nacional.pdf
+  — checked 2026-11-17
+- RENAP, Acuerdo de Directorio 55-2014 ("A los guatemaltecos naturalizados y
+  extranjeros domiciliados, les corresponde en el CUI el código del departamento
+  y municipio donde fue efectuada la inscripción"):
+  https://www.renap.gob.gt/sites/default/files/informacion-publica/Acuerdo-de-Directorio-55-2014-58-2014-y-59-2014.pdf
+  — checked 2026-11-17 (scanned, read through the search index; the same rule
+  appears in Acuerdo 36-2023 for minors)
+- RENAP, Acuerdo de Directorio 36-2023 (minors: naturalized Guatemalans and
+  domiciled foreigners get the department and municipality of the inscription):
+  https://www.renap.gob.gt/sites/default/files/informacion-publica/acuerdo_de_directorio_36-2023_dpim.pdf
+  — checked 2026-11-17 (scanned, read through the search index)
 - RENAP, *¿Qué es el DPI y por qué tengo CUI?* (8 digits assigned by RENAP, one
   check digit, department, municipality):
   https://www.renap.gob.gt/noticias/que-es-el-dpi-y-por-que-tengo-cui — checked
@@ -119,6 +158,13 @@ Cross-checks (not authority):
 
 - python-stdnum `stdnum.gt.nit` (2-12 characters, same mod 11 check digit):
   https://arthurdejong.org/python-stdnum/doc/2.2/stdnum.gt.nit
+- https://github.com/aalonzolu/cui-gt (Python and JS: 13 digits only, ordinary
+  `01-22` departments, rejects `00`, checksum `Σ d × (i+2) mod 11`; uses the
+  old 32 municipalities for Huehuetenango)
+- https://github.com/alextello/validador-dpi-nit (same checksum and department
+  table, Escuintla 13 and Huehuetenango 32). Together with the previous one,
+  every public validator read here rejects department/municipality `00` and
+  accepts only ordinary codes, which supports the Decreto 39-2010 reading above.
 - Ministerio de Finanzas, `CuiValidator.cs` (weights 2..9 and
   `sum % 11 == check digit`, i.e. no `10 -> 0` mapping):
   https://github.com/minfingt/validators
@@ -159,6 +205,8 @@ Idenumbra::infer("GTM", "12345678")?;
   padded form `0123456790101` is the same number
 - NIT: `12345679`
 - NIT written with the hyphen: `1234567-9`
+- NIT written with dots and the hyphen: `1.234.567-9`
+- CUI in its printed form with two spaces: `1234 56789 0101`
 - NIT with check character K: `1023456K`
 - NIT whose check character is 0: `12345660`
 - NIT of a natural person (first 9 CUI digits): `123456789`
@@ -177,7 +225,9 @@ company. They were generated locally with this crate's validation algorithm.
   as a NIT; other 2-12 digit values, a hyphen before the check character or a
   final `K` are a NIT; anything else alphanumeric is a passport.
 - What is not validated: whether the CUI exists in RENAP's registry, and the
-  literal department/municipality of people registered abroad or naturalised,
-  whose last four digits may follow their place of registration rather than the
-  place of birth. The 12-digit CUI shares its shape with the NIT; inference
-  tries the CUI layout first.
+  department/municipality code of a birth registered at a consulate abroad. The
+  law leaves that code to the RENAP Directorship and no published acuerdo fixes
+  it; naturalized people and domiciled foreigners do get an ordinary code (the
+  place of registration, Acuerdo 55-2014), which the table accepts. The
+  12-digit CUI shares its shape with the NIT; inference tries the CUI layout
+  first.

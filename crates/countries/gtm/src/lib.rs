@@ -48,6 +48,17 @@ mod tests {
     }
 
     #[test]
+    fn accepts_the_last_department_and_the_registration_place() {
+        // Decreto 39-2010 art. 4: consular, naturalization and foreign-resident
+        // registrations use the department/municipality boxes "según lo
+        // establezca el Directorio del RENAP"; Acuerdo 55-2014 assigns the
+        // place where the inscription was made, i.e. an ordinary code.
+        assert!(validate("1234567890101").is_ok()); // Guatemala, 01-01
+        assert!(validate("1234567892217").is_ok()); // Jutiapa, 22-17 (last code)
+        assert!(validate("1234567892218").is_err()); // no 22-18
+    }
+
+    #[test]
     fn rejects_bad_cui() {
         assert_eq!(
             validate("1234567880101"),
@@ -125,6 +136,26 @@ mod tests {
     }
 
     #[test]
+    fn depurates_the_printed_forms() {
+        // SAT §5.1.2: the CUI is "normalmente separado en 3 grupos por medio de
+        // 2 espacios en blanco (AAAA BBBBB CCCC)" and any non-digit is dropped.
+        assert!(validate("1234 56789 0101").is_ok());
+        assert!(validate_with("1234 56789 0101", "cui").is_ok());
+        assert!(validate_with("1234 56789 0101", "dpi").is_ok());
+        // §5.1.1: spaces and dots are dropped from the NIT, and the hyphen or
+        // underscore right before the check character is dropped too.
+        assert!(validate("1.234.567-9").is_ok());
+        assert!(validate("1234 567-9").is_ok());
+        assert!(validate("1234567_9").is_ok());
+        assert!(validate("102.345.6K").is_ok());
+        // A separator anywhere else is still rejected.
+        assert_eq!(
+            validate_with("1234-5679", "nit"),
+            Err(ValidationError::NonAlphanumeric { index: 4 })
+        );
+    }
+
+    #[test]
     fn rejects_bad_nit() {
         assert!(validate("12345678").is_err());
         assert!(validate("1234567K").is_err());
@@ -136,11 +167,7 @@ mod tests {
                 received: 8
             })
         );
-        // Only the hyphen before the check character is a separator.
-        assert_eq!(
-            validate_with("1234-5679", "nit"),
-            Err(ValidationError::NonNumeric { index: 4 })
-        );
+        // Only the separator before the check character is dropped.
         assert!(validate("1234-5679").is_err());
     }
 
