@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "idenumbra"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-arg",
  "idenumbra-bol",
@@ -30,137 +30,137 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-arg"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-bol"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-bra"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-chl"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-col"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-core"
-version = "0.1.0"
+version = "0.2.0"
 
 [[package]]
 name = "idenumbra-cri"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-cub"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-dom"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-ecu"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-gtm"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-hnd"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-mex"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-nic"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-pan"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-per"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-pry"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-slv"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-ury"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-ven"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "idenumbra-core",
 ]
