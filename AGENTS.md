@@ -21,6 +21,8 @@ Country codes and feature names use ISO 3166-1 alpha-3 (e.g. `ECU`, `COL`,
 - `Cargo.toml`: workspace root, shared package metadata, workspace lints.
 - `crates/`: all crates.
 - `templates/README.template.md`: template for per-crate READMEs.
+- `.agents/skills/`: one directory per agent skill (`SKILL.md` +
+  `references/`), discovered by OpenCode and Claude-compatible agents.
 - `lefthook.yml`: Git hooks (pre-commit fmt/clippy, commit-msg commitlint).
 - `.commitlintrc.yaml`: conventional commit rules for commitlint-rs.
 - `Makefile`: common build/test/lint targets.
@@ -84,8 +86,38 @@ Publishing to crates.io is not wired up.
   issuer prefixes, reserved codes) are named `const`s at the top of the
   validator file, with a note on when to change them, and each crate README
   lists them with an official source. Algorithms stay inline.
-- Synthetic test numbers only. Never commit real identification numbers; verify
-  any new test value is synthetic.
+- **Synthetic identification numbers only. No exceptions.** Never use a real
+  person's number, from any source: not an official example page, public
+  registry, leaked database, tutorial, gist, library test suite, API response,
+  screenshot, commit, ticket or bug report. Derive test values locally from the
+  published algorithm, or use a value the source explicitly labels synthetic.
+  If a user reports a real number, ask for a synthetic equivalent and never copy
+  the original into code, tests, docs, issues or the final report. Allowed
+  sources and the acceptance checklist:
+  `.agents/skills/rust-validator-implementation/references/synthetic-test-data.md`.
+- Each crate README states, per document, what is validated and what is not, the
+  editable constants, the sources with `checked YYYY-MM-DD`, and the synthetic
+  test values. Code and README change together.
+- Per-crate READMEs follow `templates/README.template.md` by copying it; there is
+  no generator. Replace the single-brace placeholders and keep the `{{ }}` TOML
+  escaping.
+
+## Agent skills
+
+Skills live in `.agents/skills/<name>/SKILL.md`, with supporting files under
+`references/` that are read only when the task needs them. Country-specific
+details stay in `crates/countries/<iso>/README.md`, not in a skill.
+
+| Task | Skill |
+|---|---|
+| Establish what a document is and which rules are authoritative today; historical formats, regulatory changes, a country audit inventory | `identity-regulatory-research` |
+| Decide what to check: normalization, check digit, region/date fields, inference, validation depth; debug a wrong checksum or rejection | `identity-validation-algorithms` |
+| Edit Rust: implement or fix a validator, add a kind, wire a country, write tests, update a crate README | `rust-validator-implementation` |
+
+Normal flow: research → algorithms → implementation. This file stays the
+canonical summary of architecture, conventions and commands; skills hold the
+procedure and the traps. If a skill disagrees with this file, follow this file and
+fix the skill.
 
 ## Known traps
 
@@ -95,8 +127,8 @@ Publishing to crates.io is not wired up.
 - Country `validate` functions trim input; the orchestrator uppercases the country
   code but does not trim the value.
 - `missing_docs` is a warning, not an error, but keep docs complete for public APIs.
-- Every check digit is implemented from the published algorithm; test values are
-  synthetic and generated with that algorithm, never taken from real people.
+- Test values are derived from the algorithm in this repository, never copied
+  from a person. The synthetic-numbers rule under Conventions is absolute.
 - Where no public check digit exists (BO NIT, CO cédula, CR cédula/DIMEX, CU
   carné, HN RTN, PA cédula/RUC), only structure and encoded dates are validated.
   Do not invent a check digit for these.
@@ -109,8 +141,12 @@ Publishing to crates.io is not wired up.
 - ARG CUIT/CUIL prefixes are deliberately not enforced: 25/26 are valid and
   ARCA assigns new prefixes randomly. GTM CUI checks municipality counts per
   department (INE currently lists 340); update the table when one is created.
-- Per-crate READMEs are generated from `templates/README.template.md`; keep the
-  double-brace template syntax intact when editing the template.
+- Per-crate READMEs are copies of `templates/README.template.md`, not generated
+  output: there is no script that renders them. Keep the `{{ }}` TOML escaping in
+  the template, and update the root `README.md` lists when a country is added.
+- There is no CI that runs the build, tests or lints; `.github/workflows` only
+  publishes releases. `make test-all && make fmt && make clippy` locally is the
+  gate.
 - Git hooks require `lefthook` and `commitlint` (`cargo install commitlint-rs`)
   on `PATH`; run `make hooks` once per clone.
 
@@ -127,6 +163,11 @@ Publishing to crates.io is not wired up.
    registry in `crates/std/src/lib.rs`, plus the re-export.
 5. Add the country to the `all` feature list and to the orchestrator tests if
    appropriate.
-6. Regenerate/extend the per-crate README from the template.
+6. Add the README from `templates/README.template.md` and update the root
+   `README.md` lists.
+
+The exact edit list (all five wiring places, including the two halves of the
+feature test) is in
+`.agents/skills/rust-validator-implementation/references/crate-wiring.md`.
 
 ## Do not commit unless asked.
