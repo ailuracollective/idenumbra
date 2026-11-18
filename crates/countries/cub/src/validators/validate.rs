@@ -21,6 +21,11 @@ fn validate_passport(value: &str) -> Result<(), ValidationError> {
 /// Validate a Cuban identity card. The layout is YYMMDD + century code +
 /// serial (2) + sex (1) + control digit. The control digit algorithm is not
 /// public, so only the encoded birth date is checked here.
+///
+/// The sex digit (10th) is even for men and odd for women. Every digit is even
+/// or odd, so it constrains nothing: without the person's sex there is no way
+/// to reject a number on that position, and the MININT reassigns the number
+/// when the registered sex changes.
 fn validate_id_card(digits: &[u8]) -> Result<(), ValidationError> {
     if digits.len() != 11 || !digits.iter().all(u8::is_ascii_digit) {
         return Err(ValidationError::InvalidLength {

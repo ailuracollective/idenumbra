@@ -46,4 +46,14 @@ mod tests {
         // 1900 was not a leap year.
         assert!(validate("00022912345").is_err());
     }
+
+    #[test]
+    fn sex_digit_constrains_nothing() {
+        // 10th digit: even = male, odd = female. Both are valid digits, so the
+        // position cannot reject anything without the person's registered sex.
+        assert!(validate("90010112345").is_ok());
+        assert!(validate("90010112355").is_ok());
+        // 21st-century century code (8 = 20xx).
+        assert!(validate("20010180110").is_ok());
+    }
 }
