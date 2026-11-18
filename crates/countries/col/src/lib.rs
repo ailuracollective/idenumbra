@@ -61,6 +61,15 @@ mod tests {
     }
 
     #[test]
+    fn accepts_short_and_long_natural_nits() {
+        // A natural person's NIT is their cédula plus the check digit, so it
+        // can be shorter or longer than the 9-digit company body.
+        assert!(validate_with("123456788", "nit").is_ok());
+        assert!(validate_with("10987654329", "nit").is_ok());
+        assert!(validate_with("10987654328", "nit").is_err());
+    }
+
+    #[test]
     fn rejects_bad_lengths() {
         assert!(validate("12345").is_err());
         assert!(validate("12345678901").is_err());

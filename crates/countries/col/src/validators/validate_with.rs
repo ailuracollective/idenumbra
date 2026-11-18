@@ -10,7 +10,7 @@ pub fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
             }
         }
         "nit" => {
-            let mut buf = [0u8; 10];
+            let mut buf = [0u8; 12];
             let n = compact_digits(value, &mut buf)?;
             validate_nit(&buf[..n])
         }

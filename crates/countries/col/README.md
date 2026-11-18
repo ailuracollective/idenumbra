@@ -5,21 +5,44 @@ Colombia identification validator.
 ## Documents
 
 - CC (cédula de ciudadanía, 6-10 digits).
-- NIT (9-digit body plus check digit, modulo 11).
+- NIT (1-11-digit body plus check digit, modulo 11).
 - Passport (alphanumeric).
 
 ## Validation algorithm
 
 CC: 6-10 digits, no check digit. NIT: weights from the right
-`[3,7,13,17,19,23,29,37,41]` (the leftmost body digit is multiplied by 41,
-per DIAN Orden Administrativa 4/1989); check digit is the remainder when it is
-0 or 1, otherwise `11 - remainder`. Dots, hyphens and spaces are ignored.
+`[3,7,13,17,19,23,29,37,41,43,47]` (the leftmost body digit is multiplied by
+41 for a 9-digit body, per DIAN Orden Administrativa 4/1989, annex 3); check
+digit is the remainder when it is 0 or 1, otherwise `11 - remainder`. Bodies of
+1-9 digits are what the DIAN publishes; 10 and 11 digits are natural persons
+whose NIT is their cédula or civil registry number, and the prime series is
+continued (`43`, `47`) as every implementation does. Dots, hyphens and spaces
+are ignored.
 
 ## References
 
-- https://www.dian.gov.co/ — checked 2026-11-17
-- https://actualicese.com/guia-consulta-digito-de-verificacion-nit — checked 2026-11-17
-- https://es.wikipedia.org/wiki/N%C3%BAmero_de_Identificaci%C3%B3n_Tributaria_(Colombia) — checked 2026-11-17
+Official sources are listed first; the `implementation` ones are the
+cross-checks used where the agency does not publish the check-digit algorithm.
+
+- **Official** — DIAN, Orden Administrativa 4 de 1989, annex 3 (weights
+  `41,37,29,23,19,17,13,7,3` right to left, remainder 0/1 kept, otherwise
+  `11 - remainder`), on the DIAN's legal compilation:
+  https://normograma.dian.gov.co/dian/compilacion/docs/orden_administrativa_dian_0004_1989.htm
+- **Official** — DIAN, Concepto 78424 de 2002: a natural person's NIT is their
+  cédula number, or an 11-digit civil registry number for minors, always plus
+  the DIAN check digit:
+  https://normograma.dian.gov.co/dian/compilacion/docs/concepto_tributario_dian_0078424_2002.htm
+- **Official** — OECD, *Information on Tax Identification Numbers – Colombia*
+  (companies: 9 digits plus check digit; natural persons: 1 to 13 digits plus
+  check digit):
+  https://www.oecd.org/content/dam/oecd/en/topics/policy-issue-focus/aeoi/colombia-tin.pdf
+- **Implementation** — python-stdnum `co.nit` (the extended prime series
+  `43,47,53,59,67,71` used for bodies longer than 9 digits):
+  https://github.com/arthurdejong/python-stdnum/blob/master/stdnum/co/nit.py
+
+The check digit is the DIAN's; the weights beyond the ninth position are not in
+annex 3 and are taken from the implementations above. Links were opened on
+2026-11-17.
 
 ## Usage
 
@@ -43,8 +66,10 @@ Idenumbra::infer("COL", "12345678")?;
 ## Test numbers (synthetic, not real)
 
 - CC: `12345678`
-- NIT: `900.657.800-0` (`9006578000`), validated with `Some("nit")`
+- NIT: `900.657.800-0` (`9006578000`), validated with `validate_with(.., "nit")`
 - NIT: `987.654.321-7`
+- NIT (8-digit body, short natural person): `12345678-8`
+- NIT (10-digit body, natural person with a 10-digit cédula): `1098765432-9`
 
 These values are **synthetic** and do **not** correspond to any real person or company. Generated locally with this crate's validation algorithm. Source: generated locally with the validator algorithm; DIAN prime weights.
 
@@ -54,4 +79,5 @@ These values are **synthetic** and do **not** correspond to any real person or c
 - Country code (ISO 3166-1 alpha-3): `COL`.
 - Lazy loading: only compiled when the corresponding Cargo feature is enabled.
 - Cédulas and NITs overlap: 10-digit numbers without a kind are validated as cédulas, so use `validate_with("nit")` to check a NIT check digit.
-- The DIAN publishes weights for bodies of up to 9 digits; that is the supported range.
+- Bodies longer than 11 digits are rejected; the DIAN publishes weights for
+  nine and the two extra positions cover cédulas and civil registry numbers.

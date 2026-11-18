@@ -21,7 +21,7 @@ fn compact_digits(value: &str, buf: &mut [u8]) -> Result<usize, ValidationError>
 /// Validate a Colombian cédula de ciudadanía or passport.
 ///
 /// Cédulas carry no check digit, so a 10-digit NIT cannot be told apart from
-/// a 10-digit cédula by shape alone; use `validate_with(.., Some("nit"))` to
+/// a 10-digit cédula by shape alone; use `validate_with(.., "nit")` to
 /// check the NIT check digit.
 pub fn validate(value: &str) -> Result<(), ValidationError> {
     let value = value.trim();
