@@ -49,6 +49,9 @@ BO NIT, CO cédula, CR cédula/DIMEX, CU carné, HN RTN and PA cédula/RUC (the
 DGI check digits depend on the taxpayer type). For CO the NIT check digit and
 for PY the CI/RUC split require an explicit `kind`.
 
+[`LIMITATIONS.md`](LIMITATIONS.md) indexes the residual risks per country and
+links the official registry where a number can be verified.
+
 ## Feature flags
 
 `arg`, `bol`, `bra`, `chl`, `col`, `cri`, `cub`, `dom`, `ecu`, `gtm`, `hnd`, `mex`, `nic`, `pan`, `per`, `pry`, `slv`, `ury`, `ven`, `all`. Only enabled validators are compiled in and registered. The registry is built lazily on first use.
