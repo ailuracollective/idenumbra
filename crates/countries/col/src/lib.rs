@@ -24,6 +24,8 @@ mod tests {
     fn rejects_all_zero_placeholders() {
         // Placeholder values are never issued.
         assert!(validate("000000").is_err());
+        assert!(validate_with("000000", "id_card").is_err());
+        assert!(validate_with("0000000", "citizen_id").is_err());
         assert!(validate_with("0000000000", "nit").is_err());
     }
 
