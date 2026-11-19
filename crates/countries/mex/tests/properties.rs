@@ -1,7 +1,7 @@
 //! Property-based tests for the Mexican CURP and RFC validators.
 
-use idenumbra_mex::{validate, validate_with, Components, IdenumbraMEX, Validation};
 use idenumbra_core::{ValidationError, Validator};
+use idenumbra_mex::{validate, validate_with, Components, IdenumbraMEX, Validation};
 use proptest::prelude::*;
 
 fn accepted(value: &str) -> Validation {
