@@ -1,15 +1,23 @@
 //! Property-based tests for the Venezuelan CI, RIF and passport validators.
 
-use idenumbra_ven::{validate, validate_with, Components, IdenumbraVEN, Validation};
 use idenumbra_core::{ValidationError, Validator};
+use idenumbra_ven::{validate, validate_with, Components, IdenumbraVEN, Validation};
 use proptest::prelude::*;
 
 const RIF_PREFIXES: [(u8, u32); 6] = [
-    (b'V', 4), (b'E', 8), (b'J', 12), (b'P', 16), (b'G', 20), (b'C', 12),
+    (b'V', 4),
+    (b'E', 8),
+    (b'J', 12),
+    (b'P', 16),
+    (b'G', 20),
+    (b'C', 12),
 ];
 
 fn rif_base(letter: u8) -> Option<u32> {
-    RIF_PREFIXES.iter().find(|(l, _)| *l == letter).map(|(_, b)| *b)
+    RIF_PREFIXES
+        .iter()
+        .find(|(l, _)| *l == letter)
+        .map(|(_, b)| *b)
 }
 
 fn rif_check(letter: u8, body: &str) -> u8 {
