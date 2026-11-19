@@ -23,20 +23,27 @@ fn all_zero(digits: &[u8]) -> bool {
 /// Neither document has a published check digit: the CI is the registry number
 /// and the NIT ends in a control code (`01`, `02`, `04`, plus `03` seen in the
 /// SIN's supplier lists) plus one random digit, both assigned by the SIN.
-pub fn validate(value: &str) -> Result<(), ValidationError> {
+pub fn validate(value: &str) -> Result<Validation, ValidationError> {
     let value = value.trim();
     if value.is_empty() {
         return Err(ValidationError::Empty);
     }
     let (digits_len, rest) = split_complement(value);
     if digits_len >= 9 && rest.is_empty() {
-        return validate_nit(value.as_bytes());
+        validate_nit(value.as_bytes())?;
+        return Ok(Validation {
+            kind: "nit",
+            components: Some(Components::Nit(nit(value.as_bytes()))),
+        });
     }
     if (5..=8).contains(&digits_len) && (rest.is_empty() || valid_complement(rest)) {
         if all_zero(&value.as_bytes()[..digits_len]) {
             return Err(ValidationError::InvalidFormat);
         }
-        return Ok(()); // CI
+        return Ok(Validation {
+            kind: "id_card",
+            components: None,
+        });
     }
     if digits_len < 5 {
         return Err(ValidationError::InvalidLength {

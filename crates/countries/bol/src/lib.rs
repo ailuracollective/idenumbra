@@ -2,19 +2,33 @@
 
 #![no_std]
 
-#[cfg(test)]
-use idenumbra_core::ValidationError;
+use idenumbra_core::{ValidationError, Validator};
+
+const COUNTRY: &str = "BOL";
 
 mod validators {
     use idenumbra_core::ValidationError;
     include!("validators/validate.rs");
     include!("validators/nit.rs");
     include!("validators/validate_with.rs");
+    include!("validators/components.rs");
 }
 
-pub use validators::{validate, validate_with};
+pub use validators::{components, validate, validate_with, Components, Nit, Validation};
 
-idenumbra_core::country_validator!(IdenumbraBOL, "BOL");
+/// Zero-sized marker type implementing [`Validator`] for Bolivia.
+pub struct IdenumbraBOL;
+
+impl Validator for IdenumbraBOL {
+    const COUNTRY: &'static str = COUNTRY;
+    type Validation = Validation;
+    fn validate(value: &str) -> Result<Self::Validation, ValidationError> {
+        validate(value)
+    }
+    fn validate_with(value: &str, kind: &str) -> Result<Self::Validation, ValidationError> {
+        crate::validate_with(value, kind)
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -68,5 +82,37 @@ mod tests {
         assert!(validate_with("0000000000", "nit").is_err());
         assert_eq!(validate("1234567-ABC"), Err(ValidationError::InvalidFormat));
         assert!(validate("1234").is_err());
+    }
+
+    fn validated(value: &str) -> Validation {
+        match validate(value) {
+            Ok(v) => v,
+            Err(e) => panic!("{e}"),
+        }
+    }
+
+    #[test]
+    fn components_of_ci() {
+        let v = validated("1234567");
+        assert_eq!(v.kind, "id_card");
+        assert_eq!(v.components, None);
+    }
+
+    #[test]
+    fn components_of_nit() {
+        let v = validated("123456012");
+        assert_eq!(v.kind, "nit");
+        let nit = match v.components {
+            Some(Components::Nit(n)) => n,
+            _ => panic!("expected nit"),
+        };
+        assert_eq!(nit.embedded_ci, 123456);
+        assert_eq!(nit.control_code, 1);
+        assert_eq!(nit.trailing, 2);
+    }
+
+    #[test]
+    fn components_require_a_valid_number() {
+        assert!(validate("1234567-ABC").is_err());
     }
 }
