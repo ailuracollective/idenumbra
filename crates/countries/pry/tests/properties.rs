@@ -1,7 +1,7 @@
 //! Property-based tests for the Paraguayan CI and RUC validators.
 
-use idenumbra_pry::{validate, validate_with};
 use idenumbra_core::ValidationError;
+use idenumbra_pry::{validate, validate_with};
 use proptest::prelude::*;
 
 fn ruc_check(body: &str) -> u32 {
@@ -12,7 +12,11 @@ fn ruc_check(body: &str) -> u32 {
         weight = if weight == 11 { 2 } else { weight + 1 };
     }
     let rest = sum % 11;
-    if rest > 1 { 11 - rest } else { 0 }
+    if rest > 1 {
+        11 - rest
+    } else {
+        0
+    }
 }
 
 proptest! {
