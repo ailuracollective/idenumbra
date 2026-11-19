@@ -114,6 +114,10 @@ pub struct Validation {
     /// `"passport"`, ...). `None` when the country validator did not report it.
     pub kind: Option<&'static str>,
     /// Parts encoded in the number, if any.
+    ///
+    /// They are extracted by inferring the document kind from the value, so
+    /// when a number is valid as two documents they may describe the inferred
+    /// one rather than the `kind` passed to [`Idenumbra::validate`].
     pub components: Option<CountryComponents>,
 }
 
@@ -396,10 +400,28 @@ impl Idenumbra {
     pub fn validate(country: &str, value: &str, kind: &str) -> Result<Validation, ValidationError> {
         lookup(country)?.1(value, kind)?;
         let components = Idenumbra::components(country, value)?;
+        // Aliases collapse to the name the country crates report.
         let kind = match kind {
-            "id_card" | "identity_card" => Some("id_card"),
+            "id_card" | "identity_card" | "citizen_id" | "cedula" => Some("id_card"),
             "ruc" => Some("ruc"),
             "passport" => Some("passport"),
+            "dni" => Some("dni"),
+            "cuit" => Some("cuit"),
+            "cuil" => Some("cuil"),
+            "cpf" => Some("cpf"),
+            "cnpj" => Some("cnpj"),
+            "rut" | "run" => Some("rut"),
+            "curp" => Some("curp"),
+            "rfc" => Some("rfc"),
+            "cui" | "dpi" => Some("cui"),
+            "nit" => Some("nit"),
+            "dui" => Some("dui"),
+            "ci" => Some("ci"),
+            "ce" => Some("ce"),
+            "dimex" => Some("dimex"),
+            "nite" => Some("nite"),
+            "cedula_juridica" => Some("cedula_juridica"),
+            "rif" => Some("rif"),
             _ => None,
         };
         Ok(Validation {
@@ -519,6 +541,30 @@ mod tests {
         assert!(Idenumbra::validate("ECU", "1712345675", "ruc").is_err());
         assert!(Idenumbra::validate("ECU", "171234567-5", "id_card").is_ok());
     }
+
+    #[test]
+    fn typed_kind_is_reported() {
+        // The kind the caller passed is echoed back as the canonical name.
+        #[cfg(feature = "arg")]
+        {
+            assert_eq!(
+                Idenumbra::validate("ARG", "12345678", "dni").map(|v| v.kind),
+                Ok(Some("dni"))
+            );
+            assert_eq!(
+                Idenumbra::validate("ARG", "20-12345678-6", "cuil").map(|v| v.kind),
+                Ok(Some("cuil"))
+            );
+        }
+        #[cfg(feature = "ecu")]
+        {
+            assert_eq!(
+                Idenumbra::validate("ECU", "1712345675", "identity_card").map(|v| v.kind),
+                Ok(Some("id_card"))
+            );
+        }
+    }
+
     #[cfg(feature = "ecu")]
     #[test]
     fn components_ecu() {
