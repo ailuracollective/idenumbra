@@ -24,6 +24,20 @@ pub trait Validator {
         let _ = kind;
         Self::validate(value)
     }
+
+    /// Canonical document kinds this validator accepts via [`Self::validate_with`].
+    ///
+    /// Defaults to an empty slice for validators that do not enumerate their
+    /// kinds; country crates override this with their supported kinds.
+    ///
+    /// # Limitations
+    ///
+    /// This list is maintained by hand alongside the `validate_with` match arms
+    /// and is not derived from them. Aliases may share a validator, and a listed
+    /// kind may not have a dedicated function yet. Keep both in sync.
+    fn document_kinds() -> &'static [&'static str] {
+        &[]
+    }
 }
 
 /// Generate the zero-sized marker struct and [`Validator`] implementation for a
@@ -35,7 +49,7 @@ pub trait Validator {
 #[macro_export]
 #[allow(clippy::crate_in_macro_def)]
 macro_rules! country_validator {
-    ($marker:ident, $code:literal) => {
+    ($marker:ident, $code:literal, $kinds:expr) => {
         /// Zero-sized marker type implementing [`$crate::Validator`].
         pub struct $marker;
 
@@ -47,6 +61,9 @@ macro_rules! country_validator {
             }
             fn validate_with(value: &str, kind: &str) -> Result<(), $crate::ValidationError> {
                 crate::validate_with(value, kind)
+            }
+            fn document_kinds() -> &'static [&'static str] {
+                $kinds
             }
         }
     };

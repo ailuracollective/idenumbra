@@ -14,7 +14,7 @@ mod validators {
 
 pub use validators::{validate, validate_with};
 
-idenumbra_core::country_validator!(IdenumbraPRY, "PRY");
+idenumbra_core::country_validator!(IdenumbraPRY, "PRY", &["ci", "id_card", "passport", "ruc"]);
 
 #[cfg(test)]
 mod tests {

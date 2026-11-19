@@ -10,4 +10,4 @@ mod validators {
 
 pub use validators::{validate, validate_with};
 
-idenumbra_core::country_validator!(IdenumbraDOM, "DOM");
+idenumbra_core::country_validator!(IdenumbraDOM, "DOM", &["id_card", "passport"]);

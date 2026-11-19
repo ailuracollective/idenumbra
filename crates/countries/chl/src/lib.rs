@@ -11,7 +11,7 @@ mod validators {
 
 pub use validators::{validate, validate_with};
 
-idenumbra_core::country_validator!(IdenumbraCHL, "CHL");
+idenumbra_core::country_validator!(IdenumbraCHL, "CHL", &["rut"]);
 
 #[cfg(test)]
 mod tests {

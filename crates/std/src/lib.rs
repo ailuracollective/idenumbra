@@ -383,6 +383,51 @@ fn lookup(country: &str) -> Result<&'static (InferFn, TypedFn), ValidationError>
         .ok_or(ValidationError::ValidatorNotAvailable { country: code })
 }
 
+/// Document kinds published by each compiled-in country validator.
+fn document_kinds_for(country: &str) -> &'static [&'static str] {
+    match country {
+        #[cfg(feature = "arg")]
+        "ARG" => idenumbra_arg::IdenumbraARG::document_kinds(),
+        #[cfg(feature = "bol")]
+        "BOL" => idenumbra_bol::IdenumbraBOL::document_kinds(),
+        #[cfg(feature = "bra")]
+        "BRA" => idenumbra_bra::IdenumbraBRA::document_kinds(),
+        #[cfg(feature = "chl")]
+        "CHL" => idenumbra_chl::IdenumbraCHL::document_kinds(),
+        #[cfg(feature = "col")]
+        "COL" => idenumbra_col::IdenumbraCOL::document_kinds(),
+        #[cfg(feature = "cri")]
+        "CRI" => idenumbra_cri::IdenumbraCRI::document_kinds(),
+        #[cfg(feature = "cub")]
+        "CUB" => idenumbra_cub::IdenumbraCUB::document_kinds(),
+        #[cfg(feature = "dom")]
+        "DOM" => idenumbra_dom::IdenumbraDOM::document_kinds(),
+        #[cfg(feature = "ecu")]
+        "ECU" => idenumbra_ecu::IdenumbraECU::document_kinds(),
+        #[cfg(feature = "gtm")]
+        "GTM" => idenumbra_gtm::IdenumbraGTM::document_kinds(),
+        #[cfg(feature = "hnd")]
+        "HND" => idenumbra_hnd::IdenumbraHND::document_kinds(),
+        #[cfg(feature = "mex")]
+        "MEX" => idenumbra_mex::IdenumbraMEX::document_kinds(),
+        #[cfg(feature = "nic")]
+        "NIC" => idenumbra_nic::IdenumbraNIC::document_kinds(),
+        #[cfg(feature = "pan")]
+        "PAN" => idenumbra_pan::IdenumbraPAN::document_kinds(),
+        #[cfg(feature = "per")]
+        "PER" => idenumbra_per::IdenumbraPER::document_kinds(),
+        #[cfg(feature = "pry")]
+        "PRY" => idenumbra_pry::IdenumbraPRY::document_kinds(),
+        #[cfg(feature = "slv")]
+        "SLV" => idenumbra_slv::IdenumbraSLV::document_kinds(),
+        #[cfg(feature = "ury")]
+        "URY" => idenumbra_ury::IdenumbraURY::document_kinds(),
+        #[cfg(feature = "ven")]
+        "VEN" => idenumbra_ven::IdenumbraVEN::document_kinds(),
+        _ => &[],
+    }
+}
+
 impl Idenumbra {
     /// Country codes compiled into this build.
     pub fn supported_countries() -> &'static [&'static str] {
@@ -445,6 +490,36 @@ impl Idenumbra {
         Self::filter_countries(value, |country| {
             Self::validate(country, value, kind).is_ok()
         })
+    }
+
+    /// Classify every document kind whose validation rules accept `value`
+    /// within `country`.
+    ///
+    /// Returns the canonical kinds (e.g. `"id_card"`, `"ruc"`) that validate
+    /// `value` successfully. A valid country with no matching kind returns an
+    /// empty collection; an unknown or disabled country produces an explicit
+    /// error. Matches are candidates only: they describe shape/check-digit
+    /// validity, not issuance or ownership.
+    ///
+    /// # Limitations
+    ///
+    /// The enumerated kinds come from each country crate's
+    /// [`Validator::document_kinds`] list, which is maintained alongside (but
+    /// not mechanically derived from) the `validate_with` match arms. A kind
+    /// may be shared across several aliases, and some documented kinds may not
+    /// yet have a dedicated validator function. Keep the list and the
+    /// `validate_with` arms in sync when editing a country crate.
+    pub fn classify(country: &str, value: &str) -> Result<Vec<&'static str>, ValidationError> {
+        lookup(country)?;
+        let code = country.trim().to_ascii_uppercase();
+        let kinds = document_kinds_for(code.as_str());
+        let mut matches = Vec::new();
+        for &kind in kinds {
+            if Self::validate(country, value, kind).is_ok() {
+                matches.push(kind);
+            }
+        }
+        Ok(matches)
     }
 
     fn filter_countries(value: &str, mut check: impl FnMut(&str) -> bool) -> Vec<&'static str> {

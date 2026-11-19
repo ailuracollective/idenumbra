@@ -11,4 +11,4 @@ mod validators {
 
 pub use validators::{validate, validate_with};
 
-idenumbra_core::country_validator!(IdenumbraCOL, "COL");
+idenumbra_core::country_validator!(IdenumbraCOL, "COL", &["id_card", "nit", "passport"]);

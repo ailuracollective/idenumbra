@@ -28,6 +28,9 @@ impl Validator for IdenumbraBOL {
     fn validate_with(value: &str, kind: &str) -> Result<Self::Validation, ValidationError> {
         crate::validate_with(value, kind)
     }
+    fn document_kinds() -> &'static [&'static str] {
+        &["id_card", "nit"]
+    }
 }
 
 #[cfg(test)]

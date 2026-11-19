@@ -15,7 +15,7 @@ mod validators {
 
 pub use validators::{validate, validate_with};
 
-idenumbra_core::country_validator!(IdenumbraSLV, "SLV");
+idenumbra_core::country_validator!(IdenumbraSLV, "SLV", &["dui", "nit", "passport"]);
 
 #[cfg(test)]
 mod tests {

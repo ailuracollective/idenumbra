@@ -34,6 +34,9 @@ impl idenumbra_core::Validator for IdenumbraBRA {
     ) -> Result<Self::Validation, idenumbra_core::ValidationError> {
         crate::validate_with(value, kind)
     }
+    fn document_kinds() -> &'static [&'static str] {
+        &["cpf", "cnpj"]
+    }
 }
 
 #[cfg(test)]
