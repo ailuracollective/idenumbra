@@ -2,20 +2,32 @@
 
 #![no_std]
 
-#[cfg(test)]
-use idenumbra_core::ValidationError;
+use idenumbra_core::{ValidationError, Validator};
 
 mod validators {
     use idenumbra_core::ValidationError;
+    include!("validators/components.rs");
     include!("validators/validate.rs");
     include!("validators/cui.rs");
     include!("validators/nit.rs");
     include!("validators/validate_with.rs");
 }
 
-pub use validators::{validate, validate_with};
+pub use validators::{components, validate, validate_with, Components, Cui, Nit, Validation};
 
-idenumbra_core::country_validator!(IdenumbraGTM, "GTM");
+/// Zero-sized marker type implementing [`Validator`] for Guatemala.
+pub struct IdenumbraGTM;
+
+impl Validator for IdenumbraGTM {
+    const COUNTRY: &'static str = "GTM";
+    type Validation = Validation;
+    fn validate(value: &str) -> Result<Self::Validation, ValidationError> {
+        validate(value)
+    }
+    fn validate_with(value: &str, kind: &str) -> Result<Self::Validation, ValidationError> {
+        crate::validate_with(value, kind)
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -49,19 +61,19 @@ mod tests {
     #[test]
     fn rejects_bad_cui() {
         assert_eq!(
-            validate("1234567880101"),
-            Err(ValidationError::CheckDigitMismatch {
+            validate("1234567880101").unwrap_err(),
+            ValidationError::CheckDigitMismatch {
                 expected: 9,
                 received: 8
-            })
+            }
         );
         assert_eq!(
-            validate("1234567892301"),
-            Err(ValidationError::InvalidRegion { region: 23 })
+            validate("1234567892301").unwrap_err(),
+            ValidationError::InvalidRegion { region: 23 }
         );
         assert_eq!(
-            validate("1234567890001"),
-            Err(ValidationError::InvalidRegion { region: 0 })
+            validate("1234567890001").unwrap_err(),
+            ValidationError::InvalidRegion { region: 0 }
         );
         // Department 01 only has 17 municipalities.
         assert!(validate("1234567890118").is_err());
@@ -81,8 +93,8 @@ mod tests {
         // 10000007 * 2..9 sums to a remainder of 10, which is not a digit, so
         // SAT's rule (§5.1.4.4, sum * 10 mod 11) has nothing to print.
         assert_eq!(
-            validate("1000000700101"),
-            Err(ValidationError::UnrepresentableCheckDigit)
+            validate("1000000700101").unwrap_err(),
+            ValidationError::UnrepresentableCheckDigit
         );
         // The same body has no valid 9-digit CUI-prefix NIT either.
         assert!(validate("100000070").is_err());
@@ -96,11 +108,11 @@ mod tests {
         assert!(validate_with("0123456790101", "cui").is_ok());
         assert!(validate_with("123456790101", "dpi").is_ok());
         assert_eq!(
-            validate_with("123456720101", "cui"),
-            Err(ValidationError::CheckDigitMismatch {
+            validate_with("123456720101", "cui").unwrap_err(),
+            ValidationError::CheckDigitMismatch {
                 expected: 9,
                 received: 2
-            })
+            }
         );
         // Escuintla has 14 municipalities.
         assert!(validate_with("123456790515", "cui").is_err());
@@ -138,8 +150,8 @@ mod tests {
         assert!(validate("102.345.6K").is_ok());
         // A separator anywhere else is still rejected.
         assert_eq!(
-            validate_with("1234-5679", "nit"),
-            Err(ValidationError::NonAlphanumeric { index: 4 })
+            validate_with("1234-5679", "nit").unwrap_err(),
+            ValidationError::NonAlphanumeric { index: 4 }
         );
     }
 
@@ -149,11 +161,11 @@ mod tests {
         assert!(validate("1234567K").is_err());
         assert!(validate("0000000").is_err());
         assert_eq!(
-            validate("1234567-8"),
-            Err(ValidationError::CheckDigitMismatch {
+            validate("1234567-8").unwrap_err(),
+            ValidationError::CheckDigitMismatch {
                 expected: 9,
                 received: 8
-            })
+            }
         );
         // Only the separator before the check character is dropped.
         assert!(validate("1234-5679").is_err());
@@ -178,11 +190,11 @@ mod tests {
         assert!(validate("A1234567").is_ok());
         assert!(validate_with("A1234567", "passport").is_ok());
         assert_eq!(
-            validate("A1234"),
-            Err(ValidationError::InvalidLength {
+            validate("A1234").unwrap_err(),
+            ValidationError::InvalidLength {
                 expected: 6,
                 found: 5
-            })
+            }
         );
     }
 
@@ -191,11 +203,79 @@ mod tests {
         // Since 2023-10-04 the NIT of a natural person derives from the CUI.
         assert!(validate_with("1234567890101", "nit").is_ok());
         assert_eq!(
-            validate_with("1234567880101", "nit"),
-            Err(ValidationError::CheckDigitMismatch {
+            validate_with("1234567880101", "nit").unwrap_err(),
+            ValidationError::CheckDigitMismatch {
                 expected: 9,
                 received: 8
-            })
+            }
         );
+    }
+
+    fn validated(value: &str) -> Validation {
+        match validate(value) {
+            Ok(v) => v,
+            Err(e) => panic!("{e}"),
+        }
+    }
+
+    #[test]
+    fn components_of_cui() {
+        let v = validated("1234567890101");
+        assert_eq!(v.kind, "cui");
+        let cui = match v.components {
+            Some(Components::Cui(c)) => c,
+            _ => panic!("expected cui"),
+        };
+        assert_eq!(cui.check_digit, 9);
+        assert_eq!(cui.department, 1);
+        assert_eq!(cui.municipality, 1);
+    }
+
+    #[test]
+    fn components_of_nit() {
+        let v = validated("12345679");
+        assert_eq!(v.kind, "nit");
+        let nit = match v.components {
+            Some(Components::Nit(n)) => n,
+            _ => panic!("expected nit"),
+        };
+        assert_eq!(nit.check_char, 9);
+    }
+
+    #[test]
+    fn components_of_nit_k() {
+        let v = validated("1023456K");
+        assert_eq!(v.kind, "nit");
+        let nit = match v.components {
+            Some(Components::Nit(n)) => n,
+            _ => panic!("expected nit"),
+        };
+        assert_eq!(nit.check_char, 10);
+    }
+
+    #[test]
+    fn components_of_passport() {
+        let v = validated("A1234567");
+        assert_eq!(v.kind, "passport");
+        assert_eq!(v.components, None);
+    }
+
+    #[test]
+    fn components_require_a_valid_number() {
+        assert!(validate("1234567880101").is_err());
+    }
+
+    #[test]
+    fn components_of_twelve_digit_cui() {
+        let v = validated("123456790101");
+        assert_eq!(v.kind, "cui");
+        let cui = match v.components {
+            Some(Components::Cui(c)) => c,
+            _ => panic!("expected cui"),
+        };
+        // padded form 0123456790101
+        assert_eq!(cui.check_digit, 9);
+        assert_eq!(cui.department, 1);
+        assert_eq!(cui.municipality, 1);
     }
 }

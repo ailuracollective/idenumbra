@@ -54,7 +54,7 @@ fn depurate(value: &str, buf: &mut [u8; 14]) -> Result<usize, ValidationError> {
 }
 
 /// Validate a Guatemalan identification number (CUI/DPI or NIT).
-pub fn validate(value: &str) -> Result<(), ValidationError> {
+pub fn validate(value: &str) -> Result<Validation, ValidationError> {
     let value = value.trim();
     if value.is_empty() {
         return Err(ValidationError::Empty);
@@ -68,13 +68,45 @@ pub fn validate(value: &str) -> Result<(), ValidationError> {
         // shape, so try the more specific CUI layout first and fall back to
         // the NIT rule.
         return match n {
-            13 => validate_cui(bytes),
-            12 => validate_cui(bytes).or_else(|_| validate_nit(bytes)),
-            _ => validate_nit(bytes),
+            13 => {
+                validate_cui(bytes)?;
+                Ok(Validation {
+                    kind: "cui",
+                    components: Some(Components::Cui(cui(bytes))),
+                })
+            }
+            12 => match validate_cui(bytes) {
+                Ok(()) => Ok(Validation {
+                    kind: "cui",
+                    components: Some(Components::Cui(cui(bytes))),
+                }),
+                Err(_) => {
+                    validate_nit(bytes)?;
+                    Ok(Validation {
+                        kind: "nit",
+                        components: Some(Components::Nit(nit(bytes))),
+                    })
+                }
+            },
+            _ => {
+                validate_nit(bytes)?;
+                Ok(Validation {
+                    kind: "nit",
+                    components: Some(Components::Nit(nit(bytes))),
+                })
+            }
         };
     }
     if n >= 2 && bytes[n - 1] == b'K' && bytes[..n - 1].iter().all(u8::is_ascii_digit) {
-        return validate_nit(bytes);
+        validate_nit(bytes)?;
+        return Ok(Validation {
+            kind: "nit",
+            components: Some(Components::Nit(nit(bytes))),
+        });
     }
-    validate_passport(value)
+    validate_passport(value)?;
+    Ok(Validation {
+        kind: "passport",
+        components: None,
+    })
 }

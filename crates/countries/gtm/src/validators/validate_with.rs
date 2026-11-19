@@ -1,5 +1,5 @@
 /// Validate `value` as an explicit document `kind`; use `validate` to infer.
-pub fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
+pub fn validate_with(value: &str, kind: &str) -> Result<Validation, ValidationError> {
     let value = value.trim();
     let mut buf = [0u8; 14];
     let n = depurate(value, &mut buf)?;
@@ -10,7 +10,11 @@ pub fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
         // first, so the printed "AAAA BBBBB CCCC" form is accepted.
         "cui" | "dpi" => {
             if bytes.iter().all(u8::is_ascii_digit) {
-                validate_cui(bytes)
+                validate_cui(bytes)?;
+                Ok(Validation {
+                    kind: "cui",
+                    components: Some(Components::Cui(cui(bytes))),
+                })
             } else {
                 Err(ValidationError::InvalidFormat)
             }
@@ -20,11 +24,25 @@ pub fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
         // CUI, which is therefore checked as a CUI.
         "nit" => {
             if n == 13 && bytes.iter().all(u8::is_ascii_digit) {
-                return validate_cui(bytes);
+                validate_cui(bytes)?;
+                return Ok(Validation {
+                    kind: "nit",
+                    components: Some(Components::Cui(cui(bytes))),
+                });
             }
-            validate_nit(bytes)
+            validate_nit(bytes)?;
+            Ok(Validation {
+                kind: "nit",
+                components: Some(Components::Nit(nit(bytes))),
+            })
         }
-        "passport" => validate_passport(value),
+        "passport" => {
+            validate_passport(value)?;
+            Ok(Validation {
+                kind: "passport",
+                components: None,
+            })
+        }
         _ => Err(ValidationError::InvalidFormat),
     }
 }
