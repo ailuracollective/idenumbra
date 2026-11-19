@@ -6,7 +6,9 @@
 //! independent of the implementation under test.
 
 use idenumbra_core::{ValidationError, Validator};
-use idenumbra_per::{components, validate, validate_with, Components, IdenumbraPER, Ruc, Validation};
+use idenumbra_per::{
+    components, validate, validate_with, Components, IdenumbraPER, Ruc, Validation,
+};
 use proptest::prelude::*;
 
 const WEIGHTS: [u32; 10] = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
