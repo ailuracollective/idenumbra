@@ -77,6 +77,12 @@ idenumbra_arg::validate_with("20-12345678-6", "cuit")?;
 - `Idenumbra::infer(country, value) -> Result<Validation, ValidationError>` — validate letting the country validator infer the document kind.
 - `Idenumbra::validate(country, value, kind) -> Result<Validation, ValidationError>` — validate as an explicit document `kind` (`"id_card"`, `"ruc"`, `"passport"`, `"dni"`, `"cuit"`, …).
 - `Idenumbra::components(country, value) -> Result<Option<CountryComponents>, ValidationError>` — country-specific parts encoded in a valid number.
+- `Idenumbra::validate_batch(country, inputs) -> impl Iterator<Item = (usize, Result<Validation, ValidationError>)>` — lazily validate a sequence of values, inferring each document kind; yields `(input_index, result)` in input order without collecting inputs or results.
+- `Idenumbra::validate_batch_with(country, inputs, kind)` — same, with a single shared document `kind`.
+- `Idenumbra::validate_batch_typed(country, inputs)` — each input is `(value, kind)`.
+- `Idenumbra::validate_batch_mixed(country, inputs)` — each input is `(value, Option<kind>)`; `None` infers the kind.
+
+Empty input yields zero results. Unknown or disabled countries surface as `Err` per item.
 
 `Validation` carries `valid: bool` (always `true` on `Ok`), `kind: Option<&'static str>` and
 `components: Option<CountryComponents>`. ARG, BOL, BRA, CRI, ECU, GTM, HND, MEX, NIC, PAN,

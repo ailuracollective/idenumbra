@@ -484,6 +484,80 @@ impl Idenumbra {
         })
     }
 
+    /// Validate a batch of values, inferring the document kind for each one.
+    ///
+    /// Returns a lazy iterator yielding `(input_index, result)` in input order.
+    /// No inputs or results are collected internally; the caller drives
+    /// iteration. An empty input yields zero items.
+    pub fn validate_batch<'a, I>(
+        country: &'a str,
+        inputs: I,
+    ) -> impl Iterator<Item = (usize, Result<Validation, ValidationError>)> + 'a
+    where
+        I: IntoIterator<Item = &'a str> + 'a,
+    {
+        ValidateBatchInfer {
+            country,
+            iter: inputs.into_iter(),
+            index: 0,
+        }
+    }
+
+    /// Validate a batch of values with a single shared document `kind`.
+    ///
+    /// Returns a lazy iterator yielding `(input_index, result)` in input order.
+    pub fn validate_batch_with<'a, I>(
+        country: &'a str,
+        inputs: I,
+        kind: &'a str,
+    ) -> impl Iterator<Item = (usize, Result<Validation, ValidationError>)> + 'a
+    where
+        I: IntoIterator<Item = &'a str> + 'a,
+    {
+        ValidateBatchWith {
+            country,
+            iter: inputs.into_iter(),
+            kind,
+            index: 0,
+        }
+    }
+
+    /// Validate a batch of values where each item supplies its own document
+    /// `kind` as `(value, kind)`.
+    ///
+    /// Returns a lazy iterator yielding `(input_index, result)` in input order.
+    pub fn validate_batch_typed<'a, I>(
+        country: &'a str,
+        inputs: I,
+    ) -> impl Iterator<Item = (usize, Result<Validation, ValidationError>)> + 'a
+    where
+        I: IntoIterator<Item = (&'a str, &'a str)> + 'a,
+    {
+        ValidateBatchTyped {
+            country,
+            iter: inputs.into_iter(),
+            index: 0,
+        }
+    }
+
+    /// Validate a batch of values where each item optionally supplies a document
+    /// `kind` as `(value, Option<kind>)`; `None` infers the kind.
+    ///
+    /// Returns a lazy iterator yielding `(input_index, result)` in input order.
+    pub fn validate_batch_mixed<'a, I>(
+        country: &'a str,
+        inputs: I,
+    ) -> impl Iterator<Item = (usize, Result<Validation, ValidationError>)> + 'a
+    where
+        I: IntoIterator<Item = (&'a str, Option<&'a str>)> + 'a,
+    {
+        ValidateBatchMixed {
+            country,
+            iter: inputs.into_iter(),
+            index: 0,
+        }
+    }
+
     /// Components encoded in a validated `value`.
     ///
     /// `Ok(None)` when the input is valid but has no structured components (a
@@ -541,6 +615,91 @@ pub use idenumbra_slv::IdenumbraSLV;
 pub use idenumbra_ury::IdenumbraURY;
 #[cfg(feature = "ven")]
 pub use idenumbra_ven::IdenumbraVEN;
+
+struct ValidateBatchInfer<'a, I> {
+    country: &'a str,
+    iter: I,
+    index: usize,
+}
+
+impl<'a, I> Iterator for ValidateBatchInfer<'a, I>
+where
+    I: Iterator<Item = &'a str>,
+{
+    type Item = (usize, Result<Validation, ValidationError>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let value = self.iter.next()?;
+        let i = self.index;
+        self.index += 1;
+        Some((i, Idenumbra::infer(self.country, value)))
+    }
+}
+
+struct ValidateBatchWith<'a, I> {
+    country: &'a str,
+    iter: I,
+    kind: &'a str,
+    index: usize,
+}
+
+impl<'a, I> Iterator for ValidateBatchWith<'a, I>
+where
+    I: Iterator<Item = &'a str>,
+{
+    type Item = (usize, Result<Validation, ValidationError>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let value = self.iter.next()?;
+        let i = self.index;
+        self.index += 1;
+        Some((i, Idenumbra::validate(self.country, value, self.kind)))
+    }
+}
+
+struct ValidateBatchTyped<'a, I> {
+    country: &'a str,
+    iter: I,
+    index: usize,
+}
+
+impl<'a, I> Iterator for ValidateBatchTyped<'a, I>
+where
+    I: Iterator<Item = (&'a str, &'a str)>,
+{
+    type Item = (usize, Result<Validation, ValidationError>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let (value, kind) = self.iter.next()?;
+        let i = self.index;
+        self.index += 1;
+        Some((i, Idenumbra::validate(self.country, value, kind)))
+    }
+}
+
+struct ValidateBatchMixed<'a, I> {
+    country: &'a str,
+    iter: I,
+    index: usize,
+}
+
+impl<'a, I> Iterator for ValidateBatchMixed<'a, I>
+where
+    I: Iterator<Item = (&'a str, Option<&'a str>)>,
+{
+    type Item = (usize, Result<Validation, ValidationError>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let (value, kind) = self.iter.next()?;
+        let i = self.index;
+        self.index += 1;
+        let res = match kind {
+            Some(k) => Idenumbra::validate(self.country, value, k),
+            None => Idenumbra::infer(self.country, value),
+        };
+        Some((i, res))
+    }
+}
 
 #[cfg(test)]
 mod tests {
