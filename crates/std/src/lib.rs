@@ -62,9 +62,45 @@ type ComponentsFn = fn(&str) -> Result<Option<CountryComponents>, ValidationErro
 /// Country-specific parts returned by [`Idenumbra::components`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CountryComponents {
+    /// Argentina: see [`idenumbra_arg::components`].
+    #[cfg(feature = "arg")]
+    ARG(idenumbra_arg::Components),
+    /// Bolivia: see [`idenumbra_bol::components`].
+    #[cfg(feature = "bol")]
+    BOL(idenumbra_bol::Components),
+    /// Brazil: see [`idenumbra_bra::components`].
+    #[cfg(feature = "bra")]
+    BRA(idenumbra_bra::Components),
+    /// Costa Rica: see [`idenumbra_cri::components`].
+    #[cfg(feature = "cri")]
+    CRI(idenumbra_cri::Components),
     /// Ecuador: see [`idenumbra_ecu::components`].
     #[cfg(feature = "ecu")]
     ECU(idenumbra_ecu::Components),
+    /// Guatemala: see [`idenumbra_gtm::components`].
+    #[cfg(feature = "gtm")]
+    GTM(idenumbra_gtm::Components),
+    /// Honduras: see [`idenumbra_hnd::components`].
+    #[cfg(feature = "hnd")]
+    HND(idenumbra_hnd::Components),
+    /// Mexico: see [`idenumbra_mex::components`].
+    #[cfg(feature = "mex")]
+    MEX(idenumbra_mex::Components),
+    /// Nicaragua: see [`idenumbra_nic::components`].
+    #[cfg(feature = "nic")]
+    NIC(idenumbra_nic::Components),
+    /// Panama: see [`idenumbra_pan::components`].
+    #[cfg(feature = "pan")]
+    PAN(idenumbra_pan::Components),
+    /// Peru: see [`idenumbra_per::components`].
+    #[cfg(feature = "per")]
+    PER(idenumbra_per::Components),
+    /// Uruguay: see [`idenumbra_ury::components`].
+    #[cfg(feature = "ury")]
+    URY(idenumbra_ury::Components),
+    /// Venezuela: see [`idenumbra_ven::components`].
+    #[cfg(feature = "ven")]
+    VEN(idenumbra_ven::Components),
 }
 
 /// Result of a successful validation: the document kind that was validated and,
@@ -87,9 +123,57 @@ fn components_registry() -> &'static BTreeMap<&'static str, ComponentsFn> {
     COMPONENTS.get_or_init(|| {
         #[allow(unused_mut)]
         let mut m: BTreeMap<&'static str, ComponentsFn> = BTreeMap::new();
+        #[cfg(feature = "arg")]
+        m.insert("ARG", |value| {
+            idenumbra_arg::components(value).map(|c| c.map(CountryComponents::ARG))
+        });
+        #[cfg(feature = "bol")]
+        m.insert("BOL", |value| {
+            idenumbra_bol::components(value).map(|c| c.map(CountryComponents::BOL))
+        });
+        #[cfg(feature = "bra")]
+        m.insert("BRA", |value| {
+            idenumbra_bra::components(value).map(|c| c.map(CountryComponents::BRA))
+        });
+        #[cfg(feature = "cri")]
+        m.insert("CRI", |value| {
+            idenumbra_cri::components(value).map(|c| c.map(CountryComponents::CRI))
+        });
         #[cfg(feature = "ecu")]
         m.insert("ECU", |value| {
             idenumbra_ecu::components(value).map(|c| c.map(CountryComponents::ECU))
+        });
+        #[cfg(feature = "gtm")]
+        m.insert("GTM", |value| {
+            idenumbra_gtm::components(value).map(|c| c.map(CountryComponents::GTM))
+        });
+        #[cfg(feature = "hnd")]
+        m.insert("HND", |value| {
+            idenumbra_hnd::components(value).map(|c| c.map(CountryComponents::HND))
+        });
+        #[cfg(feature = "mex")]
+        m.insert("MEX", |value| {
+            idenumbra_mex::components(value).map(|c| c.map(CountryComponents::MEX))
+        });
+        #[cfg(feature = "nic")]
+        m.insert("NIC", |value| {
+            idenumbra_nic::components(value).map(|c| c.map(CountryComponents::NIC))
+        });
+        #[cfg(feature = "pan")]
+        m.insert("PAN", |value| {
+            idenumbra_pan::components(value).map(|c| c.map(CountryComponents::PAN))
+        });
+        #[cfg(feature = "per")]
+        m.insert("PER", |value| {
+            idenumbra_per::components(value).map(|c| c.map(CountryComponents::PER))
+        });
+        #[cfg(feature = "ury")]
+        m.insert("URY", |value| {
+            idenumbra_ury::components(value).map(|c| c.map(CountryComponents::URY))
+        });
+        #[cfg(feature = "ven")]
+        m.insert("VEN", |value| {
+            idenumbra_ven::components(value).map(|c| c.map(CountryComponents::VEN))
         });
         m
     })
@@ -105,21 +189,30 @@ fn registry() -> &'static BTreeMap<&'static str, (InferFn, TypedFn)> {
         {
             m.insert(
                 "ARG",
-                (idenumbra_arg::validate, idenumbra_arg::validate_with),
+                (
+                    |value| idenumbra_arg::validate(value).map(|_| ()),
+                    |value, kind| idenumbra_arg::validate_with(value, kind).map(|_| ()),
+                ),
             );
         }
         #[cfg(feature = "bol")]
         {
             m.insert(
                 "BOL",
-                (idenumbra_bol::validate, idenumbra_bol::validate_with),
+                (
+                    |value| idenumbra_bol::validate(value).map(|_| ()),
+                    |value, kind| idenumbra_bol::validate_with(value, kind).map(|_| ()),
+                ),
             );
         }
         #[cfg(feature = "bra")]
         {
             m.insert(
                 "BRA",
-                (idenumbra_bra::validate, idenumbra_bra::validate_with),
+                (
+                    |value| idenumbra_bra::validate(value).map(|_| ()),
+                    |value, kind| idenumbra_bra::validate_with(value, kind).map(|_| ()),
+                ),
             );
         }
         #[cfg(feature = "chl")]
@@ -140,7 +233,10 @@ fn registry() -> &'static BTreeMap<&'static str, (InferFn, TypedFn)> {
         {
             m.insert(
                 "CRI",
-                (idenumbra_cri::validate, idenumbra_cri::validate_with),
+                (
+                    |value| idenumbra_cri::validate(value).map(|_| ()),
+                    |value, kind| idenumbra_cri::validate_with(value, kind).map(|_| ()),
+                ),
             );
         }
         #[cfg(feature = "cub")]
@@ -171,42 +267,60 @@ fn registry() -> &'static BTreeMap<&'static str, (InferFn, TypedFn)> {
         {
             m.insert(
                 "GTM",
-                (idenumbra_gtm::validate, idenumbra_gtm::validate_with),
+                (
+                    |value| idenumbra_gtm::validate(value).map(|_| ()),
+                    |value, kind| idenumbra_gtm::validate_with(value, kind).map(|_| ()),
+                ),
             );
         }
         #[cfg(feature = "hnd")]
         {
             m.insert(
                 "HND",
-                (idenumbra_hnd::validate, idenumbra_hnd::validate_with),
+                (
+                    |value| idenumbra_hnd::validate(value).map(|_| ()),
+                    |value, kind| idenumbra_hnd::validate_with(value, kind).map(|_| ()),
+                ),
             );
         }
         #[cfg(feature = "mex")]
         {
             m.insert(
                 "MEX",
-                (idenumbra_mex::validate, idenumbra_mex::validate_with),
+                (
+                    |value| idenumbra_mex::validate(value).map(|_| ()),
+                    |value, kind| idenumbra_mex::validate_with(value, kind).map(|_| ()),
+                ),
             );
         }
         #[cfg(feature = "nic")]
         {
             m.insert(
                 "NIC",
-                (idenumbra_nic::validate, idenumbra_nic::validate_with),
+                (
+                    |value| idenumbra_nic::validate(value).map(|_| ()),
+                    |value, kind| idenumbra_nic::validate_with(value, kind).map(|_| ()),
+                ),
             );
         }
         #[cfg(feature = "pan")]
         {
             m.insert(
                 "PAN",
-                (idenumbra_pan::validate, idenumbra_pan::validate_with),
+                (
+                    |value| idenumbra_pan::validate(value).map(|_| ()),
+                    |value, kind| idenumbra_pan::validate_with(value, kind).map(|_| ()),
+                ),
             );
         }
         #[cfg(feature = "per")]
         {
             m.insert(
                 "PER",
-                (idenumbra_per::validate, idenumbra_per::validate_with),
+                (
+                    |value| idenumbra_per::validate(value).map(|_| ()),
+                    |value, kind| idenumbra_per::validate_with(value, kind).map(|_| ()),
+                ),
             );
         }
         #[cfg(feature = "pry")]
@@ -227,14 +341,20 @@ fn registry() -> &'static BTreeMap<&'static str, (InferFn, TypedFn)> {
         {
             m.insert(
                 "URY",
-                (idenumbra_ury::validate, idenumbra_ury::validate_with),
+                (
+                    |value| idenumbra_ury::validate(value).map(|_| ()),
+                    |value, kind| idenumbra_ury::validate_with(value, kind).map(|_| ()),
+                ),
             );
         }
         #[cfg(feature = "ven")]
         {
             m.insert(
                 "VEN",
-                (idenumbra_ven::validate, idenumbra_ven::validate_with),
+                (
+                    |value| idenumbra_ven::validate(value).map(|_| ()),
+                    |value, kind| idenumbra_ven::validate_with(value, kind).map(|_| ()),
+                ),
             );
         }
         m
@@ -308,6 +428,7 @@ impl Idenumbra {
                 #[cfg(not(feature = "ecu"))]
                 None
             }
+            _ => None, // other countries' components do not imply a kind here
         };
         Ok(Validation {
             valid: true,
