@@ -79,8 +79,9 @@ idenumbra_arg::validate_with("20-12345678-6", "cuit")?;
 - `Idenumbra::components(country, value) -> Result<Option<CountryComponents>, ValidationError>` — country-specific parts encoded in a valid number.
 
 `Validation` carries `valid: bool` (always `true` on `Ok`), `kind: Option<&'static str>` and
-`components: Option<CountryComponents>`. The components framework is wired up but no country
-currently registers components, so `components` returns `Ok(None)` today.
+`components: Option<CountryComponents>`. ARG, BOL, BRA, CRI, ECU, GTM, HND, MEX, NIC, PAN,
+PER, URY and VEN expose components; `components` is `None` for the other countries and for
+documents that encode no parts (passports, plain cédulas).
 
 Country codes are trimmed and uppercased by the orchestrator; **the value is not trimmed**
 (country validators trim it themselves).

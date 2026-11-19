@@ -37,8 +37,10 @@ pub struct Validation {
 }
 ```
 
-`CountryComponents` is currently an empty enum: the extraction framework is wired
-but no country registers components yet, so `components` returns `Ok(None)`.
+`CountryComponents` wraps the per-country component type. ARG, BOL, BRA, CRI,
+ECU, GTM, HND, MEX, NIC, PAN, PER, URY and VEN register a parser, so
+`components` returns their parts; it is `None` for the other countries and for
+documents that encode no parts (passports, plain cédulas).
 
 Re-exports: `ValidationError`, `Validator`, and (when the feature is enabled)
 each marker type `IdenumbraARG`, `IdenumbraBOL`, …, `IdenumbraVEN`.
