@@ -27,5 +27,7 @@
         }
       ]
     }
-  }
+  },
+  "label": "release/pending",
+  "release-label": "release/tagged"
 }
