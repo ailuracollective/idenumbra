@@ -41,6 +41,7 @@ mod tests {
         assert!(validate("000000000").is_err());
         assert!(validate("00000000000").is_err());
         assert!(validate("0000000000").is_err());
+        assert!(validate_with("0000000000", "nite").is_err());
     }
 
     #[test]

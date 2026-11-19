@@ -43,6 +43,10 @@ pub fn validate_with(value: &str, kind: &str) -> Result<Validation, ValidationEr
             if !chars.iter().all(u8::is_ascii_digit) {
                 return Err(ValidationError::InvalidFormat);
             }
+            // All-zero placeholders are never issued; `validate` rejects them.
+            if chars.iter().all(|d| *d == b'0') {
+                return Err(ValidationError::InvalidFormat);
+            }
             // The annex states no leading-zero rule for the NITE, so a
             // 10-digit value starting with 0 is accepted.
             Ok(Validation {
