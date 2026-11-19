@@ -31,6 +31,9 @@ impl Validator for IdenumbraURY {
     fn validate_with(value: &str, kind: &str) -> Result<Self::Validation, ValidationError> {
         crate::validate_with(value, kind)
     }
+    fn document_kinds() -> &'static [&'static str] {
+        &["id_card", "ci", "rut", "passport"]
+    }
 }
 
 #[cfg(test)]

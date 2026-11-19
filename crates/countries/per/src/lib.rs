@@ -34,4 +34,7 @@ impl Validator for IdenumbraPER {
     fn validate_with(value: &str, kind: &str) -> Result<Self::Validation, ValidationError> {
         crate::validate_with(value, kind)
     }
+    fn document_kinds() -> &'static [&'static str] {
+        &["dni", "ruc", "ce", "passport"]
+    }
 }
