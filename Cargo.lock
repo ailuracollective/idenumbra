@@ -294,6 +294,7 @@ name = "idenumbra-pry"
 version = "0.1.0-alpha.1"
 dependencies = [
  "idenumbra-core",
+ "proptest",
 ]
 
 [[package]]
