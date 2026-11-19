@@ -90,7 +90,9 @@ Idenumbra::infer("HND", "12345678")?;
 
 These values are **synthetic** and do **not** correspond to any real person or
 company. Generated locally for the structural rules. Source: generated locally;
-no check digit is computed.
+no check digit is computed. Property tests also generate non-zero DNIs, RTNs
+with every trailing digit, and alphanumeric passports locally; none is looked
+up or associated with a person.
 
 ## Notes
 
