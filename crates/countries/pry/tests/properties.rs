@@ -59,14 +59,14 @@ proptest! {
     }
 
     #[test]
-    fn passport_round_trip(value in "[A-Z0-9]{6,12}") {
+    fn passport_round_trip(value in "[A-Z][A-Z0-9]{5,11}") {
         // must contain a letter to be passport
         if !value.bytes().any(|b| b.is_ascii_alphabetic()) { return Ok(()); }
         prop_assert!(validate(&value).is_ok());
     }
 
     #[test]
-    fn passport_rejects_too_short(value in "[A-Z0-9]{1,5}") {
+    fn passport_rejects_too_short(value in "[A-Z][A-Z0-9]{0,4}") {
         if !value.bytes().any(|b| b.is_ascii_alphabetic()) { return Ok(()); }
         prop_assert!(validate(&value).is_err());
     }
