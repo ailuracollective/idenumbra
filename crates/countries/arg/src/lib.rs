@@ -1,20 +1,39 @@
 //! Argentina identification validator.
+//!
+//! Validates DNI (7-8 digits) and CUIT/CUIL (11 digits) numbers. Implements
+//! [`idenumbra_core::Validator`], so it can be used on its own or registered
+//! in the orchestrator. Validated numbers can also be split into their parts
+//! with [`components`].
 
 #![no_std]
 
-#[cfg(test)]
-use idenumbra_core::ValidationError;
+use idenumbra_core::{ValidationError, Validator};
+
+const COUNTRY: &str = "ARG";
 
 mod validators {
     use idenumbra_core::ValidationError;
     include!("validators/validate.rs");
     include!("validators/cuit.rs");
     include!("validators/validate_with.rs");
+    include!("validators/components.rs");
 }
 
-pub use validators::{validate, validate_with};
+pub use validators::{components, validate, validate_with, Components, Cuit, Validation};
 
-idenumbra_core::country_validator!(IdenumbraARG, "ARG");
+/// Zero-sized marker type implementing [`Validator`] for Argentina.
+pub struct IdenumbraARG;
+
+impl Validator for IdenumbraARG {
+    const COUNTRY: &'static str = COUNTRY;
+    type Validation = Validation;
+    fn validate(value: &str) -> Result<Self::Validation, ValidationError> {
+        validate(value)
+    }
+    fn validate_with(value: &str, kind: &str) -> Result<Self::Validation, ValidationError> {
+        crate::validate_with(value, kind)
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -59,5 +78,37 @@ mod tests {
         assert!(validate_with("12345678", "passport").is_err());
         // The all-zero placeholder is rejected for an explicit kind too.
         assert!(validate_with("0000000", "dni").is_err());
+    }
+
+    fn validated(value: &str) -> Validation {
+        match validate(value) {
+            Ok(v) => v,
+            Err(e) => panic!("{e}"),
+        }
+    }
+
+    #[test]
+    fn components_of_dni() {
+        let v = validated("12345678");
+        assert_eq!(v.kind, "dni");
+        assert_eq!(v.components, None);
+    }
+
+    #[test]
+    fn components_of_cuit() {
+        let v = validated("20-12345678-6");
+        assert_eq!(v.kind, "cuit");
+        let cuit = match v.components {
+            Some(Components::Cuit(c)) => c,
+            _ => panic!("expected cuit"),
+        };
+        assert_eq!(cuit.prefix, 20);
+        assert_eq!(cuit.dni, 12345678);
+        assert_eq!(cuit.check_digit, 6);
+    }
+
+    #[test]
+    fn components_require_a_valid_number() {
+        assert!(validate("20123456785").is_err());
     }
 }

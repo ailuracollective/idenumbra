@@ -33,7 +33,7 @@ fn validate_dni(digits: &[u8]) -> Result<(), ValidationError> {
 }
 
 /// Validate an Argentine identification number (DNI or CUIT/CUIL).
-pub fn validate(value: &str) -> Result<(), ValidationError> {
+pub fn validate(value: &str) -> Result<Validation, ValidationError> {
     let value = value.trim();
     if value.is_empty() {
         return Err(ValidationError::Empty);
@@ -41,8 +41,20 @@ pub fn validate(value: &str) -> Result<(), ValidationError> {
     let mut buf = [0u8; 11];
     let n = compact_digits(value, &mut buf)?;
     match n {
-        7 | 8 => validate_dni(&buf[..n]),
-        11 => validate_cuit(&buf[..11]),
+        7 | 8 => {
+            validate_dni(&buf[..n])?;
+            Ok(Validation {
+                kind: "dni",
+                components: None,
+            })
+        }
+        11 => {
+            validate_cuit(&buf[..11])?;
+            Ok(Validation {
+                kind: "cuit",
+                components: Some(Components::Cuit(cuit(&buf[..11]))),
+            })
+        }
         _ => Err(ValidationError::InvalidLength {
             expected: 8,
             found: n,
