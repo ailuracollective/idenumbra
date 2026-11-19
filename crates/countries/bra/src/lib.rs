@@ -1,4 +1,9 @@
 //! Brazil identification validator.
+//!
+//! Validates CPF (11 digits) and CNPJ (14 characters) numbers. Implements
+//! [`idenumbra_core::Validator`], so it can be used on its own or registered
+//! in the orchestrator. Validated numbers can also be split into their parts
+//! with [`components`].
 
 #![no_std]
 
@@ -7,6 +12,7 @@ use idenumbra_core::ValidationError;
 
 mod validators {
     use idenumbra_core::ValidationError;
+    include!("validators/components.rs");
     include!("validators/validate.rs");
     include!("validators/char_val.rs");
     include!("validators/cpf.rs");
@@ -14,9 +20,24 @@ mod validators {
     include!("validators/validate_with.rs");
 }
 
-pub use validators::{validate, validate_with};
+pub use validators::{components, validate, validate_with, Cnpj, Components, Cpf, Validation};
 
-idenumbra_core::country_validator!(IdenumbraBRA, "BRA");
+/// Zero-sized marker type implementing [`Validator`] for Brazil.
+pub struct IdenumbraBRA;
+
+impl idenumbra_core::Validator for IdenumbraBRA {
+    const COUNTRY: &'static str = "BRA";
+    type Validation = Validation;
+    fn validate(value: &str) -> Result<Self::Validation, idenumbra_core::ValidationError> {
+        validate(value)
+    }
+    fn validate_with(
+        value: &str,
+        kind: &str,
+    ) -> Result<Self::Validation, idenumbra_core::ValidationError> {
+        crate::validate_with(value, kind)
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -82,5 +103,47 @@ mod tests {
         assert!(validate_with("123.456.789-09", "cpf").is_ok());
         assert!(validate_with("123.456.789-09", "cnpj").is_err());
         assert!(validate_with("12.345.678/0001-95", "cnpj").is_ok());
+    }
+
+    fn validated(value: &str) -> Validation {
+        match validate(value) {
+            Ok(v) => v,
+            Err(e) => panic!("{e}"),
+        }
+    }
+
+    #[test]
+    fn components_of_cpf() {
+        let v = validated("123.456.789-09");
+        assert_eq!(v.kind, "cpf");
+        let card = match v.components {
+            Some(Components::Cpf(c)) => c,
+            _ => panic!("expected cpf"),
+        };
+        assert_eq!(card.region, 9);
+        assert_eq!(card.check_digit_1, 0);
+        assert_eq!(card.check_digit_2, 9);
+    }
+
+    #[test]
+    fn components_of_cnpj() {
+        let v = validated("12.345.678/0001-95");
+        assert_eq!(v.kind, "cnpj");
+        let cnpj = match v.components {
+            Some(Components::Cnpj(c)) => c,
+            _ => panic!("expected cnpj"),
+        };
+        assert_eq!(cnpj.root, *b"12345678");
+        assert_eq!(cnpj.branch, 1);
+        assert_eq!(cnpj.check_digit_1, 9);
+        assert_eq!(cnpj.check_digit_2, 5);
+    }
+
+    #[test]
+    fn components_require_a_valid_number() {
+        assert!(validate("12345678908").is_err());
+        let v = validated("12.ABC.345/01DE-35");
+        assert_eq!(v.kind, "cnpj");
+        assert!(v.components.is_some());
     }
 }

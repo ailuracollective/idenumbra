@@ -19,7 +19,7 @@ fn compact_chars(value: &str, buf: &mut [u8]) -> Result<usize, ValidationError> 
 }
 
 /// Validate a Brazilian identification number (CPF or CNPJ).
-pub fn validate(value: &str) -> Result<(), ValidationError> {
+pub fn validate(value: &str) -> Result<Validation, ValidationError> {
     let value = value.trim();
     if value.is_empty() {
         return Err(ValidationError::Empty);
@@ -27,8 +27,20 @@ pub fn validate(value: &str) -> Result<(), ValidationError> {
     let mut buf = [0u8; 14];
     let n = compact_chars(value, &mut buf)?;
     match n {
-        11 => validate_cpf(&buf[..11]),
-        14 => validate_cnpj(&buf[..14]),
+        11 => {
+            validate_cpf(&buf[..11])?;
+            Ok(Validation {
+                kind: "cpf",
+                components: Some(Components::Cpf(cpf(&buf[..11]))),
+            })
+        }
+        14 => {
+            validate_cnpj(&buf[..14])?;
+            Ok(Validation {
+                kind: "cnpj",
+                components: Some(Components::Cnpj(cnpj(&buf[..14]))),
+            })
+        }
         _ => Err(ValidationError::InvalidLength {
             expected: 11,
             found: n,
