@@ -146,16 +146,30 @@ fn validate_ruc(value: &str) -> Result<(), ValidationError> {
 /// but applying it needs the taxpayer type, which this crate does not carry, and
 /// it changes when the holder registers as a taxpayer, so it cannot be derived
 /// from the number alone. Only the structure is validated here.
-pub fn validate(value: &str) -> Result<(), ValidationError> {
+pub fn validate(value: &str) -> Result<Validation, ValidationError> {
     let value = value.trim();
     if value.is_empty() {
         return Err(ValidationError::Empty);
     }
     if value.contains('-') {
-        return validate_hyphenated(value).map(|_| ());
+        let is_nt = validate_hyphenated(value)?;
+        let components = parse_cedula(value);
+        let kind = if is_nt { "ruc" } else { "id_card" };
+        return Ok(Validation {
+            kind,
+            components: components.map(Components::Cedula),
+        });
     }
     if all_digits(value) {
-        return validate_plain(value);
+        validate_plain(value)?;
+        return Ok(Validation {
+            kind: "id_card",
+            components: None,
+        });
     }
-    validate_passport(value)
+    validate_passport(value)?;
+    Ok(Validation {
+        kind: "passport",
+        components: None,
+    })
 }

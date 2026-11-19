@@ -1,19 +1,39 @@
 //! Panama identification validator.
+//!
+//! Validates cédula (hyphenated or plain) and RUC (including the NT tax number)
+//! and passport numbers. Implements [`idenumbra_core::Validator`], so it can be
+//! used on its own or registered in the orchestrator. Validated numbers can also
+//! be split into their parts with [`components`].
 
 #![no_std]
 
-#[cfg(test)]
-use idenumbra_core::ValidationError;
+use idenumbra_core::{ValidationError, Validator};
 
 mod validators {
     use idenumbra_core::ValidationError;
     include!("validators/validate.rs");
     include!("validators/validate_with.rs");
+    include!("validators/components.rs");
 }
 
-pub use validators::{validate, validate_with};
+pub use validators::{components, validate, validate_with, Cedula, Components, Validation};
 
-idenumbra_core::country_validator!(IdenumbraPAN, "PAN");
+/// Alias kept for callers that prefer the country-prefixed name.
+pub type PanCedula = Cedula;
+
+/// Zero-sized marker type implementing [`Validator`] for Panama.
+pub struct IdenumbraPAN;
+
+impl Validator for IdenumbraPAN {
+    const COUNTRY: &'static str = "PAN";
+    type Validation = Validation;
+    fn validate(value: &str) -> Result<Self::Validation, ValidationError> {
+        validate(value)
+    }
+    fn validate_with(value: &str, kind: &str) -> Result<Self::Validation, ValidationError> {
+        crate::validate_with(value, kind)
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -92,5 +112,86 @@ mod tests {
         assert!(validate("AB-12-34").is_err());
         assert!(validate("8-12A-4567").is_err());
         assert!(validate("8-NT-1-24-7").is_err());
+    }
+
+    fn validated(value: &str) -> Validation {
+        match validate(value) {
+            Ok(v) => v,
+            Err(e) => panic!("{e}"),
+        }
+    }
+
+    #[test]
+    fn components_of_cedula() {
+        let v = validated("8-123-4567");
+        assert_eq!(v.kind, "id_card");
+        let c = match v.components {
+            Some(Components::Cedula(c)) => c,
+            _ => panic!("expected cedula"),
+        };
+        assert_eq!(c.province, 0);
+        assert_eq!(c.marker_len, 0);
+        assert_eq!(c.folio, 123);
+        assert_eq!(c.asiento, 4567);
+        assert!(!c.is_nt);
+    }
+
+    #[test]
+    fn components_of_marker() {
+        let v = validated("PE-12-3456");
+        let c = match v.components {
+            Some(Components::Cedula(c)) => c,
+            _ => panic!("expected cedula"),
+        };
+        assert_eq!(c.province, 0);
+        assert_eq!(c.marker_len, 2);
+        assert_eq!(&c.marker[..c.marker_len as usize], b"PE");
+        assert_eq!(c.folio, 12);
+        assert_eq!(c.asiento, 3456);
+    }
+
+    #[test]
+    fn components_of_province_marker() {
+        let v = validated("8AV-123-4567");
+        let c = match v.components {
+            Some(Components::Cedula(c)) => c,
+            _ => panic!("expected cedula"),
+        };
+        assert_eq!(c.province, 8);
+        assert_eq!(c.marker_len, 2);
+        assert_eq!(&c.marker[..c.marker_len as usize], b"AV");
+    }
+
+    #[test]
+    fn components_of_nt() {
+        let v = validated("8-NT-1-13656");
+        assert_eq!(v.kind, "ruc");
+        let c = match v.components {
+            Some(Components::Cedula(c)) => c,
+            _ => panic!("expected cedula"),
+        };
+        assert!(c.is_nt);
+        assert_eq!(c.province, 8);
+        assert_eq!(c.folio, 1);
+        assert_eq!(c.asiento, 13656);
+    }
+
+    #[test]
+    fn components_of_plain() {
+        let v = validated("81234567");
+        assert_eq!(v.kind, "id_card");
+        assert_eq!(v.components, None);
+    }
+
+    #[test]
+    fn components_of_passport() {
+        let v = validated("AB123456");
+        assert_eq!(v.kind, "passport");
+        assert_eq!(v.components, None);
+    }
+
+    #[test]
+    fn components_require_a_valid_number() {
+        assert!(validate("8-123-4567890123").is_err());
     }
 }
