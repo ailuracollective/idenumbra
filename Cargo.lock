@@ -209,6 +209,7 @@ name = "idenumbra-col"
 version = "0.1.0-alpha.1"
 dependencies = [
  "idenumbra-core",
+ "proptest",
 ]
 
 [[package]]
@@ -223,6 +224,7 @@ name = "idenumbra-cri"
 version = "0.1.0-alpha.1"
 dependencies = [
  "idenumbra-core",
+ "proptest",
 ]
 
 [[package]]
@@ -230,6 +232,7 @@ name = "idenumbra-cub"
 version = "0.1.0-alpha.1"
 dependencies = [
  "idenumbra-core",
+ "proptest",
 ]
 
 [[package]]
@@ -237,6 +240,7 @@ name = "idenumbra-dom"
 version = "0.1.0-alpha.1"
 dependencies = [
  "idenumbra-core",
+ "proptest",
 ]
 
 [[package]]
@@ -244,6 +248,7 @@ name = "idenumbra-ecu"
 version = "0.1.0-alpha.1"
 dependencies = [
  "idenumbra-core",
+ "proptest",
 ]
 
 [[package]]
@@ -251,6 +256,7 @@ name = "idenumbra-gtm"
 version = "0.1.0-alpha.1"
 dependencies = [
  "idenumbra-core",
+ "proptest",
 ]
 
 [[package]]
@@ -258,6 +264,7 @@ name = "idenumbra-hnd"
 version = "0.1.0-alpha.1"
 dependencies = [
  "idenumbra-core",
+ "proptest",
 ]
 
 [[package]]
@@ -265,6 +272,7 @@ name = "idenumbra-mex"
 version = "0.1.0-alpha.1"
 dependencies = [
  "idenumbra-core",
+ "proptest",
 ]
 
 [[package]]
@@ -280,6 +288,7 @@ name = "idenumbra-pan"
 version = "0.1.0-alpha.1"
 dependencies = [
  "idenumbra-core",
+ "proptest",
 ]
 
 [[package]]
@@ -287,6 +296,7 @@ name = "idenumbra-per"
 version = "0.1.0-alpha.1"
 dependencies = [
  "idenumbra-core",
+ "proptest",
 ]
 
 [[package]]
@@ -302,6 +312,7 @@ name = "idenumbra-slv"
 version = "0.1.0-alpha.1"
 dependencies = [
  "idenumbra-core",
+ "proptest",
 ]
 
 [[package]]
@@ -309,6 +320,7 @@ name = "idenumbra-ury"
 version = "0.1.0-alpha.1"
 dependencies = [
  "idenumbra-core",
+ "proptest",
 ]
 
 [[package]]
@@ -316,6 +328,7 @@ name = "idenumbra-ven"
 version = "0.1.0-alpha.1"
 dependencies = [
  "idenumbra-core",
+ "proptest",
 ]
 
 [[package]]

@@ -484,6 +484,81 @@ impl Idenumbra {
         })
     }
 
+    /// Validate a batch of values, inferring the document kind for each one.
+    ///
+    /// Returns a lazy iterator yielding `(input_index, result)` in input order.
+    /// No inputs or results are collected internally; the caller drives
+    /// iteration. An empty input yields zero items.
+    pub fn validate_batch<'a, I>(
+        country: &'a str,
+        inputs: I,
+    ) -> impl Iterator<Item = (usize, Result<Validation, ValidationError>)> + 'a
+    where
+        I: IntoIterator<Item = &'a str> + 'a,
+    {
+        inputs
+            .into_iter()
+            .enumerate()
+            .map(move |(i, value)| (i, Idenumbra::infer(country, value)))
+    }
+
+    /// Validate a batch of values with a single shared document `kind`.
+    ///
+    /// Returns a lazy iterator yielding `(input_index, result)` in input order.
+    pub fn validate_batch_with<'a, I>(
+        country: &'a str,
+        inputs: I,
+        kind: &'a str,
+    ) -> impl Iterator<Item = (usize, Result<Validation, ValidationError>)> + 'a
+    where
+        I: IntoIterator<Item = &'a str> + 'a,
+    {
+        inputs
+            .into_iter()
+            .enumerate()
+            .map(move |(i, value)| (i, Idenumbra::validate(country, value, kind)))
+    }
+
+    /// Validate a batch of values where each item supplies its own document
+    /// `kind` as `(value, kind)`.
+    ///
+    /// Returns a lazy iterator yielding `(input_index, result)` in input order.
+    pub fn validate_batch_typed<'a, I>(
+        country: &'a str,
+        inputs: I,
+    ) -> impl Iterator<Item = (usize, Result<Validation, ValidationError>)> + 'a
+    where
+        I: IntoIterator<Item = (&'a str, &'a str)> + 'a,
+    {
+        inputs
+            .into_iter()
+            .enumerate()
+            .map(move |(i, (value, kind))| (i, Idenumbra::validate(country, value, kind)))
+    }
+
+    /// Validate a batch of values where each item optionally supplies a document
+    /// `kind` as `(value, Option<kind>)`; `None` infers the kind.
+    ///
+    /// Returns a lazy iterator yielding `(input_index, result)` in input order.
+    pub fn validate_batch_mixed<'a, I>(
+        country: &'a str,
+        inputs: I,
+    ) -> impl Iterator<Item = (usize, Result<Validation, ValidationError>)> + 'a
+    where
+        I: IntoIterator<Item = (&'a str, Option<&'a str>)> + 'a,
+    {
+        inputs
+            .into_iter()
+            .enumerate()
+            .map(move |(i, (value, kind))| {
+                let res = match kind {
+                    Some(k) => Idenumbra::validate(country, value, k),
+                    None => Idenumbra::infer(country, value),
+                };
+                (i, res)
+            })
+    }
+
     /// Components encoded in a validated `value`.
     ///
     /// `Ok(None)` when the input is valid but has no structured components (a
