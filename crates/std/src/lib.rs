@@ -496,11 +496,10 @@ impl Idenumbra {
     where
         I: IntoIterator<Item = &'a str> + 'a,
     {
-        ValidateBatchInfer {
-            country,
-            iter: inputs.into_iter(),
-            index: 0,
-        }
+        inputs
+            .into_iter()
+            .enumerate()
+            .map(move |(i, value)| (i, Idenumbra::infer(country, value)))
     }
 
     /// Validate a batch of values with a single shared document `kind`.
@@ -514,12 +513,10 @@ impl Idenumbra {
     where
         I: IntoIterator<Item = &'a str> + 'a,
     {
-        ValidateBatchWith {
-            country,
-            iter: inputs.into_iter(),
-            kind,
-            index: 0,
-        }
+        inputs
+            .into_iter()
+            .enumerate()
+            .map(move |(i, value)| (i, Idenumbra::validate(country, value, kind)))
     }
 
     /// Validate a batch of values where each item supplies its own document
@@ -533,11 +530,10 @@ impl Idenumbra {
     where
         I: IntoIterator<Item = (&'a str, &'a str)> + 'a,
     {
-        ValidateBatchTyped {
-            country,
-            iter: inputs.into_iter(),
-            index: 0,
-        }
+        inputs
+            .into_iter()
+            .enumerate()
+            .map(move |(i, (value, kind))| (i, Idenumbra::validate(country, value, kind)))
     }
 
     /// Validate a batch of values where each item optionally supplies a document
@@ -551,11 +547,16 @@ impl Idenumbra {
     where
         I: IntoIterator<Item = (&'a str, Option<&'a str>)> + 'a,
     {
-        ValidateBatchMixed {
-            country,
-            iter: inputs.into_iter(),
-            index: 0,
-        }
+        inputs
+            .into_iter()
+            .enumerate()
+            .map(move |(i, (value, kind))| {
+                let res = match kind {
+                    Some(k) => Idenumbra::validate(country, value, k),
+                    None => Idenumbra::infer(country, value),
+                };
+                (i, res)
+            })
     }
 
     /// Components encoded in a validated `value`.
@@ -615,91 +616,6 @@ pub use idenumbra_slv::IdenumbraSLV;
 pub use idenumbra_ury::IdenumbraURY;
 #[cfg(feature = "ven")]
 pub use idenumbra_ven::IdenumbraVEN;
-
-struct ValidateBatchInfer<'a, I> {
-    country: &'a str,
-    iter: I,
-    index: usize,
-}
-
-impl<'a, I> Iterator for ValidateBatchInfer<'a, I>
-where
-    I: Iterator<Item = &'a str>,
-{
-    type Item = (usize, Result<Validation, ValidationError>);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let value = self.iter.next()?;
-        let i = self.index;
-        self.index += 1;
-        Some((i, Idenumbra::infer(self.country, value)))
-    }
-}
-
-struct ValidateBatchWith<'a, I> {
-    country: &'a str,
-    iter: I,
-    kind: &'a str,
-    index: usize,
-}
-
-impl<'a, I> Iterator for ValidateBatchWith<'a, I>
-where
-    I: Iterator<Item = &'a str>,
-{
-    type Item = (usize, Result<Validation, ValidationError>);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let value = self.iter.next()?;
-        let i = self.index;
-        self.index += 1;
-        Some((i, Idenumbra::validate(self.country, value, self.kind)))
-    }
-}
-
-struct ValidateBatchTyped<'a, I> {
-    country: &'a str,
-    iter: I,
-    index: usize,
-}
-
-impl<'a, I> Iterator for ValidateBatchTyped<'a, I>
-where
-    I: Iterator<Item = (&'a str, &'a str)>,
-{
-    type Item = (usize, Result<Validation, ValidationError>);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let (value, kind) = self.iter.next()?;
-        let i = self.index;
-        self.index += 1;
-        Some((i, Idenumbra::validate(self.country, value, kind)))
-    }
-}
-
-struct ValidateBatchMixed<'a, I> {
-    country: &'a str,
-    iter: I,
-    index: usize,
-}
-
-impl<'a, I> Iterator for ValidateBatchMixed<'a, I>
-where
-    I: Iterator<Item = (&'a str, Option<&'a str>)>,
-{
-    type Item = (usize, Result<Validation, ValidationError>);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let (value, kind) = self.iter.next()?;
-        let i = self.index;
-        self.index += 1;
-        let res = match kind {
-            Some(k) => Idenumbra::validate(self.country, value, k),
-            None => Idenumbra::infer(self.country, value),
-        };
-        Some((i, res))
-    }
-}
 
 #[cfg(test)]
 mod tests {
