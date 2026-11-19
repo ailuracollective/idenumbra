@@ -11,6 +11,7 @@ repository = "https://github.com/ailuracollective/idenumbra"
 authors = ["ailuracollective"]
 
 [workspace.dependencies]
+proptest = "1.6"
 idenumbra-core = { version = "0.1.0-alpha.1", path = "crates/core" }
 idenumbra-arg = { version = "0.1.0-alpha.1", path = "crates/countries/arg" }
 idenumbra-bol = { version = "0.1.0-alpha.1", path = "crates/countries/bol" }
