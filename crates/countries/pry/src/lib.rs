@@ -34,6 +34,10 @@ mod tests {
         assert!(validate("80001234-8").is_ok()); // company RUC
         assert!(validate_with("1236", "ruc").is_ok()); // shortest RUC body
         assert!(validate_with("12345678", "ci").is_ok()); // CI by kind
+
+        // The explicit kinds read the same separators as inference.
+        assert!(validate_with("1.234.567", "ci").is_ok());
+        assert!(validate_with("1.234.567", "id_card").is_ok());
     }
 
     #[test]
