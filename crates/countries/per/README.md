@@ -23,6 +23,24 @@ remainder 1 gives 0). That is the computation SUNAT's own form validator uses
   `20` legal person (national or foreign) are described by SUNAT; `17` is only
   documented by implementations.
 
+## Components
+
+`components(value)` (and the `Validation` returned by `validate`) expose the
+parts encoded in the number. `Ok(None)` for a valid DNI or passport/carné de
+extranjería.
+
+- RUC: `prefix` (`10`, `15`, `17` or `20`), `embedded_dni` (the DNI in
+  positions 3-10 when `prefix == 10`, otherwise `None`) and `check_digit`.
+
+```rust
+use idenumbra_per::{components, Components};
+
+if let Ok(Some(Components::Ruc(ruc))) = components("20123456786") {
+    assert_eq!(ruc.prefix, 20);
+    assert_eq!(ruc.check_digit, 6);
+}
+```
+
 ## References
 
 Official sources are listed first; the `implementation` ones are the

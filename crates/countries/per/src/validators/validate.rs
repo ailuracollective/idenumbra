@@ -1,5 +1,5 @@
 /// Validate a Peruvian identification number (DNI, RUC or foreign ID).
-pub fn validate(value: &str) -> Result<(), ValidationError> {
+pub fn validate(value: &str) -> Result<Validation, ValidationError> {
     let value = value.trim();
     if value.is_empty() {
         return Err(ValidationError::Empty);
@@ -10,9 +10,18 @@ pub fn validate(value: &str) -> Result<(), ValidationError> {
                 if value.bytes().all(|b| b == b'0') {
                     return Err(ValidationError::InvalidFormat);
                 }
-                Ok(()) // DNI
+                Ok(Validation {
+                    kind: "dni",
+                    components: None,
+                })
             }
-            11 => validate_ruc(value.as_bytes()),
+            11 => {
+                validate_ruc(value.as_bytes())?;
+                Ok(Validation {
+                    kind: "ruc",
+                    components: Some(Components::Ruc(ruc(value.as_bytes()))),
+                })
+            }
             found => Err(ValidationError::InvalidLength {
                 expected: 8,
                 found,
@@ -30,5 +39,8 @@ pub fn validate(value: &str) -> Result<(), ValidationError> {
             return Err(ValidationError::NonAlphanumeric { index: i });
         }
     }
-    Ok(())
+    Ok(Validation {
+        kind: "passport",
+        components: None,
+    })
 }
