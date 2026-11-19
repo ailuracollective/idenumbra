@@ -6,11 +6,11 @@
 //! than using a checksum fixture. All concrete values are synthetic and were
 //! authored here from the structural rules in the crate README.
 
+use idenumbra_core::{ValidationError, Validator};
 use idenumbra_cri::{
     components, validate, validate_with, CedulaFisica, CedulaJuridica, Components, Dimex,
     IdenumbraCRI, Validation,
 };
-use idenumbra_core::{ValidationError, Validator};
 use proptest::prelude::*;
 
 const ALNUM: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -37,15 +37,12 @@ fn alnum_to_string(chars: Vec<u8>) -> String {
 }
 
 fn id_card_digits() -> impl Strategy<Value = String> {
-    (1u8..=9, prop::collection::vec(0u8..=9, 8))
-        .prop_map(|(first, rest)| with_first(first, rest))
+    (1u8..=9, prop::collection::vec(0u8..=9, 8)).prop_map(|(first, rest)| with_first(first, rest))
 }
 
 fn dimex_digits() -> impl Strategy<Value = String> {
     (1u8..=9, 11usize..=12)
-        .prop_flat_map(|(first, len)| {
-            (Just(first), prop::collection::vec(0u8..=9, len - 1))
-        })
+        .prop_flat_map(|(first, len)| (Just(first), prop::collection::vec(0u8..=9, len - 1)))
         .prop_map(|(first, rest)| with_first(first, rest))
 }
 
@@ -388,7 +385,11 @@ fn all_zero_placeholders_are_rejected() {
         ("00000000000", "dimex"),
         ("000000000000", "dimex"),
     ] {
-        assert_eq!(validate(value), Err(ValidationError::InvalidFormat), "{value}");
+        assert_eq!(
+            validate(value),
+            Err(ValidationError::InvalidFormat),
+            "{value}"
+        );
         assert_eq!(
             validate_with(value, kind),
             Err(ValidationError::InvalidFormat),
@@ -417,7 +418,11 @@ fn malformed_and_invoice_key_padded_values_are_rejected() {
 
     // Invoice-key padding is not part of the document number.
     for value in ["01234567890", "012345678901"] {
-        assert_eq!(validate(value), Err(ValidationError::InvalidFormat), "{value}");
+        assert_eq!(
+            validate(value),
+            Err(ValidationError::InvalidFormat),
+            "{value}"
+        );
         assert_eq!(
             validate_with(value, "dimex"),
             Err(ValidationError::InvalidFormat),
