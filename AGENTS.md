@@ -2,6 +2,21 @@
 
 Guidance for coding agents working in this repository.
 
+## Organization standards
+
+**Mandatory. Read it before anything else in this file.**
+
+The organisation's conventions live in
+[.agents/organization-conventions.md](.agents/organization-conventions.md), not
+in this file. The link is mandatory and applies to every repository in the
+organisation. Do not paste them here or restate them from memory — if a rule is
+not in that file, it is not an organisation rule.
+
+Organisation standards apply here unless this repository documents a specific
+exception, in § Conventions, carrying the reason it was taken. An exception
+nobody wrote down is not an exception.
+
+
 ## Project
 
 `idenumbra` is a Cargo workspace of Latin American identification validators.
