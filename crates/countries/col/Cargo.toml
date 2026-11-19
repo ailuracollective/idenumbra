@@ -17,3 +17,6 @@ workspace = true
 
 [dependencies]
 idenumbra-core = { workspace = true }
+
+[dev-dependencies]
+proptest.workspace = true
