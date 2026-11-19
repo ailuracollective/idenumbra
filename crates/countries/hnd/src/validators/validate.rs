@@ -38,19 +38,35 @@ fn validate_passport(value: &str) -> Result<(), ValidationError> {
 }
 
 /// Validate a Honduran identification number (DNI or RTN).
-pub fn validate(value: &str) -> Result<(), ValidationError> {
+pub fn validate(value: &str) -> Result<Validation, ValidationError> {
     let value = value.trim();
     if value.is_empty() {
         return Err(ValidationError::Empty);
     }
     if value.bytes().any(|b| b.is_ascii_alphabetic()) {
-        return validate_passport(value);
+        validate_passport(value)?;
+        return Ok(Validation {
+            kind: "passport",
+            components: None,
+        });
     }
     let mut buf = [0u8; 14];
     let n = compact_digits(value, &mut buf)?;
     match n {
-        13 => validate_dni(&buf[..13]),
-        14 => validate_rtn(&buf[..14]),
+        13 => {
+            validate_dni(&buf[..13])?;
+            Ok(Validation {
+                kind: "dni",
+                components: None,
+            })
+        }
+        14 => {
+            validate_rtn(&buf[..14])?;
+            Ok(Validation {
+                kind: "rtn",
+                components: Some(Components::Rtn(rtn_from_digits(&buf[..14]))),
+            })
+        }
         _ => Err(ValidationError::InvalidLength {
             expected: 13,
             found: n,
