@@ -436,20 +436,23 @@ impl Idenumbra {
     /// match means the number's shape/check digits are valid for that country,
     /// not that it was issued there or belongs to a real person.
     pub fn candidates(value: &str) -> Vec<&'static str> {
-        supported_countries()
-            .iter()
-            .copied()
-            .filter(|&country| Self::infer(country, value).is_ok())
-            .collect()
+        Self::filter_countries(value, |country| Self::infer(country, value).is_ok())
     }
 
     /// Return the enabled country codes whose validation rules accept `value`
     /// as the explicit document `kind` (e.g. `"id_card"`, `"ruc"`).
     pub fn candidates_with(value: &str, kind: &str) -> Vec<&'static str> {
+        Self::filter_countries(value, |country| {
+            Self::validate(country, value, kind).is_ok()
+        })
+    }
+
+    fn filter_countries(value: &str, mut check: impl FnMut(&str) -> bool) -> Vec<&'static str> {
+        let _ = value;
         supported_countries()
             .iter()
             .copied()
-            .filter(|&country| Self::validate(country, value, kind).is_ok())
+            .filter(|&country| check(country))
             .collect()
     }
 
