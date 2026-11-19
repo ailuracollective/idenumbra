@@ -1,22 +1,34 @@
 //! Property-based tests for the Uruguayan CI and RUT validators.
 
-use idenumbra_ury::{validate, validate_with, Components, IdenumbraURY, Validation};
 use idenumbra_core::{ValidationError, Validator};
+use idenumbra_ury::{validate, validate_with, Components, IdenumbraURY, Validation};
 use proptest::prelude::*;
 
 fn ci_check(body: &str) -> u8 {
     let mut padded = [b'0'; 7];
     padded[7 - body.len()..].copy_from_slice(body.as_bytes());
     let weights = [2u32, 9, 8, 7, 6, 3, 4];
-    let sum: u32 = padded.iter().zip(weights).map(|(d, w)| (d - b'0') as u32 * w).sum();
+    let sum: u32 = padded
+        .iter()
+        .zip(weights)
+        .map(|(d, w)| (d - b'0') as u32 * w)
+        .sum();
     ((10 - sum % 10) % 10) as u8
 }
 
 fn rut_check(digits: &str) -> u32 {
     let weights = [4u32, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-    let sum: u32 = digits[..11].bytes().zip(weights).map(|(d, w)| (d - b'0') as u32 * w).sum();
+    let sum: u32 = digits[..11]
+        .bytes()
+        .zip(weights)
+        .map(|(d, w)| (d - b'0') as u32 * w)
+        .sum();
     let rest = sum % 11;
-    if rest == 0 { 0 } else { 11 - rest }
+    if rest == 0 {
+        0
+    } else {
+        11 - rest
+    }
 }
 
 fn accepted(value: &str) -> Validation {
