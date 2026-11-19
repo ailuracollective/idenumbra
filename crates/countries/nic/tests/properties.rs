@@ -1,7 +1,7 @@
 //! Property-based tests for the Nicaraguan cédula and passport validators.
 
-use idenumbra_nic::{validate, validate_with, Components, IdenumbraNIC, Validation};
 use idenumbra_core::{ValidationError, Validator};
+use idenumbra_nic::{validate, validate_with, Components, IdenumbraNIC, Validation};
 use proptest::prelude::*;
 
 const LETTERS: &[u8; 23] = b"ABCDEFGHJKLMNPQRSTUVWXY";
