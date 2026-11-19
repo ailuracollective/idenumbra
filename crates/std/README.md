@@ -26,6 +26,8 @@ pub struct Idenumbra;
   `"passport"`, `"dni"`, `"cuit"`), skipping inference.
 - `Idenumbra::components(country, value) -> Result<Option<CountryComponents>, ValidationError>` —
   country-specific parts encoded in a valid number.
+- `Idenumbra::candidates(value) -> Vec<&'static str>` — enabled country codes whose inferred validation rules accept `value` (candidates only, not verified origin).
+- `Idenumbra::candidates_with(value, kind) -> Vec<&'static str>` — same, validating as an explicit document `kind`.
 
 `Validation`:
 
