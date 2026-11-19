@@ -252,7 +252,11 @@ proptest! {
 #[test]
 fn all_zero_placeholders_are_rejected() {
     for value in ["00000000000", "000-0000000-0", "000 0000000 0"] {
-        assert_eq!(validate(value), Err(ValidationError::InvalidFormat), "{value}");
+        assert_eq!(
+            validate(value),
+            Err(ValidationError::InvalidFormat),
+            "{value}"
+        );
         assert_eq!(
             validate_with(value, "id_card"),
             Err(ValidationError::InvalidFormat),
