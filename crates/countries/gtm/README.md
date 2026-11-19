@@ -217,6 +217,8 @@ Idenumbra::infer("GTM", "12345678")?;
 
 These values are **synthetic** and do **not** correspond to any real person or
 company. They were generated locally with this crate's validation algorithm.
+The property-based tests generate additional synthetic values locally from the
+published check-character algorithms and municipality table.
 
 ## Notes
 
