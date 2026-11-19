@@ -2,18 +2,33 @@
 
 #![no_std]
 
-#[cfg(test)]
-use idenumbra_core::ValidationError;
+use idenumbra_core::{ValidationError, Validator};
 
 mod validators {
     use idenumbra_core::ValidationError;
     include!("validators/validate.rs");
     include!("validators/validate_with.rs");
+    include!("validators/components.rs");
 }
 
-pub use validators::{validate, validate_with};
+pub use validators::{
+    components, validate, validate_with, CedulaFisica, CedulaJuridica, Components, Dimex,
+    Validation,
+};
 
-idenumbra_core::country_validator!(IdenumbraCRI, "CRI");
+/// Zero-sized marker type implementing [`Validator`] for Costa Rica.
+pub struct IdenumbraCRI;
+
+impl Validator for IdenumbraCRI {
+    const COUNTRY: &'static str = "CRI";
+    type Validation = Validation;
+    fn validate(value: &str) -> Result<Self::Validation, ValidationError> {
+        validate(value)
+    }
+    fn validate_with(value: &str, kind: &str) -> Result<Self::Validation, ValidationError> {
+        crate::validate_with(value, kind)
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -108,5 +123,62 @@ mod tests {
         assert!(validate_with("12345678901", "id_card").is_err());
         assert!(validate_with("AB123456", "passport").is_ok());
         assert!(validate_with("AB123456", "id_card").is_err());
+    }
+
+    fn validated(value: &str) -> Validation {
+        match validate(value) {
+            Ok(v) => v,
+            Err(e) => panic!("{e}"),
+        }
+    }
+
+    #[test]
+    fn components_of_id_card() {
+        let v = validated("123456789");
+        assert_eq!(v.kind, "id_card");
+        let card = match v.components {
+            Some(Components::CedulaFisica(c)) => c,
+            _ => panic!("expected cedula fisica"),
+        };
+        assert_eq!(card.province, 1);
+    }
+
+    #[test]
+    fn components_of_juridical() {
+        let v = validated("3101A00001");
+        assert_eq!(v.kind, "cedula_juridica");
+        let j = match v.components {
+            Some(Components::CedulaJuridica(c)) => c,
+            _ => panic!("expected cedula juridica"),
+        };
+        assert_eq!(j.person_type, 3);
+        assert_eq!(j.class, 101);
+    }
+
+    #[test]
+    fn components_of_dimex() {
+        let v = validated("12345678901");
+        assert_eq!(v.kind, "dimex");
+        let d = match v.components {
+            Some(Components::Dimex(c)) => c,
+            _ => panic!("expected dimex"),
+        };
+        assert_eq!(d.country_code, 123);
+        let v = validated("123456789012");
+        let d = match v.components {
+            Some(Components::Dimex(c)) => c,
+            _ => panic!("expected dimex"),
+        };
+        assert_eq!(d.country_code, 123);
+    }
+
+    #[test]
+    fn components_none_for_nite_and_passport() {
+        let v = validated("1234567890");
+        assert_eq!(v.kind, "nite");
+        assert_eq!(v.components, None);
+        let v = validated("AB123456");
+        assert_eq!(v.kind, "passport");
+        assert_eq!(v.components, None);
     }
 }

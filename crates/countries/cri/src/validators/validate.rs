@@ -88,7 +88,7 @@ fn validate_passport(chars: &[u8]) -> Result<(), ValidationError> {
 /// No Costa Rican agency publishes a check digit for these documents, so only
 /// the length, the alphabet and (for the cédula física and the DIMEX) the
 /// no-leading-zero rule are checked.
-pub fn validate(value: &str) -> Result<(), ValidationError> {
+pub fn validate(value: &str) -> Result<Validation, ValidationError> {
     let value = value.trim();
     if value.is_empty() {
         return Err(ValidationError::Empty);
@@ -103,10 +103,58 @@ pub fn validate(value: &str) -> Result<(), ValidationError> {
     }
     let chars = &buf[..n];
     if chars.iter().all(u8::is_ascii_digit) {
-        return validate_digits(chars);
+        match n {
+            ID_CARD_LEN => {
+                validate_digits(chars)?;
+                Ok(Validation {
+                    kind: "id_card",
+                    components: Some(Components::CedulaFisica(cedula_fisica(chars))),
+                })
+            }
+            JURIDICAL_LEN => {
+                if chars[0] >= b'2' && chars[0] <= b'5' {
+                    validate_juridical(chars)?;
+                    Ok(Validation {
+                        kind: "cedula_juridica",
+                        components: Some(Components::CedulaJuridica(cedula_juridica(chars))),
+                    })
+                } else {
+                    validate_digits(chars)?;
+                    Ok(Validation {
+                        kind: "nite",
+                        components: None,
+                    })
+                }
+            }
+            _ => {
+                if DIMEX_LENGTHS.contains(&n) {
+                    validate_digits(chars)?;
+                    Ok(Validation {
+                        kind: "dimex",
+                        components: Some(Components::Dimex(dimex(chars))),
+                    })
+                } else {
+                    validate_digits(chars)?;
+                    Err(ValidationError::InvalidLength {
+                        expected: ID_CARD_LEN,
+                        found: n,
+                    })
+                }
+            }
+        }
+    } else {
+        if n == JURIDICAL_LEN {
+            validate_juridical(chars)?;
+            Ok(Validation {
+                kind: "cedula_juridica",
+                components: Some(Components::CedulaJuridica(cedula_juridica(chars))),
+            })
+        } else {
+            validate_passport(chars)?;
+            Ok(Validation {
+                kind: "passport",
+                components: None,
+            })
+        }
     }
-    if n == JURIDICAL_LEN {
-        return validate_juridical(chars);
-    }
-    validate_passport(chars)
 }
