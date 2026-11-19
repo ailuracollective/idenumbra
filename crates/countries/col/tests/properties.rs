@@ -56,7 +56,9 @@ fn citizen_id() -> impl Strategy<Value = String> {
 fn passport() -> impl Strategy<Value = String> {
     prop::collection::vec(prop::sample::select(ALNUM), 6..=12)
         .prop_filter("inferred passport must contain a letter", |chars| {
-            chars.iter().any(|character| character.is_ascii_alphabetic())
+            chars
+                .iter()
+                .any(|character| character.is_ascii_alphabetic())
         })
         .prop_map(|chars| chars.into_iter().map(char::from).collect())
 }
