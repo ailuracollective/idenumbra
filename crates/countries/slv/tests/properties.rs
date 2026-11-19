@@ -1,7 +1,7 @@
 //! Property-based tests for the Salvadoran DUI and NIT validators.
 
-use idenumbra_slv::{validate, validate_with};
 use idenumbra_core::ValidationError;
+use idenumbra_slv::{validate, validate_with};
 use proptest::prelude::*;
 
 fn dui_check(body8: &str) -> u8 {
