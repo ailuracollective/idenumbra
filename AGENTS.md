@@ -152,10 +152,11 @@ fix the skill.
 - Per-crate READMEs are copies of `templates/README.template.md`, not generated
   output: there is no script that renders them. Keep the `{{ }}` TOML escaping in
   the template, and update the root `README.md` lists when a country is added.
-- There is no CI that runs on ordinary pushes; `.github/workflows/publish.yml`
-  verifies the tagged tree (fmt, clippy, tests, tag/version) and then publishes
-  every crate to crates.io on a published release. `make test-all && make fmt &&
-  make clippy` locally is the gate.
+- `.github/workflows/ci.yml` runs fmt, clippy and the test suite (default and
+  all features) on every push and pull request. `.github/workflows/publish.yml`
+  re-runs the same checks on a tagged tree (plus tag/version verification) and
+  then publishes every crate to crates.io on a published release.
+  `make test-all && make fmt && make clippy` locally is still the gate.
 - Git hooks require `lefthook` and `commitlint` (`cargo install commitlint-rs`)
   on `PATH`; run `make hooks` once per clone.
 

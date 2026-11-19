@@ -1,0 +1,49 @@
+name: CI
+
+# Basic checks that run on every push and pull request: formatting, linting and
+# the test suite (both with default (no) features and with all features). This
+# is the fast gate; the heavier publish workflow runs the same checks on a
+# tagged tree before uploading to crates.io.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    name: fmt + clippy + tests
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Install the Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal \
+            --component rustfmt --component clippy
+          rustup default stable
+          rustc --version
+          cargo --version
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Check formatting
+        run: cargo fmt --all --check
+
+      - name: Lint
+        run: cargo clippy --workspace --all-features --examples
+
+      - name: Test (default features)
+        run: cargo test --workspace
+
+      - name: Test (all features)
+        run: cargo test --workspace --all-features

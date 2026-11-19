@@ -97,8 +97,9 @@ make clippy                                # workspace, all features, examples
 cargo run --example basic --all-features   # orchestrator still resolves codes
 ```
 
-There is no CI workflow that runs these; `make test-all && make fmt && make
-clippy` locally is the gate. Report the commands you ran and their result.
+There is a CI workflow (`.github/workflows/ci.yml`) that runs these on every
+push and pull request; `make test-all && make fmt && make
+clippy` locally is still the gate. Report the commands you ran and their result.
 
 ## Boundaries
 

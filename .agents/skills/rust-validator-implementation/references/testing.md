@@ -105,7 +105,8 @@ cargo build --workspace                       # default features: nothing enable
 ```
 
 `make test-features` is what exercises the `#[cfg(not(feature = …))]` half of the
-orchestrator tests. There is no CI and no `no_std` cross-target build here, so
+orchestrator tests. CI (`.github/workflows/ci.yml`) runs fmt, clippy and the
+test suite on every push/PR; there is no `no_std` cross-target build here, so
 `no_std` compliance is enforced by `#![no_std]` plus review: no `std::`,
 `format!`, `Vec` or `String` in a country crate. `cargo build` alone does not
 prove it.
