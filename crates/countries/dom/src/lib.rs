@@ -29,6 +29,14 @@ mod tests {
     fn accepts_formatted_id_card() {
         assert!(validate("12345678903").is_ok());
         assert!(validate("123-4567890-3").is_ok());
+        // The explicit kind reads the same separators as inference.
+        assert!(validate_with("12345678903", "id_card").is_ok());
+        assert!(validate_with("123-4567890-3", "id_card").is_ok());
+        // A passport is not an identity card.
+        assert_eq!(
+            validate_with("AB123456", "id_card"),
+            Err(ValidationError::InvalidFormat)
+        );
     }
 
     #[test]
