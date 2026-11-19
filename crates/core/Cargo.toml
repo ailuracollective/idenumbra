@@ -16,3 +16,6 @@ categories = ["no-std", "parsing"]
 workspace = true
 
 [dependencies]
+
+[dev-dependencies]
+proptest.workspace = true
