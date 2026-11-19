@@ -1,20 +1,37 @@
 //! Uruguay identification validator.
+//!
+//! Validates CI (cédula de identidad), RUT and passport numbers. Implements
+//! [`idenumbra_core::Validator`], so it can be used on its own or registered
+//! in the orchestrator. Validated numbers can also be split into their parts
+//! with [`components`].
 
 #![no_std]
 
-#[cfg(test)]
-use idenumbra_core::ValidationError;
+use idenumbra_core::{ValidationError, Validator};
 
 mod validators {
     use idenumbra_core::ValidationError;
     include!("validators/validate.rs");
     include!("validators/rut.rs");
     include!("validators/validate_with.rs");
+    include!("validators/components.rs");
 }
 
-pub use validators::{validate, validate_with};
+pub use validators::{components, validate, validate_with, Ci, Components, Rut, Validation};
 
-idenumbra_core::country_validator!(IdenumbraURY, "URY");
+/// Zero-sized marker type implementing [`Validator`] for Uruguay.
+pub struct IdenumbraURY;
+
+impl Validator for IdenumbraURY {
+    const COUNTRY: &'static str = "URY";
+    type Validation = Validation;
+    fn validate(value: &str) -> Result<Self::Validation, ValidationError> {
+        validate(value)
+    }
+    fn validate_with(value: &str, kind: &str) -> Result<Self::Validation, ValidationError> {
+        crate::validate_with(value, kind)
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -75,5 +92,48 @@ mod tests {
             Err(ValidationError::InvalidRegion { region: 23 })
         );
         assert!(validate("219999830029").is_err()); // positions 9-11 are 001
+    }
+
+    fn validated(value: &str) -> Validation {
+        match validate(value) {
+            Ok(v) => v,
+            Err(e) => panic!("{e}"),
+        }
+    }
+
+    #[test]
+    fn components_of_ci() {
+        let v = validated("12345672");
+        assert_eq!(v.kind, "ci");
+        let c = match v.components {
+            Some(Components::Ci(c)) => c,
+            _ => panic!("expected ci"),
+        };
+        assert_eq!(c.check_digit, 2);
+    }
+
+    #[test]
+    fn components_of_rut() {
+        let v = validated("219999830019");
+        assert_eq!(v.kind, "rut");
+        let r = match v.components {
+            Some(Components::Rut(r)) => r,
+            _ => panic!("expected rut"),
+        };
+        assert_eq!(r.operating_unit, 21);
+        assert_eq!(r.sequential, 999983);
+        assert_eq!(r.check_digit, 9);
+    }
+
+    #[test]
+    fn components_of_passport() {
+        let v = validated("AB123456");
+        assert_eq!(v.kind, "passport");
+        assert_eq!(v.components, None);
+    }
+
+    #[test]
+    fn components_require_a_valid_number() {
+        assert!(validate("12345673").is_err());
     }
 }

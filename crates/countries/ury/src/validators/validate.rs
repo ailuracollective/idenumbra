@@ -69,7 +69,7 @@ fn validate_ci(digits: &[u8]) -> Result<(), ValidationError> {
 }
 
 /// Validate a Uruguayan identification number (CI or RUT).
-pub fn validate(value: &str) -> Result<(), ValidationError> {
+pub fn validate(value: &str) -> Result<Validation, ValidationError> {
     let value = value.trim();
     if value.is_empty() {
         return Err(ValidationError::Empty);
@@ -87,12 +87,29 @@ pub fn validate(value: &str) -> Result<(), ValidationError> {
             buf[n] = b;
             n += 1;
         } else if !matches!(b, b'.' | b'-' | b' ') {
-            return validate_passport(value);
+            validate_passport(value)?;
+            return Ok(Validation {
+                kind: "passport",
+                components: None,
+            });
         }
     }
     match n {
-        7 | 8 => validate_ci(&buf[..n]),
-        12 => validate_rut(&buf[..12]),
+        7 | 8 => {
+            validate_ci(&buf[..n])?;
+            Ok(Validation {
+                kind: "ci",
+                components: Some(Components::Ci(ci(&buf[..n]))),
+            })
+        }
+        12 => {
+            // validate_rut is defined in rut.rs (same module).
+            validate_rut(&buf[..12])?;
+            Ok(Validation {
+                kind: "rut",
+                components: Some(Components::Rut(rut(&buf[..12]))),
+            })
+        }
         _ => Err(ValidationError::InvalidLength {
             expected: 8,
             found: n,
