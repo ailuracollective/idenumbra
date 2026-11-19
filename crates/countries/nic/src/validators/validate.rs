@@ -99,7 +99,7 @@ fn validate_passport(value: &str) -> Result<(), ValidationError> {
 }
 
 /// Validate a Nicaraguan identification number (identity card or passport).
-pub fn validate(value: &str) -> Result<(), ValidationError> {
+pub fn validate(value: &str) -> Result<Validation, ValidationError> {
     let value = value.trim();
     if value.is_empty() {
         return Err(ValidationError::Empty);
@@ -110,7 +110,15 @@ pub fn validate(value: &str) -> Result<(), ValidationError> {
     // the cédula path (and a shorter digit-only run is reported as a cédula
     // length error, not silently accepted as a passport).
     if n >= 13 || !value.bytes().any(|b| b.is_ascii_alphabetic()) {
-        return validate_id_card(&buf[..n]);
+        validate_id_card(&buf[..n])?;
+        return Ok(Validation {
+            kind: "id_card",
+            components: Some(Components::Cedula(cedula(&buf[..n]))),
+        });
     }
-    validate_passport(value)
+    validate_passport(value)?;
+    Ok(Validation {
+        kind: "passport",
+        components: None,
+    })
 }
