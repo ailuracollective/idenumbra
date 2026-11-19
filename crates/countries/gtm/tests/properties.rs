@@ -1,11 +1,13 @@
 //! Property-based tests for the Guatemalan CUI/DPI, NIT and passport validators.
 
-use idenumbra_gtm::{validate, validate_with, Components, Validation};
 use idenumbra_core::ValidationError;
+use idenumbra_gtm::{validate, validate_with, Components, Validation};
 use proptest::prelude::*;
 
 // Municipality counts per department (index 0 unused).
-const MUNICIPALITIES: [u8; 23] = [0, 17, 8, 16, 16, 14, 14, 19, 8, 24, 21, 9, 30, 33, 21, 8, 17, 14, 5, 11, 11, 7, 17];
+const MUNICIPALITIES: [u8; 23] = [
+    0, 17, 8, 16, 16, 14, 14, 19, 8, 24, 21, 9, 30, 33, 21, 8, 17, 14, 5, 11, 11, 7, 17,
+];
 
 fn cui_check(body8: &str) -> u8 {
     let mut sum = 0u32;
