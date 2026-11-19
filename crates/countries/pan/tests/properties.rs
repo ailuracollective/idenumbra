@@ -6,10 +6,10 @@
 //! panic resistance. All generated identifiers are synthetic and derived
 //! locally from the documented shapes.
 
+use idenumbra_core::{ValidationError, Validator};
 use idenumbra_pan::{
     components, validate, validate_with, Cedula, Components, IdenumbraPAN, Validation,
 };
-use idenumbra_core::{ValidationError, Validator};
 use proptest::prelude::*;
 
 const ID_MARKERS: [&str; 5] = ["E", "N", "PE", "AV", "PI"];
@@ -70,18 +70,15 @@ fn cedula_case() -> impl Strategy<Value = CedulaCase> {
             (first, province.map_or(0, |(province, _)| province), marker)
         });
 
-    (
-        prop_oneof![rollo, marked],
-        0u32..=9_999,
-        0u32..=999_999_999,
-    )
-        .prop_map(|((first, province, marker), folio, asiento)| CedulaCase {
+    (prop_oneof![rollo, marked], 0u32..=9_999, 0u32..=999_999_999).prop_map(
+        |((first, province, marker), folio, asiento)| CedulaCase {
             first,
             province,
             marker,
             folio,
             asiento,
-        })
+        },
+    )
 }
 
 /// Plain 7-13 digit cédulas/RUCs, excluding the all-zero placeholder.
@@ -98,7 +95,9 @@ fn plain_digits() -> impl Strategy<Value = String> {
 fn passport_value() -> impl Strategy<Value = String> {
     prop::collection::vec(prop::sample::select(ALNUM), 6..=12)
         .prop_filter("inferred passports contain a letter", |chars| {
-            chars.iter().any(|character| character.is_ascii_alphabetic())
+            chars
+                .iter()
+                .any(|character| character.is_ascii_alphabetic())
         })
         .prop_map(|chars| chars.into_iter().map(char::from).collect())
 }
@@ -123,9 +122,8 @@ fn accepted(value: &str) -> Validation {
 fn valid_value() -> impl Strategy<Value = String> {
     prop_oneof![
         cedula_case().prop_map(|case| case.value()),
-        nt_parts().prop_map(|(province, folio, asiento)| format!(
-            "{province}-NT-{folio}-{asiento}"
-        )),
+        nt_parts()
+            .prop_map(|(province, folio, asiento)| format!("{province}-NT-{folio}-{asiento}")),
         plain_digits(),
         passport_value(),
     ]
