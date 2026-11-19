@@ -146,6 +146,7 @@ Idenumbra::infer("CRI", "12345678")?;
 - Cédula jurídica: `3101123456` and `3101A00001`
 - NITE: `1234567890` and, with the leading zero the annex does not forbid,
   `0123456789`
+- Passport: `AB123456`
 
 These values are **synthetic** and do **not** correspond to any real person or company. Generated locally matching the validator format rules. Source: Ministerio de Hacienda *Anexos y Estructuras* v4.4 and the Registro Nacional communiqué on the alphanumeric cédula jurídica; the `3-101-A00001` shape follows the Registro Nacional's published example.
 
