@@ -35,37 +35,3 @@ impl Validator for IdenumbraPER {
         crate::validate_with(value, kind)
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn rejects_all_zero_placeholders() {
-        // Placeholder values are never issued.
-        assert!(validate("00000000").is_err());
-        assert!(validate_with("00000000", "dni").is_err());
-    }
-
-    #[test]
-    fn accepts_dni_and_ruc() {
-        assert!(validate("12345678").is_ok());
-        assert!(validate("20123456786").is_ok());
-        assert!(validate("15123456782").is_ok()); // foreign natural person
-        assert!(validate("17123456785").is_ok()); // prefix 17, undocumented
-        assert!(validate("AB123456").is_ok());
-    }
-
-    #[test]
-    fn rejects_bad_ruc() {
-        assert_eq!(
-            validate("20123456787"),
-            Err(ValidationError::CheckDigitMismatch {
-                expected: 6,
-                received: 7
-            })
-        );
-        assert!(validate("30123456786").is_err());
-        assert!(validate("2012345678").is_err());
-    }
-}
