@@ -1,11 +1,14 @@
 /// Validate `value` as an explicit document `kind`; use `validate` to infer.
-pub fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
+pub fn validate_with(value: &str, kind: &str) -> Result<Validation, ValidationError> {
     let value = value.trim();
     match kind {
-        "id_card" => {
+        "ci" | "id_card" | "identity_card" => {
             let digits = value.bytes().all(|b| b.is_ascii_digit());
             if digits && (6..=8).contains(&value.len()) && !value.bytes().all(|b| b == b'0') {
-                Ok(())
+                Ok(Validation {
+                    kind: "ci",
+                    components: None,
+                })
             } else {
                 Err(ValidationError::InvalidFormat)
             }
@@ -27,9 +30,19 @@ pub fn validate_with(value: &str, kind: &str) -> Result<(), ValidationError> {
                     return Err(ValidationError::NonAlphanumeric { index: i });
                 }
             }
-            validate_rif(&buf[..n])
+            validate_rif(&buf[..n])?;
+            Ok(Validation {
+                kind: "rif",
+                components: Some(Components::Rif(rif(&buf[..n]))),
+            })
         }
-        "passport" => validate_passport(value),
+        "passport" => {
+            validate_passport(value)?;
+            Ok(Validation {
+                kind: "passport",
+                components: None,
+            })
+        }
         _ => Err(ValidationError::InvalidFormat),
     }
 }

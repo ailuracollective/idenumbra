@@ -70,7 +70,7 @@ fn validate_passport(value: &str) -> Result<(), ValidationError> {
 }
 
 /// Validate a Venezuelan identification number (CI or RIF).
-pub fn validate(value: &str) -> Result<(), ValidationError> {
+pub fn validate(value: &str) -> Result<Validation, ValidationError> {
     let value = value.trim();
     if value.is_empty() {
         return Err(ValidationError::Empty);
@@ -95,14 +95,21 @@ pub fn validate(value: &str) -> Result<(), ValidationError> {
         && rif_base(buf[0]).is_some()
         && buf[1..10].iter().all(u8::is_ascii_digit)
     {
-        return validate_rif(&buf[..10]);
+        validate_rif(&buf[..10])?;
+        return Ok(Validation {
+            kind: "rif",
+            components: Some(Components::Rif(rif(&buf[..10]))),
+        });
     }
     if buf[..n].iter().all(u8::is_ascii_digit) {
         if buf[..n].iter().all(|d| *d == b'0') {
             return Err(ValidationError::InvalidFormat);
         }
         return if (6..=8).contains(&n) {
-            Ok(())
+            Ok(Validation {
+                kind: "ci",
+                components: None,
+            })
         } else {
             Err(ValidationError::InvalidLength {
                 expected: 8,
@@ -110,5 +117,9 @@ pub fn validate(value: &str) -> Result<(), ValidationError> {
             })
         };
     }
-    validate_passport(value)
+    validate_passport(value)?;
+    Ok(Validation {
+        kind: "passport",
+        components: None,
+    })
 }
