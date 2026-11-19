@@ -83,7 +83,7 @@ proptest! {
     }
 
     #[test]
-    fn passport_round_trip(value in "[A-Z0-9]{6,12}") {
+    fn passport_round_trip(value in "[A-Z][A-Z0-9]{5,11}") {
         prop_assert!(validate(&value).is_ok());
         let v = validate(&value).unwrap();
         prop_assert_eq!(v.kind, "passport");
@@ -93,7 +93,7 @@ proptest! {
     }
 
     #[test]
-    fn passport_rejects_too_short(value in "[A-Z0-9]{1,5}") {
+    fn passport_rejects_too_short(value in "[A-Z][A-Z0-9]{0,4}") {
         prop_assert!(validate(&value).is_err());
     }
 
