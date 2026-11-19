@@ -5,8 +5,8 @@
 //! and control digits, exact errors, and panic resistance. All identification
 //! values are generated locally from fictional dates and arbitrary digits.
 
-use idenumbra_cub::{validate, validate_with, IdenumbraCUB};
 use idenumbra_core::{ValidationError, Validator};
+use idenumbra_cub::{validate, validate_with, IdenumbraCUB};
 use proptest::prelude::*;
 
 const ALNUM: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -88,12 +88,7 @@ fn id_card_value() -> impl Strategy<Value = String> {
 
 fn id_card_with_invalid_month() -> impl Strategy<Value = IdCardParts> {
     id_card_parts()
-        .prop_flat_map(|parts| {
-            (
-                Just(parts),
-                prop_oneof![Just(0u8), 13u8..=99],
-            )
-        })
+        .prop_flat_map(|parts| (Just(parts), prop_oneof![Just(0u8), 13u8..=99]))
         .prop_map(|(mut parts, month)| {
             parts.month = month;
             parts
@@ -104,10 +99,7 @@ fn id_card_with_invalid_day() -> impl Strategy<Value = IdCardParts> {
     id_card_parts()
         .prop_flat_map(|parts| {
             let last_day = days_in_month(full_year(parts.year, parts.century), parts.month);
-            (
-                Just(parts),
-                prop_oneof![Just(0u8), (last_day + 1)..=99],
-            )
+            (Just(parts), prop_oneof![Just(0u8), (last_day + 1)..=99])
         })
         .prop_map(|(mut parts, day)| {
             parts.day = day;
@@ -116,7 +108,10 @@ fn id_card_with_invalid_day() -> impl Strategy<Value = IdCardParts> {
 }
 
 fn digits_to_string(digits: &[u8]) -> String {
-    digits.iter().map(|digit| char::from(b'0' + digit)).collect()
+    digits
+        .iter()
+        .map(|digit| char::from(b'0' + digit))
+        .collect()
 }
 
 fn passport_value() -> impl Strategy<Value = String> {
