@@ -6,8 +6,8 @@
 //! rather than checksum mutation. In particular, every RTN trailing digit is
 //! accepted for a non-zero embedded DNI.
 
-use idenumbra_hnd::{components, validate, validate_with, Components, IdenumbraHND, Validation};
 use idenumbra_core::{ValidationError, Validator};
+use idenumbra_hnd::{components, validate, validate_with, Components, IdenumbraHND, Validation};
 use proptest::prelude::*;
 
 const ALNUM: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
