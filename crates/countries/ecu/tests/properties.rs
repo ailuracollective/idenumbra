@@ -6,19 +6,17 @@
 //! structural checks because their final sequential digit is not a reliable
 //! check digit.
 
+use idenumbra_core::{ValidationError, Validator};
 use idenumbra_ecu::{
     components, validate, validate_with, Components, IdenumbraECU, Taxpayer, Validation,
 };
-use idenumbra_core::{ValidationError, Validator};
 use proptest::prelude::*;
 
 const ID_PROVINCES: [u8; 25] = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-    30,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 30,
 ];
 const RUC_PROVINCES: [u8; 26] = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-    30, 50,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 30, 50,
 ];
 const ID_WEIGHTS: [u32; 9] = [2, 1, 2, 1, 2, 1, 2, 1, 2];
 const PUBLIC_WEIGHTS: [u32; 8] = [3, 2, 7, 6, 5, 4, 3, 2];
@@ -122,27 +120,20 @@ fn private_ruc_value() -> impl Strategy<Value = String> {
 }
 
 fn numeric_ruc_value() -> impl Strategy<Value = String> {
-    prop_oneof![
-        natural_ruc_value(),
-        public_ruc_value(),
-        private_ruc_value(),
-    ]
+    prop_oneof![natural_ruc_value(), public_ruc_value(), private_ruc_value(),]
 }
 
 fn passport_value() -> impl Strategy<Value = String> {
     prop::collection::vec(prop::sample::select(ALNUM), 6..=9)
-        .prop_filter("numeric strings are inferred as malformed cédulas", |chars| {
-            chars.iter().any(u8::is_ascii_alphabetic)
-        })
+        .prop_filter(
+            "numeric strings are inferred as malformed cédulas",
+            |chars| chars.iter().any(u8::is_ascii_alphabetic),
+        )
         .prop_map(|chars| chars.into_iter().map(char::from).collect())
 }
 
 fn any_valid_value() -> impl Strategy<Value = String> {
-    prop_oneof![
-        id_card_value(),
-        numeric_ruc_value(),
-        passport_value(),
-    ]
+    prop_oneof![id_card_value(), numeric_ruc_value(), passport_value(),]
 }
 
 proptest! {
