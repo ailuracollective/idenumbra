@@ -3,7 +3,11 @@ pub fn validate_with(value: &str, kind: &str) -> Result<Validation, ValidationEr
     let value = value.trim();
     match kind {
         "dni" => {
-            if value.bytes().all(|b| b.is_ascii_digit()) && value.len() == 8 {
+            // All-zero placeholders are never issued; `validate` rejects them.
+            if value.bytes().all(|b| b.is_ascii_digit())
+                && value.len() == 8
+                && value.bytes().any(|b| b != b'0')
+            {
                 Ok(Validation {
                     kind: "dni",
                     components: None,

@@ -44,6 +44,7 @@ mod tests {
     fn rejects_all_zero_placeholders() {
         // Placeholder values are never issued.
         assert!(validate("00000000").is_err());
+        assert!(validate_with("00000000", "dni").is_err());
     }
 
     #[test]
