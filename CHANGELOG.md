@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0-alpha.4](https://github.com/ailuracollective/idenumbra/compare/v0.1.0-alpha.3...v0.1.0-alpha.4) (2026-11-20)
+
+
+### Miscellaneous Chores
+
+* trigger 0.1.0-alpha.4 release ([#91](https://github.com/ailuracollective/idenumbra/issues/91)) ([16f81ad](https://github.com/ailuracollective/idenumbra/commit/16f81ad29708f5f9419c05d9f1a0314c18e90ab1))
+
 ## [0.1.0-alpha.3](https://github.com/ailuracollective/idenumbra/compare/v0.1.0-alpha.2...v0.1.0-alpha.3) (2026-11-20)
 
 
