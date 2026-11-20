@@ -3,7 +3,7 @@ resolver = "2"
 members = ["crates/core", "crates/std", "crates/countries/*"]
 
 [workspace.package]
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.2"
 edition = "2021"
 rust-version = "1.81"
 license = "MIT"
@@ -12,26 +12,26 @@ authors = ["ailuracollective"]
 
 [workspace.dependencies]
 proptest = "1.6"
-idenumbra-core = { version = "0.1.0-alpha.1", path = "crates/core" }
-idenumbra-arg = { version = "0.1.0-alpha.1", path = "crates/countries/arg" }
-idenumbra-bol = { version = "0.1.0-alpha.1", path = "crates/countries/bol" }
-idenumbra-bra = { version = "0.1.0-alpha.1", path = "crates/countries/bra" }
-idenumbra-chl = { version = "0.1.0-alpha.1", path = "crates/countries/chl" }
-idenumbra-col = { version = "0.1.0-alpha.1", path = "crates/countries/col" }
-idenumbra-cri = { version = "0.1.0-alpha.1", path = "crates/countries/cri" }
-idenumbra-cub = { version = "0.1.0-alpha.1", path = "crates/countries/cub" }
-idenumbra-dom = { version = "0.1.0-alpha.1", path = "crates/countries/dom" }
-idenumbra-ecu = { version = "0.1.0-alpha.1", path = "crates/countries/ecu" }
-idenumbra-gtm = { version = "0.1.0-alpha.1", path = "crates/countries/gtm" }
-idenumbra-hnd = { version = "0.1.0-alpha.1", path = "crates/countries/hnd" }
-idenumbra-mex = { version = "0.1.0-alpha.1", path = "crates/countries/mex" }
-idenumbra-nic = { version = "0.1.0-alpha.1", path = "crates/countries/nic" }
-idenumbra-pan = { version = "0.1.0-alpha.1", path = "crates/countries/pan" }
-idenumbra-per = { version = "0.1.0-alpha.1", path = "crates/countries/per" }
-idenumbra-pry = { version = "0.1.0-alpha.1", path = "crates/countries/pry" }
-idenumbra-slv = { version = "0.1.0-alpha.1", path = "crates/countries/slv" }
-idenumbra-ury = { version = "0.1.0-alpha.1", path = "crates/countries/ury" }
-idenumbra-ven = { version = "0.1.0-alpha.1", path = "crates/countries/ven" }
+idenumbra-core = { version = "0.1.0-alpha.2", path = "crates/core" }
+idenumbra-arg = { version = "0.1.0-alpha.2", path = "crates/countries/arg" }
+idenumbra-bol = { version = "0.1.0-alpha.2", path = "crates/countries/bol" }
+idenumbra-bra = { version = "0.1.0-alpha.2", path = "crates/countries/bra" }
+idenumbra-chl = { version = "0.1.0-alpha.2", path = "crates/countries/chl" }
+idenumbra-col = { version = "0.1.0-alpha.2", path = "crates/countries/col" }
+idenumbra-cri = { version = "0.1.0-alpha.2", path = "crates/countries/cri" }
+idenumbra-cub = { version = "0.1.0-alpha.2", path = "crates/countries/cub" }
+idenumbra-dom = { version = "0.1.0-alpha.2", path = "crates/countries/dom" }
+idenumbra-ecu = { version = "0.1.0-alpha.2", path = "crates/countries/ecu" }
+idenumbra-gtm = { version = "0.1.0-alpha.2", path = "crates/countries/gtm" }
+idenumbra-hnd = { version = "0.1.0-alpha.2", path = "crates/countries/hnd" }
+idenumbra-mex = { version = "0.1.0-alpha.2", path = "crates/countries/mex" }
+idenumbra-nic = { version = "0.1.0-alpha.2", path = "crates/countries/nic" }
+idenumbra-pan = { version = "0.1.0-alpha.2", path = "crates/countries/pan" }
+idenumbra-per = { version = "0.1.0-alpha.2", path = "crates/countries/per" }
+idenumbra-pry = { version = "0.1.0-alpha.2", path = "crates/countries/pry" }
+idenumbra-slv = { version = "0.1.0-alpha.2", path = "crates/countries/slv" }
+idenumbra-ury = { version = "0.1.0-alpha.2", path = "crates/countries/ury" }
+idenumbra-ven = { version = "0.1.0-alpha.2", path = "crates/countries/ven" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
