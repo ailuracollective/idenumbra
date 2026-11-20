@@ -3,6 +3,15 @@
 Core contract shared by every idenumbra country validator. Dependency-free and
 `no_std`-compatible (Rust 1.81+).
 
+## Contents
+
+- [Modules](#modules)
+- [Validator trait](#validator-trait)
+- [ValidationError](#validationerror)
+- [Country codes](#country-codes)
+- [country_validator! macro](#country_validator-macro)
+- [Usage](#usage)
+
 ## Modules
 
 - `country` — ISO 3166-1 alpha-3 country code constants (`ARG`, `BOL`, …,
@@ -17,7 +26,8 @@ pub trait Validator {
     const COUNTRY: &'static str;
     type Validation;
     fn validate(value: &str) -> Result<Self::Validation, ValidationError>;
-    fn validate_with(value: &str, kind: &str) -> Result<Self::Validation, ValidationError> { ... }
+    fn validate_with(value: &str, kind: &str) -> Result<Self::Validation, ValidationError>;
+    fn document_kinds() -> &'static [&'static str];
 }
 ```
 
@@ -25,9 +35,9 @@ pub trait Validator {
 - `Validation` is `()` for countries that expose no extra information.
 - `validate` infers the document kind from the input.
 - `validate_with` validates as an explicit document `kind` (`"id_card"`, `"ruc"`,
-  `"passport"`, `"dni"`, `"cuit"`, …), skipping inference. The default
-  implementation ignores `kind` and delegates to `validate`; kind-aware crates
-  override it.
+  `"passport"`, `"dni"`, `"cuit"`, …), skipping inference.
+- The default `validate_with` ignores `kind` and delegates to `validate`;
+  kind-aware crates override it.
 
 ## `ValidationError`
 
@@ -45,6 +55,7 @@ pub trait Validator {
 | `InvalidRegion { region }` | An invalid province/region code. |
 
 `ValidationError` implements `core::fmt::Display` and `core::error::Error`.
+Derives `Debug, Clone, Copy, PartialEq, Eq, Hash`.
 
 ## Country codes
 
@@ -103,6 +114,10 @@ idenumbra_core::country_validator!(IdenumbraXXX, "XXX");
 - `ValidationError` derives `Debug, Clone, Copy, PartialEq, Eq, Hash`.
 - Errors implement `core::error::Error`, so they work with `?` in `no_std`
   contexts that provide an error type.
+
+## API documentation
+
+Generated reference: `cargo doc -p idenumbra-core --no-deps`.
 
 ## References
 

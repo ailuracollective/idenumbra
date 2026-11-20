@@ -3,6 +3,13 @@
 Orchestrator for idenumbra country validators. Feature-gated registry with lazy
 initialization, untyped and typed entry points, and a shared error type.
 
+## Contents
+
+- [Feature flags](#feature-flags)
+- [API](#api)
+- [Registry](#registry)
+- [Usage](#usage)
+
 ## Feature flags
 
 `arg`, `bol`, `bra`, `chl`, `col`, `cri`, `cub`, `dom`, `ecu`, `gtm`, `hnd`,
@@ -15,10 +22,15 @@ empty: a country is compiled in only when its feature is enabled.
 pub struct Idenumbra;
 ```
 
+### Discovery
+
 - `Idenumbra::supported_countries() -> &'static [&'static str]` — country codes
   compiled into this build (sorted, cached).
 - `Idenumbra::is_available(country) -> bool` — whether a validator for `country`
   is compiled in.
+
+### Validation
+
 - `Idenumbra::infer(country, value) -> Result<Validation, ValidationError>` —
   validate letting the country validator infer the document kind.
 - `Idenumbra::validate(country, value, kind) -> Result<Validation, ValidationError>` —
@@ -26,10 +38,28 @@ pub struct Idenumbra;
   `"passport"`, `"dni"`, `"cuit"`), skipping inference.
 - `Idenumbra::components(country, value) -> Result<Option<CountryComponents>, ValidationError>` —
   country-specific parts encoded in a valid number.
-- `Idenumbra::candidates(value) -> Vec<&'static str>` — enabled country codes whose inferred validation rules accept `value` (candidates only, not verified origin).
-- `Idenumbra::candidates_with(value, kind) -> Vec<&'static str>` — same, validating as an explicit document `kind`.
+- `Idenumbra::classify(country, value) -> Result<Vec<&'static str>, ValidationError>` —
+  document kinds that validate `value` in `country`.
 
-`Validation`:
+### Candidates
+
+- `Idenumbra::candidates(value) -> Vec<&'static str>` — enabled country codes
+  whose inferred validation rules accept `value` (candidates only).
+- `Idenumbra::candidates_with(value, kind) -> Vec<&'static str>` — same, with an
+  explicit document `kind`.
+
+### Batch (lazy iterators)
+
+- `Idenumbra::validate_batch(country, inputs)` — infers each kind.
+- `Idenumbra::validate_batch_with(country, inputs, kind)` — shared `kind`.
+- `Idenumbra::validate_batch_typed(country, inputs)` — items are `(value, kind)`.
+- `Idenumbra::validate_batch_mixed(country, inputs)` — items are
+  `(value, Option<kind>)`; `None` infers.
+
+Each yields `(input_index, result)` in input order. Empty input yields zero
+results.
+
+### `Validation`
 
 ```rust
 pub struct Validation {
@@ -39,13 +69,17 @@ pub struct Validation {
 }
 ```
 
-`CountryComponents` wraps the per-country component type. ARG, BOL, BRA, CRI,
-ECU, GTM, HND, MEX, NIC, PAN, PER, URY and VEN register a parser, so
-`components` returns their parts; it is `None` for the other countries and for
-documents that encode no parts (passports, plain cédulas).
+### `CountryComponents`
 
-Re-exports: `ValidationError`, `Validator`, and (when the feature is enabled)
-each marker type `IdenumbraARG`, `IdenumbraBOL`, …, `IdenumbraVEN`.
+Wraps the per-country component type. ARG, BOL, BRA, CRI, ECU, GTM, HND, MEX,
+NIC, PAN, PER, URY and VEN register a parser, so `components` returns their
+parts; it is `None` for the other countries and for documents that encode no
+parts (passports, plain cédulas).
+
+### Re-exports
+
+`ValidationError`, `Validator`, and (when the feature is enabled) each marker
+type `IdenumbraARG`, `IdenumbraBOL`, …, `IdenumbraVEN`.
 
 ## Registry
 
@@ -81,6 +115,11 @@ assert!(!Idenumbra::is_available("ZZZ"));
 ```
 
 Example binary: `cargo run --example basic --all-features`.
+
+## API documentation
+
+Generated reference: `cargo doc -p idenumbra --all-features --no-deps`.
+Human-readable summary: [`docs/API.md`](../../docs/API.md).
 
 ## Build / test
 

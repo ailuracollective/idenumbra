@@ -19,7 +19,7 @@ mod validators {
 
 pub use validators::{components, validate, validate_with, Cnpj, Components, Cpf, Validation};
 
-/// Zero-sized marker type implementing [`Validator`] for Brazil.
+/// Zero-sized marker type implementing [`idenumbra_core::Validator`] for Brazil.
 pub struct IdenumbraBRA;
 
 impl idenumbra_core::Validator for IdenumbraBRA {

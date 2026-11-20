@@ -7,6 +7,17 @@ registration.
 > Country codes and crate/feature names use the **ISO 3166-1 alpha-3** standard
 > (e.g. `ARG`, `MEX`). Codes are matched case-insensitively.
 
+## Contents
+
+- [Crates](#crates)
+- [Quick start](#quick-start)
+- [Supported countries](#supported-countries)
+- [Orchestrator API](#orchestrator-api-idenumbra)
+- [Feature flags](#feature-flags)
+- [Validation scope](#validation-scope)
+- [API documentation](#api-documentation)
+- [Build / test / lint](#build--test--lint)
+
 ## Crates
 
 | Crate | Package | Description |
@@ -77,12 +88,13 @@ idenumbra_arg::validate_with("20-12345678-6", "cuit")?;
 - `Idenumbra::infer(country, value) -> Result<Validation, ValidationError>` — validate letting the country validator infer the document kind.
 - `Idenumbra::validate(country, value, kind) -> Result<Validation, ValidationError>` — validate as an explicit document `kind` (`"id_card"`, `"ruc"`, `"passport"`, `"dni"`, `"cuit"`, …).
 - `Idenumbra::components(country, value) -> Result<Option<CountryComponents>, ValidationError>` — country-specific parts encoded in a valid number.
-- `Idenumbra::validate_batch(country, inputs) -> impl Iterator<Item = (usize, Result<Validation, ValidationError>)>` — lazily validate a sequence of values, inferring each document kind; yields `(input_index, result)` in input order without collecting inputs or results.
-- `Idenumbra::validate_batch_with(country, inputs, kind)` — same, with a single shared document `kind`.
-- `Idenumbra::validate_batch_typed(country, inputs)` — each input is `(value, kind)`.
-- `Idenumbra::validate_batch_mixed(country, inputs)` — each input is `(value, Option<kind>)`; `None` infers the kind.
-
-Empty input yields zero results. Unknown or disabled countries surface as `Err` per item.
+- `Idenumbra::candidates(value) -> Vec<&'static str>` — enabled country codes whose inferred rules accept `value` (candidates only).
+- `Idenumbra::candidates_with(value, kind) -> Vec<&'static str>` — same, with an explicit `kind`.
+- `Idenumbra::classify(country, value) -> Result<Vec<&'static str>, ValidationError>` — kinds that validate `value` in `country`.
+- `Idenumbra::validate_batch(country, inputs)` — lazily validate a sequence, inferring each kind; yields `(index, result)`.
+- `Idenumbra::validate_batch_with(country, inputs, kind)` — same, with a shared `kind`.
+- `Idenumbra::validate_batch_typed(country, inputs)` — items are `(value, kind)`.
+- `Idenumbra::validate_batch_mixed(country, inputs)` — items are `(value, Option<kind>)`; `None` infers.
 
 `Validation` carries `valid: bool` (always `true` on `Ok`), `kind: Option<&'static str>` and
 `components: Option<CountryComponents>`. ARG, BOL, BRA, CRI, ECU, GTM, HND, MEX, NIC, PAN,
@@ -121,6 +133,13 @@ Values that come from a published catalogue (province codes, issuer prefixes,
 reserved codes) live in named `const`s at the top of each validator file, so a
 catalogue change is a one-line edit and never touches the algorithm. Each crate
 README lists them with the source that backs the current value.
+
+## API documentation
+
+- Generated reference: `cargo doc --workspace --all-features --no-deps`.
+- Human-readable summary: [`docs/API.md`](docs/API.md).
+- Published on docs.rs: [`idenumbra`](https://docs.rs/idenumbra),
+  [`idenumbra-core`](https://docs.rs/idenumbra-core).
 
 ## Build / test / lint
 
