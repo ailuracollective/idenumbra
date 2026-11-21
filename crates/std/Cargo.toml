@@ -1,5 +1,5 @@
 [package]
-name = "idenumbra"
+name = "idenumbra-std"
 description = "Orchestrator for country identification validators"
 version.workspace = true
 edition.workspace = true

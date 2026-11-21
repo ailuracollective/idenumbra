@@ -96,7 +96,7 @@ trimmed** by the orchestrator (country validators trim it themselves).
 
 ```toml
 [dependencies]
-idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
+idenumbra-std = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 ```rust

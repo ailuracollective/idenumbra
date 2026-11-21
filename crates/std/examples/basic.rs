@@ -1,6 +1,6 @@
 //! Example usage of idenumbra.
 
-use idenumbra::Idenumbra;
+use idenumbra_std::Idenumbra;
 
 fn main() {
     for (country, value) in [("ARG", "12345678"), ("MEX", "GALA850315HNERXN05")] {

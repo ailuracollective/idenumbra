@@ -23,7 +23,7 @@ nobody wrote down is not an exception.
 
 - `crates/core`: shared contract (`Validator` trait, `ValidationError`,
   country code constants). Dependency-free and `no_std`.
-- Country validators: `crates/countries/{arg,bol,bra,chl,col,cri,cub,dom,ecu,gtm,hnd,mex,nic,pan,per,pry,slv,ury,ven}` (ISO code only; package name remains `idenumbra-<code>`).
+- Country validators: `crates/countries/{arg,bol,bra,chl,col,cri,cub,dom,ecu,gtm,hnd,mex,nic,pan,per,pry,slv,ury,ven}` (ISO code only; package name remains `idenumbra-<code>`). Internal resources, `publish = false`, not published to crates.io.
   Each is `no_std` and implements `idenumbra_core::Validator`.
 - `crates/std`: orchestrator with one Cargo feature per country plus `all`.
   Builds a lazy `BTreeMap` registry on first use.
@@ -174,6 +174,15 @@ fix the skill.
   `make test-all && make fmt && make clippy` locally is still the gate.
 - Git hooks require `lefthook` and `commitlint` (`cargo install commitlint-rs`)
   on `PATH`; run `make hooks` once per clone.
+
+## CLI (`crates/cli`)
+
+- Package `idenumbra-cli`, binary `idenumbra`. Codegen-style installer: copies
+  country validator sources from `crates/countries/<code>/src` into the consumer
+  project (`src/idenumbra/countries/<code>/`) and writes `idenumbra.toml`.
+- Commands: `add`, `list`, `remove`, `update`, `diff` (with `--dry-run`).
+- Country crates remain internal workspace resources; they are not published.
+- `make` has no CLI target; build with `cargo build -p idenumbra-cli`.
 
 ## Adding a country
 

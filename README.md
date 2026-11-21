@@ -18,13 +18,19 @@ registration.
 - [API documentation](#api-documentation)
 - [Build / test / lint](#build--test--lint)
 
-## Crates
+## Crates (published)
 
 | Crate | Package | Description |
 |---|---|---|
 | `idenumbra-core` | `idenumbra-core` | Shared contract: `Validator` trait, `ValidationError`, country code constants, `canonical()`. `no_std`, dependency-free. |
-| `idenumbra-<code>` (×19) | `idenumbra-arg`, … | One crate per country. `no_std`, implements `Validator`. |
-| `idenumbra` | `idenumbra` | Orchestrator: feature-gated registry, lazy `BTreeMap`, untyped/typed entry points. |
+| `idenumbra-std` | `idenumbra-std` | Orchestrator: feature-gated registry, lazy `BTreeMap`, untyped/typed entry points. |
+| `idenumbra` | `idenumbra` | CLI: installs validators into a project via codegen. |
+
+## Internal resources (not published)
+
+| Path | Description |
+|---|---|
+| `crates/countries/<code>` | One `no_std` validator per country (`publish = false`). Used by `idenumbra-std` (feature-gated) and as the source copied by the CLI. |
 
 ## Quick start
 
@@ -32,11 +38,11 @@ Orchestrator (enable only the countries you need):
 
 ```toml
 [dependencies]
-idenumbra = { version = "0.1.0-alpha.1", features = ["arg", "mex"] }
+idenumbra-std = { version = "0.1.0-alpha.1", features = ["arg", "mex"] }
 ```
 
 ```rust
-use idenumbra::Idenumbra;
+use idenumbra_std::Idenumbra;
 
 Idenumbra::infer("ARG", "12345678")?;                 // infers the document kind
 Idenumbra::validate("ARG", "20-12345678-6", "cuit")?; // explicit kind
@@ -111,6 +117,19 @@ Country codes are trimmed and uppercased by the orchestrator; **the value is not
 validators are compiled in and registered; the registry is built lazily on first use
 (`OnceLock`). A disabled country is not compiled and returns
 `ValidationError::ValidatorNotAvailable`.
+
+## CLI (`idenumbra-cli`)
+
+Install validators into a consumer project via codegen (shadcn-style):
+
+```bash
+cargo run -p idenumbra-cli -- add ECU ARG
+cargo run -p idenumbra-cli -- list
+cargo run -p idenumbra-cli -- remove ECU
+cargo run -p idenumbra-cli -- update
+```
+
+Configuration is stored in `idenumbra.toml` at the project root.
 
 ## Validation scope
 

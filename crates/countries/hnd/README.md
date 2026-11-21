@@ -69,13 +69,13 @@ cross-checks, not the rule source.
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
+idenumbra-std = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1.0-alpha.1", features = ["hnd"] }
+idenumbra-std = { version = "0.1.0-alpha.1", features = ["hnd"] }
 ```
 
 ```rust

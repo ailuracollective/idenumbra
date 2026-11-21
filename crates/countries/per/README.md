@@ -78,13 +78,13 @@ in a few ports and blogs, not in python-stdnum) is not accepted. Links checked o
 All features:
 ```toml
 [dependencies]
-idenumbra = { version = "0.1.0-alpha.1", features = ["all"] }
+idenumbra-std = { version = "0.1.0-alpha.1", features = ["all"] }
 ```
 
 Single feature (only the country you need):
 ```toml
 [dependencies]
-idenumbra = { version = "0.1.0-alpha.1", features = ["per"] }
+idenumbra-std = { version = "0.1.0-alpha.1", features = ["per"] }
 ```
 
 ```rust
