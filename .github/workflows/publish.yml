@@ -32,6 +32,11 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to publish (e.g. v0.1.0-beta.1)'
+        required: true
+        default: 'v0.1.0-beta.1' 
 
 # One run per published tag, and not cancellable. Cancelling halfway would
 # leave a partially published workspace, which no retry can clean up (crates.io
@@ -104,7 +109,7 @@ jobs:
       - name: Verify the tag matches the workspace version
         id: version
         env:
-          TAG: ${{ github.event.release.tag_name }}
+          TAG: ${{ github.event.inputs.tag || github.event.release.tag_name }}
         run: |
           set -euo pipefail
           case "$TAG" in
@@ -200,7 +205,7 @@ jobs:
 
       - name: Summarise the release
         env:
-          TAG: ${{ github.event.release.tag_name }}
+          TAG: ${{ github.event.inputs.tag || github.event.release.tag_name }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
