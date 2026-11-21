@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.0-beta.1](https://github.com/ailuracollective/idenumbra/compare/v0.1.0-alpha.4...v0.1.0-beta.1) (2026-11-21)
+
+
+### Features
+
+* add idenumbra CLI (codegen) and mark country crates as internal ([a42c322](https://github.com/ailuracollective/idenumbra/commit/a42c3228b46f6d488bc66474deb697052de4d5a8))
+
+
+### Miscellaneous Chores
+
+* switch prerelease type to beta ([46d6d4a](https://github.com/ailuracollective/idenumbra/commit/46d6d4a86af8e12f6ca5e64800f98755cb5c9c35))
+
 ## [0.1.0-alpha.4](https://github.com/ailuracollective/idenumbra/compare/v0.1.0-alpha.3...v0.1.0-alpha.4) (2026-11-20)
 
 
