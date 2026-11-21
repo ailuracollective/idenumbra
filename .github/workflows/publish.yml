@@ -198,9 +198,7 @@ jobs:
           }
 
           publish idenumbra-core
-          for dir in crates/countries/*; do
-            publish "idenumbra-$(basename "$dir")"
-          done
+          publish idenumbra-std
           publish idenumbra
 
       - name: Summarise the release
@@ -214,6 +212,6 @@ jobs:
             echo "## idenumbra ${TAG}"
             echo ""
             echo "- Workspace version: \`${VERSION}\`"
-            echo "- Published: \`idenumbra-core\`, every country crate, and \`idenumbra\`"
+            echo "- Published: \`idenumbra-core\`, \`idenumbra-std\`, and \`idenumbra\` (CLI)"
             echo "- Authentication: ${auth}"
           } >> "$GITHUB_STEP_SUMMARY"
