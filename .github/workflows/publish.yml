@@ -31,6 +31,7 @@ name: Publish
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 # One run per published tag, and not cancellable. Cancelling halfway would
 # leave a partially published workspace, which no retry can clean up (crates.io
