@@ -13,7 +13,10 @@ pub fn run(project: PathBuf, dry_run: bool) -> Result<(), String> {
     let source = match fetch_source_tarball(env!("CARGO_PKG_VERSION")) {
         Ok(p) => Some(p),
         Err(e) => {
-            eprintln!("warning: could not fetch remote source ({}); using local", e);
+            eprintln!(
+                "warning: could not fetch remote source ({}); using local",
+                e
+            );
             None
         }
     };

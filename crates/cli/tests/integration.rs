@@ -15,7 +15,10 @@ fn add_ecu_creates_files_and_manifest() {
         .args(["add", "ECU", "--path", dir.path().to_str().unwrap()])
         .assert()
         .success();
-    assert!(dir.path().join("src/idenumbra/countries/ecu/lib.rs").exists());
+    assert!(dir
+        .path()
+        .join("src/idenumbra/countries/ecu/lib.rs")
+        .exists());
     assert!(dir.path().join("src/idenumbra/mod.rs").exists());
     assert!(dir.path().join("idenumbra.toml").exists());
     let manifest = std::fs::read_to_string(dir.path().join("idenumbra.toml")).unwrap();
@@ -57,10 +60,19 @@ fn remove_deletes_and_updates_manifest() {
 fn dry_run_does_not_write() {
     let dir = tempdir().unwrap();
     cli()
-        .args(["add", "ECU", "--path", dir.path().to_str().unwrap(), "--dry-run"])
+        .args([
+            "add",
+            "ECU",
+            "--path",
+            dir.path().to_str().unwrap(),
+            "--dry-run",
+        ])
         .assert()
         .success();
-    assert!(!dir.path().join("src/idenumbra/countries/ecu/lib.rs").exists());
+    assert!(!dir
+        .path()
+        .join("src/idenumbra/countries/ecu/lib.rs")
+        .exists());
     assert!(!dir.path().join("idenumbra.toml").exists());
 }
 
@@ -77,14 +89,21 @@ fn unknown_country_fails() {
 fn add_multi() {
     let dir = tempdir().unwrap();
     cli()
-        .args(["add", "ECU", "ARG", "MEX", "--path", dir.path().to_str().unwrap()])
+        .args([
+            "add",
+            "ECU",
+            "ARG",
+            "MEX",
+            "--path",
+            dir.path().to_str().unwrap(),
+        ])
         .assert()
         .success();
     for c in ["ecu", "arg", "mex"] {
-        assert!(dir
-            .path()
-            .join(format!("src/idenumbra/countries/{}/lib.rs", c))
-            .exists(),
+        assert!(
+            dir.path()
+                .join(format!("src/idenumbra/countries/{}/lib.rs", c))
+                .exists(),
             "missing {}",
             c
         );

@@ -7,7 +7,11 @@ pub fn run(codes: Vec<String>, project: PathBuf, dry_run: bool) -> Result<(), St
     let mut installed = util::read_installed(&project);
     for code in &codes {
         let code_low = code.to_lowercase();
-        let dst = project.join("src").join("idenumbra").join("countries").join(&code_low);
+        let dst = project
+            .join("src")
+            .join("idenumbra")
+            .join("countries")
+            .join(&code_low);
         if dst.exists() {
             if dry_run {
                 println!("[dry] would remove {}", dst.display());

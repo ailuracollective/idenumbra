@@ -19,7 +19,10 @@ pub fn detect_source(explicit: Option<PathBuf>) -> Result<PathBuf, String> {
             break;
         }
     }
-    Err("could not locate idenumbra source repository; pass --source or set IDENUMBRA_SOURCE".into())
+    Err(
+        "could not locate idenumbra source repository; pass --source or set IDENUMBRA_SOURCE"
+            .into(),
+    )
 }
 
 pub fn copy_dir_all(src: &Path, dst: &Path, dry_run: bool) -> Result<usize, String> {

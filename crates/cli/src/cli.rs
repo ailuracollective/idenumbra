@@ -4,7 +4,11 @@ use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
-#[command(name = "idenumbra", version, about = "Install idenumbra validators into a project")]
+#[command(
+    name = "idenumbra",
+    version,
+    about = "Install idenumbra validators into a project"
+)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Command,
