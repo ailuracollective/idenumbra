@@ -796,7 +796,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "assert_cmd",
  "clap",
@@ -812,7 +812,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-arg"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -820,7 +820,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-bol"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -828,7 +828,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-bra"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -836,14 +836,14 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-chl"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-col"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -851,14 +851,14 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-core"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "proptest",
 ]
 
 [[package]]
 name = "idenumbra-cri"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -866,7 +866,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-cub"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -874,7 +874,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-dom"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -882,7 +882,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-ecu"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -890,7 +890,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-gtm"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -898,7 +898,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-hnd"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -906,7 +906,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-mex"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -914,7 +914,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-nic"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -922,7 +922,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-pan"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -930,7 +930,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-per"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -938,7 +938,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-pry"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -946,7 +946,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-slv"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -954,14 +954,14 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-std"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
 ]
 
 [[package]]
 name = "idenumbra-ury"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",
@@ -969,7 +969,7 @@ dependencies = [
 
 [[package]]
 name = "idenumbra-ven"
-version = "0.1.0-beta.1"
+version = "0.1.0-beta.2"
 dependencies = [
  "idenumbra-core",
  "proptest",

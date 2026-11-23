@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0-beta.2](https://github.com/ailuracollective/idenumbra/compare/v0.1.0-beta.1...v0.1.0-beta.2) (2026-11-23)
+
+
+### Bug Fixes
+
+* **std:** drop unpublished country crate dependencies ([#97](https://github.com/ailuracollective/idenumbra/issues/97)) ([fb7ff22](https://github.com/ailuracollective/idenumbra/commit/fb7ff2248d9367f72d16cd4735bdf40204f89643))
+
 ## [0.1.0-beta.1](https://github.com/ailuracollective/idenumbra/compare/v0.1.0-alpha.4...v0.1.0-beta.1) (2026-11-21)
 
 
