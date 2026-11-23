@@ -956,26 +956,7 @@ dependencies = [
 name = "idenumbra-std"
 version = "0.1.0-beta.1"
 dependencies = [
- "idenumbra-arg",
- "idenumbra-bol",
- "idenumbra-bra",
- "idenumbra-chl",
- "idenumbra-col",
  "idenumbra-core",
- "idenumbra-cri",
- "idenumbra-cub",
- "idenumbra-dom",
- "idenumbra-ecu",
- "idenumbra-gtm",
- "idenumbra-hnd",
- "idenumbra-mex",
- "idenumbra-nic",
- "idenumbra-pan",
- "idenumbra-per",
- "idenumbra-pry",
- "idenumbra-slv",
- "idenumbra-ury",
- "idenumbra-ven",
 ]
 
 [[package]]
