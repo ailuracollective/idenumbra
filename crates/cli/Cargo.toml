@@ -23,7 +23,7 @@ clap = { version = "4", features = ["derive"] }
 console = "0.15"
 indicatif = "0.17"
 human-panic = "2"
-reqwest = { version = "0.12", features = ["blocking"] }
+reqwest = { version = "0.13", features = ["blocking"] }
 flate2 = "1"
 tar = "0.4"
 
