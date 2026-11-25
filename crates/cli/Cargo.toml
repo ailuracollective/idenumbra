@@ -21,7 +21,7 @@ workspace = true
 [dependencies]
 clap = { version = "4", features = ["derive"] }
 console = "0.15"
-indicatif = "0.17"
+indicatif = "0.18"
 human-panic = "2"
 reqwest = { version = "0.12", features = ["blocking"] }
 flate2 = "1"
